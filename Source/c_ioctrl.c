@@ -15,14 +15,14 @@
 
 #include  "stdconst.h"
 #include  "modules.h"
-#include  "c_ioctrl.iom"
+#include  "c_ioctrl.iom.h"
 #include  "c_ioctrl.h"
 #include  "d_ioctrl.h"
 
 static    IOMAPIOCTRL   IOMapIOCtrl;
 static    VARSIOCTRL    VarsIOCtrl;
-  
-const     HEADER  cIOCtrl = 
+
+const     HEADER  cIOCtrl =
 {
   0x00060001L,
   "IOCtrl",
@@ -39,8 +39,8 @@ const     HEADER  cIOCtrl =
 
 void      cIOCtrlInit(void* pHeader)
 {
+  dIOCtrlInit(pHeader);
   dIOCtrlSetPower(0);
-  dIOCtrlInit();
 }
 
 

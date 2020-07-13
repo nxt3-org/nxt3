@@ -1,5 +1,5 @@
 //
-// Programmer      
+// Programmer
 //
 // Date init       14.12.2004
 //
@@ -20,9 +20,7 @@
 #ifndef   C_SOUND
 #define   C_SOUND
 
-#define   SOUNDBUFFERSIZE               64    // Flash Sector size ?
-#define   SOUNDBUFFERS                  3     // Min 3 - max 255
-
+#include "d_sound.h"
 
 typedef   struct
 {

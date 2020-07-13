@@ -34,6 +34,14 @@ enum
   DISPLAY_FRAME             = 0x07      // W - draw a frame (on/off) (CMD,TRUE/FALSE,X1,Y1,X2,Y2)
 };
 
+// EV3 display scaling modes
+enum
+{
+  SCALING_OFF,
+  SCALING_STRETCH,
+  SCALING_CROP
+};
+
 //JJR
 // Constants related to drawing operations.
 
@@ -93,10 +101,9 @@ enum
   DISPLAY_BUSY              = 0x80      // R  - Refresh in progress
 };
 
-
 #define   DISPLAY_HEIGHT      64        // Y pixels
 #define   DISPLAY_WIDTH       100       // X pixels
-#define   DISPLAY_BUFF_WIDTH  100       // width of buffer 
+#define   DISPLAY_BUFF_WIDTH  100       // width of buffer
 
 #define   DISPLAY_MENUICONS_Y       40
 #define   DISPLAY_MENUICONS_X_OFFS  7
@@ -183,7 +190,7 @@ enum      STEP_NO                       // Used in macro "STEPICON_BIT"
 #define   TEXTLINE_BITS                 ((ULONG)0x000000FF)  // Executed as 7.
 
 #define   SCREEN_BIT(No)                ((ULONG)0x20000000 << (No))
-#define   STEPICON_BIT(No)              ((ULONG)0x01000000 << (No))  
+#define   STEPICON_BIT(No)              ((ULONG)0x01000000 << (No))
 #define   BITMAP_BIT(No)                ((ULONG)0x00100000 << (No))
 #define   MENUICON_BIT(No)              ((ULONG)0x00020000 << (No))
 #define   STATUSICON_BIT(No)            ((ULONG)0x00002000 << (No))
@@ -198,22 +205,22 @@ typedef   struct
   ULONG   EraseMask;                                        // Section erase mask   (executed first)
   ULONG   UpdateMask;                                       // Section update mask  (executed next)
 
-  FONT    *pFont;                                           // Pointer to font file
-  UBYTE   *pTextLines[TEXTLINES];                           // Pointer to text strings
+  const FONT    *pFont;                                     // Pointer to font file
+  const UBYTE   *pTextLines[TEXTLINES];                     // Pointer to text strings
 
-  UBYTE   *pStatusText;                                     // Pointer to status text string
-  ICON    *pStatusIcons;                                    // Pointer to status icon collection file
+  const UBYTE   *pStatusText;                               // Pointer to status text string
+  const ICON    *pStatusIcons;                              // Pointer to status icon collection file
 
-  BMPMAP  *pScreens[SCREENS];                               // Pointer to screen bitmap file
-  BMPMAP  *pBitmaps[BITMAPS];                               // Pointer to free bitmap files
+  const BMPMAP  *pScreens[SCREENS];                         // Pointer to screen bitmap file
+  const BMPMAP  *pBitmaps[BITMAPS];                         // Pointer to free bitmap files
 
-  UBYTE   *pMenuText;                                       // Pointer to menu icon text                (NULL == none)
-  UBYTE   *pMenuIcons[MENUICONS];                           // Pointer to menu icon images              (NULL == none)
+  const UBYTE   *pMenuText;                                 // Pointer to menu icon text                (NULL == none)
+  const UBYTE   *pMenuIcons[MENUICONS];                     // Pointer to menu icon images              (NULL == none)
 
-  ICON    *pStepIcons;                                      // Pointer to step icon collection file
+  const ICON    *pStepIcons;                                // Pointer to step icon collection file
 
   UBYTE   *Display;                                         // Display content copied to physical display every 17 mS
-  
+
   UBYTE   StatusIcons[STATUSICONS];                         // Index in status icon collection file     (index = 0 -> none)
 
   UBYTE   StepIcons[STEPICONS];                             // Index in step icon collection file       (index = 0 -> none)
@@ -222,10 +229,11 @@ typedef   struct
 
   UBYTE   TextLinesCenterFlags;                             // Mask to center TextLines
 
-  UBYTE   Normal[DISPLAY_HEIGHT / 8][DISPLAY_BUFF_WIDTH];        // Raw display memory for normal screen
-  UBYTE   Popup[DISPLAY_HEIGHT / 8][DISPLAY_BUFF_WIDTH];         // Raw display memory for popup screen
+  UBYTE   Normal[DISPLAY_HEIGHT / 8][DISPLAY_BUFF_WIDTH];   // Raw display memory for normal screen
+  UBYTE   Popup[DISPLAY_HEIGHT / 8][DISPLAY_BUFF_WIDTH];    // Raw display memory for popup screen
 
   UBYTE   Contrast;                                         // Display contrast
+  UBYTE   Scaling;                                          // Scaling to EV3 display size
 }
 IOMAPDISPLAY;
 

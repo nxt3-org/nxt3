@@ -88,7 +88,7 @@
 
 // JCH ADDS
 #define OP_WAITI           0x64  // immed
-#define OP_WAITV           0x65  // var 
+#define OP_WAITV           0x65  // var
 #define OP_SIGN            0x66  // dest, src
 #define OP_STOPCLUMPIMMED  0x67  // clumpID
 #define OP_STARTCLUMPIMMED 0x68  // clumpID
@@ -175,16 +175,5 @@
 #define	SHORT_OP_ACQUIRE	1
 #define	SHORT_OP_RELEASE	2
 #define	SHORT_OP_SUBCALL	3
-
-//
-// short op mapping table
-//
-static UBYTE ShortOpMap[4] = 
-{
-	OP_MOV,
-	OP_ACQUIRE,
-	OP_RELEASE,
-	OP_SUBCALL
-};
 
 #endif  // C_CMD_BYTECODES

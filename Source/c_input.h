@@ -19,7 +19,7 @@
 extern    const HEADER cInput;
 #endif
 
-#include  "c_input.iom"
+#include  "c_input.iom.h"
 
 #define   ACTUAL_AD_RES                 1023L
 #define   SENSOR_RESOLUTION             1023L

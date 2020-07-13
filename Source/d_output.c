@@ -15,7 +15,7 @@
 #include  "stdconst.h"
 #include  "m_sched.h"
 #include  "d_output.h"
-#include  "d_output.r"
+#include  "d_output_ev3.h"
 
 #include  <math.h>
 
@@ -123,11 +123,8 @@ void      dOutputInit(void)
 {
   UBYTE Temp;
 
-  OUTPUTInit;
-  ENABLECaptureMotorA;
-  ENABLECaptureMotorB;
-  ENABLECaptureMotorC;
-  
+  ev3OutputInit();
+
   RegulationTime = REGULATION_TIME;
 
   for (Temp = 0; Temp < 3; Temp++)
@@ -149,12 +146,12 @@ void      dOutputInit(void)
     pMD->RegDParameter = DEFAULT_D_GAIN_FACTOR;
     pMD->MotorMaxSpeed = DEFAULT_MAX_SPEED;
     pMD->MotorMaxAcceleration = DEFAULT_MAX_ACCELERATION;
-    pMD->RegulationMode = 0; 	
+    pMD->RegulationMode = 0;
     pMD->MotorOverloaded = 0;
     pMD->RunStateAtLimit = MOTOR_RUN_STATE_IDLE;
     pMD->RampDownToLimit = 0;
-    INSERTMode(Temp, COAST_MOTOR_MODE);
-    INSERTSpeed(Temp, pMD->MotorSetSpeed);
+    ev3OutputSetStopMode((ev3_motor_port) Temp, ev3_stop_coast);
+    ev3OutputSetPwmDuty((ev3_motor_port) Temp, pMD->MotorSetSpeed);
   }
 }
 
@@ -169,7 +166,12 @@ void dOutputCtrl(void)
   UBYTE MotorNr;
   SLONG NewTachoCount[3];
 
-  TACHOCaptureReadResetAll(NewTachoCount[MOTOR_A], NewTachoCount[MOTOR_B], NewTachoCount[MOTOR_C]);
+  ev3OutputCtrl();
+
+  for (MotorNr = 0; MotorNr < 3; MotorNr++)
+  {
+    ev3OutputCalcTachoDelta((ev3_motor_port) MotorNr, &NewTachoCount[MotorNr]);
+  }
 
   for (MotorNr = 0; MotorNr < 3; MotorNr++)
   {
@@ -213,14 +215,15 @@ void dOutputCtrl(void)
       pMD->DeltaCaptureCount = 0;
     }
   }
-  INSERTSpeed(MOTOR_A, MotorData[MOTOR_A].MotorActualSpeed);
-  INSERTSpeed(MOTOR_B, MotorData[MOTOR_B].MotorActualSpeed);
-  INSERTSpeed(MOTOR_C, MotorData[MOTOR_C].MotorActualSpeed);
+
+  ev3OutputSetPwmDuty(ev3_motor_a, MotorData[MOTOR_A].MotorActualSpeed);
+  ev3OutputSetPwmDuty(ev3_motor_b, MotorData[MOTOR_B].MotorActualSpeed);
+  ev3OutputSetPwmDuty(ev3_motor_c, MotorData[MOTOR_C].MotorActualSpeed);
 }
 
 void      dOutputExit(void)
 {
-  OUTPUTExit;
+  ev3OutputExit();
 }
 
 /* Called eveyr 1 mS */
@@ -243,7 +246,11 @@ void dOutputGetMotorParameters(UBYTE *CurrentMotorSpeed, SLONG *TachoCount, SLON
 
 void dOutputSetMode(UBYTE Motor, UBYTE Mode)     //Set motor mode (break, Float)
 {
-  INSERTMode(Motor, Mode);
+  if (Mode & 0x02) {
+    ev3OutputSetStopMode((ev3_motor_port) Motor, ev3_stop_brake);
+  } else {
+    ev3OutputSetStopMode((ev3_motor_port) Motor, ev3_stop_coast);
+  }
 }
 
 /* Update the regulation state for the motor */
@@ -395,7 +402,7 @@ void dOutputSetTachoLimit(UBYTE MotorNr, ULONG BlockTachoCntToTravel, UBYTE Opti
 void dOutputSetSpeed (UBYTE MotorNr, UBYTE NewMotorRunState, SBYTE Speed, SBYTE NewTurnParameter)
 {
   MOTORDATA * pMD = &(MotorData[MotorNr]);
-  if ((pMD->MotorSetSpeed != Speed) || (pMD->MotorRunState != NewMotorRunState) || 
+  if ((pMD->MotorSetSpeed != Speed) || (pMD->MotorRunState != NewMotorRunState) ||
       (NewMotorRunState == MOTOR_RUN_STATE_IDLE) || (pMD->TurnParameter != NewTurnParameter))
   {
     if (pMD->MotorTargetSpeed == 0)
@@ -405,7 +412,7 @@ void dOutputSetSpeed (UBYTE MotorNr, UBYTE NewMotorRunState, SBYTE Speed, SBYTE 
       pMD->PositionFracError = 0;
       pMD->RegulationTimeCount = 0;
       pMD->DeltaCaptureCount = 0;
-      TACHOCountReset(MotorNr);
+      ev3OutputResetTacho((ev3_motor_port) MotorNr);
     }
     switch (NewMotorRunState)
     {
@@ -596,7 +603,7 @@ void dOutputRampUpFunction(UBYTE MotorNr)
     if ((pMD->CurrentCaptureCount - pMD->MotorRampTachoCountStart) >= (pMD->MotorTachoCountToRun - pMD->MotorRampTachoCountStart))
     {
       pMD->MotorTargetSpeed = pMD->MotorSetSpeed;
-      pMD->MotorRunState = dOutputRunStateAtLimit(pMD);	
+      pMD->MotorRunState = dOutputRunStateAtLimit(pMD);
     }
   }
   else
@@ -604,7 +611,7 @@ void dOutputRampUpFunction(UBYTE MotorNr)
     if ((pMD->CurrentCaptureCount + pMD->MotorRampTachoCountStart) <= (pMD->MotorTachoCountToRun + pMD->MotorRampTachoCountStart))
     {
       pMD->MotorTargetSpeed = pMD->MotorSetSpeed;
-      pMD->MotorRunState = dOutputRunStateAtLimit(pMD);	
+      pMD->MotorRunState = dOutputRunStateAtLimit(pMD);
     }
   }
   if (pMD->MotorSetSpeed > 0)
@@ -824,10 +831,10 @@ void dOutputTachoLimitControl(UBYTE MotorNr)
 /* Function used to decrease speed slowly when the motor is set to idle */
 void dOutputMotorIdleControl(UBYTE MotorNr)
 {
-  INSERTMode(MotorNr, COAST_MOTOR_MODE);
+  dOutputSetMode(MotorNr, COAST_MOTOR_MODE);
 
   MOTORDATA * pMD = &(MotorData[MotorNr]);
-  
+
   if (pMD->MotorActualSpeed != 0)
   {
     if (pMD->MotorActualSpeed > 0)
@@ -1245,12 +1252,12 @@ void dOutputSyncTachoLimitControl(UBYTE MotorNr)
     SLONG l2 = pTwo->MotorTachoCountToRun;
     UBYTE NewRunState1 = dOutputRunStateAtLimit(pOne);
     UBYTE NewRunState2 = dOutputRunStateAtLimit(pTwo);
-    if (dOutputRampDownToLimit(pOne) == OPTION_RAMPDOWNTOLIMIT) 
+    if (dOutputRampDownToLimit(pOne) == OPTION_RAMPDOWNTOLIMIT)
     {
       NewRunState1 = MOTOR_RUN_STATE_RAMPDOWN;
       l1 = (SLONG)((float)l1 * 0.80f);
     }
-    if (dOutputRampDownToLimit(pTwo) == OPTION_RAMPDOWNTOLIMIT) 
+    if (dOutputRampDownToLimit(pTwo) == OPTION_RAMPDOWNTOLIMIT)
     {
       NewRunState2 = MOTOR_RUN_STATE_RAMPDOWN;
       l2 = (SLONG)((float)l2 * 0.80f);

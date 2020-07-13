@@ -15,69 +15,40 @@
 #include  "stdconst.h"
 #include  "m_sched.h"
 #include  "d_lowspeed.h"
-#include <string.h>
-#include  "d_lowspeed.r"
+#include  <string.h>
 
 
-void      dLowSpeedInit(void)
-{
-  LOWSpeedTxInit;
-  LOWSpeedTimerInit;
-  //ENABLEDebugOutput; 
+void      dLowSpeedInit(void) {
 }
 
-void dLowSpeedStartTimer(void)
-{
-  ENABLEPWMTimerForLowCom;
+void dLowSpeedStartTimer(void) {
 }
 
-void dLowSpeedStopTimer(void)
-{
-  DISABLEPWMTimerForLowCom; 
+void dLowSpeedStopTimer(void) {
 }
 
-void dLowSpeedInitPins(UBYTE ChannelNumber)
-{
-  ENABLETxPins(ChannelNumber);  
+void dLowSpeedInitPins(UBYTE ChannelNumber) {
 }
 
-UBYTE dLowSpeedSendData(UBYTE ChannelNumber, UBYTE *DataOutBuffer, UBYTE NumberOfTxByte)
-{  
-  UBYTE Status;
-	
-  TxData(ChannelNumber, Status, DataOutBuffer, NumberOfTxByte);
-  return(Status);
+UBYTE dLowSpeedSendData(UBYTE ChannelNumber, UBYTE *DataOutBuffer, UBYTE NumberOfTxByte) {
+  return FALSE;
 }
 
-void dLowSpeedReceiveData(UBYTE ChannelNumber, UBYTE *DataInBuffer, UBYTE ByteToRx, UBYTE NoRestart)
-{	
-  RxData(ChannelNumber, DataInBuffer, ByteToRx, NoRestart); 
+void dLowSpeedReceiveData(UBYTE ChannelNumber, UBYTE *DataInBuffer, UBYTE ByteToRx, UBYTE NoRestart) {
 }
 
-UBYTE dLowSpeedComTxStatus(UBYTE ChannelNumber)
-{
-  UBYTE Status; 
-
-  STATUSTxCom(ChannelNumber, Status)
-
-  return(Status);
+UBYTE dLowSpeedComTxStatus(UBYTE ChannelNumber) {
+  return 0xFF;
 }
 
-UBYTE dLowSpeedComRxStatus(UBYTE ChannelNumber)
-{
-  UBYTE Status; 
-
-  STATUSRxCom(ChannelNumber, Status)
-
-  return(Status);
+UBYTE dLowSpeedComRxStatus(UBYTE ChannelNumber) {
+  return 0xFF;
 }
 
-void      dLowSpeedExit(void)
-{
-  LOWSpeedExit;
+void  dLowSpeedExit(void) {
 }
 
 SBYTE dLowSpeedFastI2C(UBYTE port, UBYTE address, UBYTE *write_data, UBYTE write_len, UBYTE *pReadLen, UBYTE *data_out)
 {
-  return rI2CFastStart(port, address, write_data, write_len, pReadLen, data_out);
+  return 0;
 }

@@ -14,8 +14,8 @@
 
 #include  "stdconst.h"
 #include  "modules.h"
-#include  "c_lowspeed.iom"
-#include  "c_input.iom"
+#include  "c_lowspeed.iom.h"
+#include  "c_input.iom.h"
 #include  "c_lowspeed.h"
 #include  "d_lowspeed.h"
 #include <string.h>
@@ -74,7 +74,7 @@ void      cLowSpeedLoadWriteBuffer(UBYTE ch)
   memcpy(VarsLowSpeed.OutputBuf[ch].Buf, IOMapLowSpeed.OutBuf[ch].Buf, IOMapLowSpeed.OutBuf[ch].InPtr);
   VarsLowSpeed.OutputBuf[ch].InPtr = IOMapLowSpeed.OutBuf[ch].InPtr;
   IOMapLowSpeed.OutBuf[ch].OutPtr = IOMapLowSpeed.OutBuf[ch].InPtr;
-/*            
+/*
   VarsLowSpeed.OutputBuf[ch].OutPtr = 0;
   for (VarsLowSpeed.OutputBuf[ch].InPtr = 0; VarsLowSpeed.OutputBuf[ch].InPtr < IOMapLowSpeed.OutBuf[ch].InPtr; VarsLowSpeed.OutputBuf[ch].InPtr++)
   {
@@ -100,11 +100,11 @@ void cLowSpeedFinished(UBYTE ch, UBYTE bDone)
 SBYTE      cLowSpeedFastI2C(UBYTE ch)
 {
   cLowSpeedLoadWriteBuffer(ch);
-  SBYTE result = dLowSpeedFastI2C(ch, 
-                                  *(VarsLowSpeed.OutputBuf[ch].Buf), 
-                                  VarsLowSpeed.OutputBuf[ch].Buf+1, 
-                                  VarsLowSpeed.OutputBuf[ch].InPtr-1, 
-                                  &(IOMapLowSpeed.InBuf[ch].BytesToRx), 
+  SBYTE result = dLowSpeedFastI2C(ch,
+                                  *(VarsLowSpeed.OutputBuf[ch].Buf),
+                                  VarsLowSpeed.OutputBuf[ch].Buf+1,
+                                  VarsLowSpeed.OutputBuf[ch].InPtr-1,
+                                  &(IOMapLowSpeed.InBuf[ch].BytesToRx),
                                   VarsLowSpeed.InputBuf[ch].Buf);
   if (result >= 0)
   {
@@ -127,26 +127,26 @@ void      cLowSpeedCtrl(void)
 {
   UBYTE Temp;
   UBYTE ChannelNumber = 0;
-    	
+
   if (IOMapLowSpeed.State != 0)
   {
     for (ChannelNumber = 0; ChannelNumber < NO_OF_LOWSPEED_COM_CHANNEL; ChannelNumber++)
     {
       //Lowspeed com is activated
-	    switch (IOMapLowSpeed.ChannelState[ChannelNumber])			
+	    switch (IOMapLowSpeed.ChannelState[ChannelNumber])
 	    {
 	      case LOWSPEED_IDLE:
 		    {
 		    }
 		    break;
-		
+
 		    case LOWSPEED_INIT:
 		    {
 		      if ((pMapInput->Inputs[ChannelNumber].SensorType == LOWSPEED) || (pMapInput->Inputs[ChannelNumber].SensorType == LOWSPEED_9V))
           {
             if (IOMapLowSpeed.Speed & (COM_CHANNEL_ONE_FAST << ChannelNumber))
             {
-              cLowSpeedFastI2C(ChannelNumber); 
+              cLowSpeedFastI2C(ChannelNumber);
             }
             else
             {
@@ -168,7 +168,7 @@ void      cLowSpeedCtrl(void)
           }
 		    }
 		    break;
-			
+
 		    case LOWSPEED_LOAD_BUFFER:
 		    {
 		      if ((pMapInput->Inputs[ChannelNumber].SensorType == LOWSPEED) || (pMapInput->Inputs[ChannelNumber].SensorType == LOWSPEED_9V))
@@ -197,7 +197,7 @@ void      cLowSpeedCtrl(void)
           }
 	      }
 		    break;
-			
+
 		    case LOWSPEED_COMMUNICATING:
 		    {
 		      if ((pMapInput->Inputs[ChannelNumber].SensorType == LOWSPEED) || (pMapInput->Inputs[ChannelNumber].SensorType == LOWSPEED_9V))
@@ -205,12 +205,12 @@ void      cLowSpeedCtrl(void)
             if (IOMapLowSpeed.Mode[ChannelNumber] == LOWSPEED_TRANSMITTING)
 		        {
 		          Temp = dLowSpeedComTxStatus(ChannelNumber);			// Returns 0x00 if not done, 0x01 if success, 0xFF if error
-		
+
 		          if (Temp == LOWSPEED_COMMUNICATION_SUCCESS)
 		          {
 		            if (IOMapLowSpeed.InBuf[ChannelNumber].BytesToRx != 0)
                 {
-                  IOMapLowSpeed.Mode[ChannelNumber] = LOWSPEED_RECEIVING;							    			
+                  IOMapLowSpeed.Mode[ChannelNumber] = LOWSPEED_RECEIVING;
                 }
                 else
                 {
@@ -231,7 +231,7 @@ void      cLowSpeedCtrl(void)
 			          {
 			            IOMapLowSpeed.ChannelState[ChannelNumber] = LOWSPEED_LOAD_BUFFER;
 			          }
-		          }			
+		          }
 		        }
 		        if (IOMapLowSpeed.Mode[ChannelNumber] == LOWSPEED_RECEIVING)
 		        {
@@ -257,17 +257,17 @@ void      cLowSpeedCtrl(void)
                 }
                 IOMapLowSpeed.ChannelState[ChannelNumber] = LOWSPEED_ERROR;
                 IOMapLowSpeed.ErrorType[ChannelNumber] = LOWSPEED_RX_ERROR;
-              }              
-		        }		        			
+              }
+		        }
 	        }
           else
           {
             IOMapLowSpeed.ChannelState[ChannelNumber] = LOWSPEED_ERROR;
             IOMapLowSpeed.ErrorType[ChannelNumber] = LOWSPEED_CH_NOT_READY;
-          }          
+          }
         }
-	      break;	
-			
+	      break;
+
         case LOWSPEED_ERROR:
         {
           cLowSpeedFinished(ChannelNumber, FALSE);
@@ -282,7 +282,7 @@ void      cLowSpeedCtrl(void)
 	   	    break;
 	    }
     }
-  }	
+  }
 }
 
 void      cLowSpeedExit(void)

@@ -19,7 +19,7 @@
 #include  <string.h>
 #include  "stdconst.h"
 #include  "modules.h"
-#include  "c_display.iom"
+#include  "c_display.iom.h"
 #include  "c_display.h"
 #include  "d_display.h"
 
@@ -107,7 +107,7 @@ void      cDisplayXorPixel(UBYTE X,UBYTE Y)
 }
 
 
-void      cDisplayChar(FONT *pFont,UBYTE On,UBYTE X,UBYTE Y,UBYTE Char)
+void      cDisplayChar(const FONT *pFont,UBYTE On,UBYTE X,UBYTE Y,UBYTE Char)
 {
   UBYTE   *pSource;
   UBYTE   FontWidth;
@@ -160,7 +160,7 @@ void      cDisplayChar(FONT *pFont,UBYTE On,UBYTE X,UBYTE Y,UBYTE Char)
 }
 
 
-void      cDisplayString(FONT *pFont,UBYTE X,UBYTE Y,UBYTE *pString)
+void      cDisplayString(const FONT *pFont,UBYTE X,UBYTE Y,const UBYTE *pString)
 {
   UBYTE   *pSource;
   UBYTE   *pDestination;
@@ -193,9 +193,9 @@ void      cDisplayString(FONT *pFont,UBYTE X,UBYTE Y,UBYTE *pString)
 }
 
 
-void      cDisplayUpdateScreen(SCREEN_CORDINATE *pCord,BMPMAP *pBitmap)
+void      cDisplayUpdateScreen(const SCREEN_CORDINATE *pCord,const BMPMAP *pBitmap)
 {
-  UBYTE   *pSource;
+  const UBYTE   *pSource;
   UBYTE   *pDestination;
   UBYTE   Line;
   UBYTE   Lines;
@@ -219,7 +219,7 @@ void      cDisplayUpdateScreen(SCREEN_CORDINATE *pCord,BMPMAP *pBitmap)
 }
 
 
-void      cDisplayCenterString(FONT *pFont,UBYTE *pString,UBYTE Line)
+void      cDisplayCenterString(const FONT *pFont,const UBYTE *pString,UBYTE Line)
 {
   UWORD   Chars;
   UBYTE   Column;
@@ -237,7 +237,7 @@ void      cDisplayCenterString(FONT *pFont,UBYTE *pString,UBYTE Line)
 }
 
 
-void      cDisplayUpdateMenuIcon(UBYTE *pIcon,SCREEN_CORDINATE *pCord)
+void      cDisplayUpdateMenuIcon(const UBYTE *pIcon,const SCREEN_CORDINATE *pCord)
 {
   UBYTE   *pDestination;
   UBYTE   Line;
@@ -280,9 +280,9 @@ void      cDisplayUpdateMenuIcon(UBYTE *pIcon,SCREEN_CORDINATE *pCord)
 }
 
 
-void      cDisplayUpdateIcon(ICON *pIcons,UBYTE Index,SCREEN_CORDINATE *pCord)
+void      cDisplayUpdateIcon(const ICON *pIcons,UBYTE Index,const SCREEN_CORDINATE *pCord)
 {
-  UBYTE   *pSource;
+  const UBYTE   *pSource;
   UBYTE   *pDestination;
   UBYTE   Line;
   UBYTE   Lines;
@@ -333,7 +333,7 @@ void cDisplayLineX(UBYTE X1, UBYTE X2, UBYTE Y, UBYTE PixelMode)
   if (Y > DISPLAY_HEIGHT) return;
   if (X1 > X2) {t = X1; X1 = X2; X2 = t;}
   if (X2 > (DISPLAY_WIDTH-1)) X2 = (DISPLAY_WIDTH-1);
-  
+
   M   = 1 << (Y % 8);
   Y >>= 3;
   for (X = X1;X <= X2;X++)
@@ -361,14 +361,14 @@ void      cDisplayLineY(UBYTE X,UBYTE Y1,UBYTE Y2,UBYTE PixelMode)
   UBYTE   Y;
   UBYTE   M;
   UBYTE   t;
-  
+
   if (X > DISPLAY_WIDTH) return;
   if (Y1 > Y2) {t = Y1; Y1 = Y2; Y2 = t;}
   if (Y2 > (DISPLAY_HEIGHT-1)) Y2 = (DISPLAY_HEIGHT-1);
 
   // starting point of Y is the byte containing Y1
   Y = (Y1 / 8) * 8;
-  
+
   while (Y <= Y2)
   {
     M = 0xff;
@@ -391,7 +391,7 @@ void      cDisplayLineY(UBYTE X,UBYTE Y1,UBYTE Y2,UBYTE PixelMode)
     }
     Y += 8;
   }
-  
+
 }
 
 void cDisplayFrame(SCREEN_CORDINATE *pCord, UBYTE PixelMode)
@@ -422,7 +422,7 @@ void      cDisplayFillScreen(SCREEN_CORDINATE *pCord, UBYTE PixelMode)
   UBYTE   X2, Y2;
   UBYTE   X, Y;
   UBYTE   M;
-  
+
   X1 = pCord->StartX;
   Y1 = pCord->StartY;
   X2 = pCord->StartX + pCord->PixelsX - 1;
@@ -432,7 +432,7 @@ void      cDisplayFillScreen(SCREEN_CORDINATE *pCord, UBYTE PixelMode)
   if (Y2 > (DISPLAY_HEIGHT-1)) Y2 = (DISPLAY_HEIGHT-1);
 
   Y = (Y1 / 8) * 8;
-  
+
   while (Y <= Y2)
   {
     M = 0xff;
@@ -464,7 +464,7 @@ void      cDisplayFillScreen(SCREEN_CORDINATE *pCord, UBYTE PixelMode)
 void cDisplayDraw(UBYTE Cmd,UBYTE PixelMode,UBYTE X1,UBYTE Y1,UBYTE X2,UBYTE Y2)
 {
   SCREEN_CORDINATE Coord;
-  
+
   switch (Cmd)
   {
     case DISPLAY_ERASE_ALL :
@@ -541,7 +541,7 @@ void cDisplayDraw(UBYTE Cmd,UBYTE PixelMode,UBYTE X1,UBYTE Y1,UBYTE X2,UBYTE Y2)
 
 void      cDisplayInit(void* pHeader)
 {
-  dDisplayInit();
+  pDisplay->Init(pHeader);
   IOMapDisplay.Display              =  (UBYTE*)IOMapDisplay.Normal;
   IOMapDisplay.pFunc                =  &cDisplayDraw;
   IOMapDisplay.EraseMask            =  0;
@@ -549,6 +549,7 @@ void      cDisplayInit(void* pHeader)
   IOMapDisplay.TextLinesCenterFlags =  0;
   IOMapDisplay.Flags                =  DISPLAY_REFRESH | DISPLAY_ON;
   IOMapDisplay.Contrast             =  0x5A; // 90
+  IOMapDisplay.Scaling              =  SCALING_OFF; //SCALING_STRETCH;
   VarsDisplay.ErasePointer          =  0;
   VarsDisplay.UpdatePointer         =  0;
 }
@@ -663,7 +664,7 @@ void      cDisplayCtrl(void)
                 Cordinate.StartY  = VarsDisplay.pOldBitmaps[Tmp]->StartY;
                 Cordinate.PixelsX = VarsDisplay.pOldBitmaps[Tmp]->PixelsX;
                 Cordinate.PixelsY = VarsDisplay.pOldBitmaps[Tmp]->PixelsY;
-                cDisplayFillScreen(&Cordinate, DRAW_PIXELS_CLEAR); 
+                cDisplayFillScreen(&Cordinate, DRAW_PIXELS_CLEAR);
               }
             }
             else
@@ -862,7 +863,7 @@ void      cDisplayCtrl(void)
 
                     case TOPLINE :
                     {
-                      cDisplayLineX(0,DISPLAY_WIDTH - 1,9,DRAW_PIXELS_SET); 
+                      cDisplayLineX(0,DISPLAY_WIDTH - 1,9,DRAW_PIXELS_SET);
                     }
                     break;
 
@@ -903,13 +904,13 @@ void      cDisplayCtrl(void)
     {
       if ((IOMapDisplay.Flags & DISPLAY_ON))
       {
-        dDisplayOn(TRUE, IOMapDisplay.Contrast);
+        pDisplay->SetPower(TRUE, IOMapDisplay.Contrast);
       }
       else
       {
-        dDisplayOn(FALSE, IOMapDisplay.Contrast);
+        pDisplay->SetPower(FALSE, IOMapDisplay.Contrast);
       }
-      if (!(dDisplayUpdate(DISPLAY_HEIGHT,DISPLAY_WIDTH,(UBYTE*)IOMapDisplay.Normal)))
+      if (!(pDisplay->Update(DISPLAY_HEIGHT,DISPLAY_WIDTH,(UBYTE*)IOMapDisplay.Normal,IOMapDisplay.Scaling)))
       {
         IOMapDisplay.Flags &= ~DISPLAY_BUSY;
         if (!(IOMapDisplay.Flags & DISPLAY_REFRESH))
@@ -932,13 +933,13 @@ void      cDisplayCtrl(void)
   }
   else
   {
-    dDisplayUpdate(DISPLAY_HEIGHT,DISPLAY_WIDTH,(UBYTE*)IOMapDisplay.Popup);
+    pDisplay->Update(DISPLAY_HEIGHT,DISPLAY_WIDTH,(UBYTE*)IOMapDisplay.Popup,IOMapDisplay.Scaling);
   }
 }
 
 
 void      cDisplayExit(void)
 {
-  dDisplayExit();
+  pDisplay->Exit();
 }
 

@@ -20,8 +20,8 @@
 #include  <string.h>
 #include  "stdconst.h"
 #include  "modules.h"
-#include  "c_sound.iom"
-#include  "c_loader.iom"
+#include  "c_sound.iom.h"
+#include  "c_loader.iom.h"
 #include  "c_sound.h"
 #include  "d_sound.h"
 
@@ -136,7 +136,10 @@ void      cSoundCtrl(void)
                 VarsSound.SampleRate  = ((UWORD)Header[4] << 8) + (UWORD)Header[5];
               }
               dSoundVolume(IOMapSound.Volume);
-              Length = SOUNDBUFFERSIZE;
+              if (FileFormat == FILEFORMAT_SOUND_COMPRESSED)
+                Length = SOUNDBUFFERSIZE_ADPCM;
+              else
+                Length = SOUNDBUFFERSIZE;
               pMapLoader->pFunc(READ,(UBYTE*)&VarsSound.File,VarsSound.Buffer[In],&Length);
               VarsSound.Length[In] = (UWORD)Length;
               In++;
@@ -218,7 +221,10 @@ void      cSoundCtrl(void)
         }
         if (Tmp != Out)
         {
-          Length = SOUNDBUFFERSIZE;
+          if (FileFormat == FILEFORMAT_SOUND_COMPRESSED)
+            Length = SOUNDBUFFERSIZE_ADPCM;
+          else
+            Length = SOUNDBUFFERSIZE;
           Handle = cSoundFile(READ,(UBYTE*)&VarsSound.File,VarsSound.Buffer[In],&Length);
           if ((Handle & 0x8000))
           {
@@ -233,7 +239,10 @@ void      cSoundCtrl(void)
               {
                 cSoundFile(CLOSE,(UBYTE*)&VarsSound.File,NULL,NULL);
                 VarsSound.File = cSoundFile(OPENREAD,SoundFilename,NULL,&Length);
-                Length = FILEHEADER_LENGTH;
+                if (FileFormat == FILEFORMAT_SOUND_COMPRESSED)
+                  Length = SOUNDBUFFERSIZE_ADPCM;
+                else
+                  Length = SOUNDBUFFERSIZE;
                 cSoundFile(READ,(UBYTE*)&VarsSound.File,Header,&Length);
                 Length = SOUNDBUFFERSIZE;
                 cSoundFile(READ,(UBYTE*)&VarsSound.File,VarsSound.Buffer[In],&Length);

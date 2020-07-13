@@ -2,19 +2,15 @@
 
 #include  "Test1.txt"
 #include  "Test2.txt"
+#include  <stdlib.h>
 //#define TESTPRG                     // If defined the test program will be included
 
 extern    void BtIo(void);
 
-const     char  BUILD_DATE[] = __DATE__;
-const     char  BUILD_TIME[] = __TIME__;
-
-const     char  MONTH[]  = "JanFebMarAprMajJunJulAugSepOktNovDec";
-
 void      GetProtocolVersion(UBYTE *String)
 {
   UWORD   Tmp;
-  
+
   Tmp = FIRMWAREVERSION & 0x00FF;
 
   if (Tmp < 100)
@@ -27,64 +23,38 @@ void      GetProtocolVersion(UBYTE *String)
   }
 }
 
-
-void      GetARMBuild(UBYTE *String)
+void      GetNativeVersion(UBYTE *String)
 {
   UWORD   Tmp;
-  UWORD   Lng;
-  char    String1[4];
-  char    String2[4];
 
-  String1[0] = BUILD_DATE[4];
-  String1[1] = BUILD_DATE[5];
-  String1[2] = 0;
+  Tmp = SOFTWAREVERSION & 0x00FF;
 
-  Tmp = (UWORD)atoi(String1);
-  Lng  = 0;
-  Lng += sprintf((char*)&String[Lng],"BUILD ");
-  Lng += sprintf((char*)&String[Lng],"%02u",Tmp);
-
-  String1[0] = BUILD_DATE[0];
-  String1[1] = BUILD_DATE[1];
-  String1[2] = BUILD_DATE[2];
-  String1[3] = 0;
-  String2[3] = 0;
-
-  Tmp = 0;
-  do
+  if (Tmp < 100)
   {
-    String2[0] = MONTH[0 + 3 * Tmp];
-    String2[1] = MONTH[1 + 3 * Tmp];
-    String2[2] = MONTH[2 + 3 * Tmp];
-    Tmp++;
+    sprintf((char*)String,"SW NXT3    %2u.%02u",(SOFTWAREVERSION >> 8) & 0x00FF,Tmp & 0x00FF);
   }
-  while ((Tmp < 12) && (strcmp(String1,String2) != 0));
-
-  Lng += sprintf((char*)&String[Lng],"%02u",Tmp);
-  Lng += sprintf((char*)&String[Lng],"%c%c",BUILD_DATE[9],BUILD_DATE[10]);
-  Lng += sprintf((char*)&String[Lng],"%c%c",BUILD_TIME[0],BUILD_TIME[1]);
-  Lng += sprintf((char*)&String[Lng],"%c%c",BUILD_TIME[3],BUILD_TIME[4]);
+  else
+  {
+    sprintf((char*)String,"SW NXT3    %2X.%02X",(SOFTWAREVERSION >> 8) & 0x00FF,Tmp & 0x00FF);
+  }
 }
 
-
-void      GetBC4Build(UBYTE *String)
+void      GetARMBuild(UBYTE *Line)
 {
-  sprintf((char*)String,"BC4        %2X.%02X",pMapComm->BrickData.BluecoreVersion[1],pMapComm->BrickData.BluecoreVersion[0]);
+  sprintf((char*)Line, "from %-11s", __DATE__);
 }
 
-
-void      GetAVRBuild(UBYTE *String)
+void      GetEV3Build(UBYTE *Line)
 {
-  sprintf((char*)String,"AVR         %1u.%02u",((IoFromAvr.Battery >> 13) & 3),((IoFromAvr.Battery >> 10) & 7));
+  sprintf((char*)Line, "FW EV3      ????");
 }
-
 
 void      GetBC4Address(UBYTE *String)
 {
   UWORD   Count;
   UBYTE   Tmp;
 
-  Count = (UWORD)sprintf((char*)String,"ID  ");
+  Count = (UWORD)sprintf((char*)String,"MAC ");
   for (Tmp = 0;(Tmp < (SIZE_OF_BDADDR - 1)) && (Count <= (DISPLAYLINE_LENGTH - 2));Tmp++)
   {
     Count += (UWORD)sprintf((char*)&String[Count],"%02X",(UWORD)(pMapComm->BrickData.BdAddr[Tmp]) & 0xFF);
@@ -254,9 +224,9 @@ UBYTE     TestPrg(UBYTE Dummy)
     case SYSTEM_INIT :
     {
       GetProtocolVersion(TxtBuffer[0]);
-      GetAVRBuild(TxtBuffer[1]);
-      GetBC4Build(TxtBuffer[2]);
-      GetARMBuild(TxtBuffer[3]);
+      GetNativeVersion(TxtBuffer[1]);
+      GetARMBuild(TxtBuffer[2]);
+      GetEV3Build(TxtBuffer[3]);
       GetBC4Address(TxtBuffer[4]);
 
       pMapDisplay->pTextLines[TEXTLINE_3] = (UBYTE*)TxtBuffer[0];
@@ -617,7 +587,6 @@ UBYTE     TestPrg(UBYTE Dummy)
     {
       if (++Timer >= 100)
       {
-        BtIo();
       }
     }
     break;
@@ -1266,12 +1235,12 @@ UBYTE     TestPrg(UBYTE Dummy)
     {
       if ((Count & 0x7FF) == 0x000)
       {
-        pMapDisplay->pScreens[SCREEN_BACKGROUND]       =  (BMPMAP*)Test1;
+        pMapDisplay->pScreens[SCREEN_BACKGROUND]       =  &Test1;
         pMapDisplay->UpdateMask                       |=  SCREEN_BIT(SCREEN_BACKGROUND);
       }
       if ((Count & 0x7FF) == 0x3FF)
       {
-        pMapDisplay->pScreens[SCREEN_BACKGROUND]       =  (BMPMAP*)Test2;
+        pMapDisplay->pScreens[SCREEN_BACKGROUND]       =  &Test2;
         pMapDisplay->UpdateMask                       |=  SCREEN_BIT(SCREEN_BACKGROUND);
       }
       Count++;

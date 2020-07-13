@@ -280,11 +280,11 @@ void      cUiUpdateSensor(SWORD Time)
           {
             if (VarsUi.SensorReset == TRUE)
             {
-              cUiWriteLowspeed(Port,3,"\x02\x41\x02",0);
+              cUiWriteLowspeed(Port,3,(UBYTE*) "\x02\x41\x02",0);
             }
             if (VarsUi.SensorState == SENSOR_ACQUIRE)
             {
-              cUiWriteLowspeed(Port,2,"\x02\x42",1);
+              cUiWriteLowspeed(Port,2,(UBYTE*) "\x02\x42",1);
             }
             if (VarsUi.SensorState == SENSOR_READ)
             {
@@ -313,11 +313,11 @@ void      cUiUpdateSensor(SWORD Time)
             {
               if (VarsUi.SensorState == SENSOR_SETUP)
               {
-                cUiWriteLowspeed(Port,3,"\x98\x01\x60",0);
+                cUiWriteLowspeed(Port,3,(UBYTE*) "\x98\x01\x60",0);
               }
               if (VarsUi.SensorState == SENSOR_ACQUIRE)
               {
-                cUiWriteLowspeed(Port,2,"\x98\x00",2);
+                cUiWriteLowspeed(Port,2,(UBYTE*) "\x98\x00",2);
               }
               if (VarsUi.SensorState == SENSOR_READ)
               {
@@ -720,7 +720,7 @@ void      cUiNVRead(void)
 
 //******* cUiFeedback ********************************************************
 
-UBYTE     cUiFeedback(BMPMAP *Bitmap,UBYTE TextNo1,UBYTE TextNo2,UWORD Time) // Show bimap and text
+UBYTE     cUiFeedback(const BMPMAP *Bitmap,UBYTE TextNo1,UBYTE TextNo2,UWORD Time) // Show bimap and text
 {
 //  if ((VarsUi.FBState == 0) || ((pMapDisplay->Flags & DISPLAY_POPUP) == 0))
   {
@@ -1066,17 +1066,17 @@ UBYTE     cUiFileList(UBYTE Action)       // Show files and select
 
         if (VarsUi.FileLeft)
         {
-          pMapDisplay->pMenuIcons[MENUICON_LEFT]    = (UBYTE*)&Icons->Data[(VarsUi.FileType + ALLFILES) * Icons->ItemPixelsX * (Icons->ItemPixelsY / 8)];
+          pMapDisplay->pMenuIcons[MENUICON_LEFT]    = (UBYTE*)&Icons.Data[(VarsUi.FileType + ALLFILES) * Icons.ItemPixelsX * (Icons.ItemPixelsY / 8)];
           pMapDisplay->UpdateMask                  |= MENUICON_BIT(MENUICON_LEFT);
         }
         if (VarsUi.FileCenter)
         {
-          pMapDisplay->pMenuIcons[MENUICON_CENTER]  = (UBYTE*)&Icons->Data[(VarsUi.FileType + ALLFILES) * Icons->ItemPixelsX * (Icons->ItemPixelsY / 8)];
+          pMapDisplay->pMenuIcons[MENUICON_CENTER]  = (UBYTE*)&Icons.Data[(VarsUi.FileType + ALLFILES) * Icons.ItemPixelsX * (Icons.ItemPixelsY / 8)];
           pMapDisplay->UpdateMask                  |= MENUICON_BIT(MENUICON_CENTER);
         }
         if (VarsUi.FileRight)
         {
-          pMapDisplay->pMenuIcons[MENUICON_RIGHT]   = (UBYTE*)&Icons->Data[(VarsUi.FileType + ALLFILES) * Icons->ItemPixelsX * (Icons->ItemPixelsY / 8)];
+          pMapDisplay->pMenuIcons[MENUICON_RIGHT]   = (UBYTE*)&Icons.Data[(VarsUi.FileType + ALLFILES) * Icons.ItemPixelsX * (Icons.ItemPixelsY / 8)];
           pMapDisplay->UpdateMask                  |= MENUICON_BIT(MENUICON_RIGHT);
         }
 
@@ -1137,7 +1137,7 @@ UBYTE     cUiVolume(UBYTE Action) // MENU_INIT,MENU_LEFT,MENU_RIGHT,MENU_EXIT
       VarsUi.Counter    = VarsUi.NVData.VolumeStep + 1;
 
 #ifndef STRIPPED
-      VarsUi.pTmp       = (UBYTE*)Cursor;
+      VarsUi.pTmp       = (UBYTE*) &Cursor;
       for (VarsUi.Tmp = 0;(VarsUi.Tmp < SIZE_OF_CURSOR) && (VarsUi.Tmp < (UBYTE)sizeof(Cursor));VarsUi.Tmp++)
       {
         VarsUi.CursorTmp[VarsUi.Tmp] = *VarsUi.pTmp;
@@ -1187,7 +1187,7 @@ UBYTE     cUiVolume(UBYTE Action) // MENU_INIT,MENU_LEFT,MENU_RIGHT,MENU_EXIT
     pMapDisplay->pTextLines[TEXTLINE_3] = VarsUi.DisplayBuffer;
 
 #ifndef STRIPPED
-    pMapDisplay->pBitmaps[BITMAP_1]     = (BMPMAP*)VarsUi.CursorTmp;
+    pMapDisplay->pBitmaps[BITMAP_1]     = (const BMPMAP*) VarsUi.CursorTmp;
     VarsUi.CursorTmp[4] = 46;
     VarsUi.CursorTmp[5] = 24;
 #endif
@@ -1245,7 +1245,7 @@ UBYTE     cUiGetUserString(UBYTE Type)  // 0=Pincode, 1=filename
       {
         // Disable update and prepare screen
         pMapDisplay->EraseMask              |=  SCREEN_BIT(SCREEN_LARGE);
-        pMapDisplay->pBitmaps[BITMAP_1]      = (BMPMAP*)Ok;
+        pMapDisplay->pBitmaps[BITMAP_1]      = &Ok;
 
         // Set figure pointer to default
         VarsUi.FigurePointer = (SBYTE)StrSets[Type].DefaultPointer;
@@ -1474,13 +1474,13 @@ void      cUiDrawPortNo(UBYTE *Bitmap,UBYTE MenuIconNo,UBYTE PortNo)
   Bitmap[3] = (UBYTE)(SIZE_OF_PORTBITMAP);
   Bitmap[4] = DISPLAY_MENUICONS_X_OFFS + DISPLAY_MENUICONS_X_DIFF * MenuIconNo + 2;
   Bitmap[5] = DISPLAY_MENUICONS_Y;
-  Bitmap[6] = Port[0].ItemPixelsX;
-  Bitmap[7] = Port[0].ItemPixelsY;
+  Bitmap[6] = Port.ItemPixelsX;
+  Bitmap[7] = Port.ItemPixelsY;
 
   Tmp = 0;
   while (Tmp < Bitmap[6])
   {
-    Bitmap[Tmp + FILEHEADER_LENGTH] = Port[0].Data[Tmp + PortNo * Bitmap[6]];
+    Bitmap[Tmp + FILEHEADER_LENGTH] = Port.Data[Tmp + PortNo * Bitmap[6]];
     Tmp++;
   }
 
@@ -1490,7 +1490,7 @@ UBYTE     cUiDataLogging(UBYTE Action)
 {
 #ifndef STRIPPED
   SBYTE   TmpBuffer[DATALOGBUFFERSIZE + 1];
-  
+
   switch (Action)
   {
     case MENU_INIT : // Initialize all ports to empty
@@ -1581,41 +1581,41 @@ UBYTE     cUiDataLogging(UBYTE Action)
           VarsUi.DatalogError = VarsUi.TmpHandle;
           if (!(VarsUi.DatalogError & 0x8000))
           {
-            VarsUi.TmpLength      = (ULONG)sprintf((char*)TmpBuffer,"%s\t%lu",SENSORSYNCDATA,pMapCmd->SyncTime); 
+            VarsUi.TmpLength      = (ULONG)sprintf((char*)TmpBuffer,"%s\t%lu",SENSORSYNCDATA,pMapCmd->SyncTime);
             VarsUi.DatalogError  |= pMapLoader->pFunc(WRITE,(UBYTE*)&VarsUi.TmpHandle,(UBYTE*)TmpBuffer,&VarsUi.TmpLength);
 
-            VarsUi.TmpLength      = (ULONG)sprintf((char*)TmpBuffer,"\t%lu",pMapCmd->SyncTick); 
+            VarsUi.TmpLength      = (ULONG)sprintf((char*)TmpBuffer,"\t%lu",pMapCmd->SyncTick);
             VarsUi.DatalogError  |= pMapLoader->pFunc(WRITE,(UBYTE*)&VarsUi.TmpHandle,(UBYTE*)TmpBuffer,&VarsUi.TmpLength);
 
-            VarsUi.TmpLength      = (ULONG)sprintf((char*)TmpBuffer,"\t%lu",pMapCmd->Tick); 
+            VarsUi.TmpLength      = (ULONG)sprintf((char*)TmpBuffer,"\t%lu",pMapCmd->Tick);
             VarsUi.DatalogError  |= pMapLoader->pFunc(WRITE,(UBYTE*)&VarsUi.TmpHandle,(UBYTE*)TmpBuffer,&VarsUi.TmpLength);
 
-            VarsUi.TmpLength      = (ULONG)sprintf((char*)TmpBuffer,"\t%lu\t-1\r\n",DATALOG_DEFAULT_SAMPLE_TIME); 
+            VarsUi.TmpLength      = (ULONG)sprintf((char*)TmpBuffer,"\t%lu\t-1\r\n",DATALOG_DEFAULT_SAMPLE_TIME);
             VarsUi.DatalogError  |= pMapLoader->pFunc(WRITE,(UBYTE*)&VarsUi.TmpHandle,(UBYTE*)TmpBuffer,&VarsUi.TmpLength);
 
-            VarsUi.TmpLength      = (ULONG)sprintf((char*)TmpBuffer,"%s",SENSORSDATA); 
+            VarsUi.TmpLength      = (ULONG)sprintf((char*)TmpBuffer,"%s",SENSORSDATA);
             VarsUi.DatalogError  |= pMapLoader->pFunc(WRITE,(UBYTE*)&VarsUi.TmpHandle,(UBYTE*)TmpBuffer,&VarsUi.TmpLength);
             for (VarsUi.Tmp = 0;(VarsUi.Tmp < DATALOGPORTS) && (!(VarsUi.DatalogError & 0x8000));VarsUi.Tmp++)
             {
               if (MENU_SENSOR_EMPTY != VarsUi.DatalogPort[VarsUi.Tmp])
               {
-                VarsUi.TmpLength      = (ULONG)sprintf((char*)TmpBuffer,"\t%u_%s%s",(UWORD)(VarsUi.Tmp + 1),(char*)SENSORDIRNAME[(VarsUi.DatalogPort[VarsUi.Tmp] - MENU_SENSOR_EMPTY) - 1],(char*)SENSORUNITNAME[(VarsUi.DatalogPort[VarsUi.Tmp] - MENU_SENSOR_EMPTY) - 1]); 
+                VarsUi.TmpLength      = (ULONG)sprintf((char*)TmpBuffer,"\t%u_%s%s",(UWORD)(VarsUi.Tmp + 1),(char*)SENSORDIRNAME[(VarsUi.DatalogPort[VarsUi.Tmp] - MENU_SENSOR_EMPTY) - 1],(char*)SENSORUNITNAME[(VarsUi.DatalogPort[VarsUi.Tmp] - MENU_SENSOR_EMPTY) - 1]);
                 VarsUi.DatalogError  |= pMapLoader->pFunc(WRITE,(UBYTE*)&VarsUi.TmpHandle,(UBYTE*)TmpBuffer,&VarsUi.TmpLength);
               }
             }
-            VarsUi.TmpLength      = (ULONG)sprintf((char*)TmpBuffer,"\r\n"); 
+            VarsUi.TmpLength      = (ULONG)sprintf((char*)TmpBuffer,"\r\n");
             VarsUi.DatalogError  |= pMapLoader->pFunc(WRITE,(UBYTE*)&VarsUi.TmpHandle,(UBYTE*)TmpBuffer,&VarsUi.TmpLength);
-            VarsUi.TmpLength      = (ULONG)sprintf((char*)TmpBuffer,"%s",SENSORTIME); 
+            VarsUi.TmpLength      = (ULONG)sprintf((char*)TmpBuffer,"%s",SENSORTIME);
             VarsUi.DatalogError  |= pMapLoader->pFunc(WRITE,(UBYTE*)&VarsUi.TmpHandle,(UBYTE*)TmpBuffer,&VarsUi.TmpLength);
             for (VarsUi.Tmp = 0;(VarsUi.Tmp < DATALOGPORTS) && (!(VarsUi.DatalogError & 0x8000));VarsUi.Tmp++)
             {
               if (MENU_SENSOR_EMPTY != VarsUi.DatalogPort[VarsUi.Tmp])
               {
-                VarsUi.TmpLength      = (ULONG)sprintf((char*)TmpBuffer,"\t%s",(char*)SENSORDIRNAME[(VarsUi.DatalogPort[VarsUi.Tmp] - MENU_SENSOR_EMPTY) - 1]); 
+                VarsUi.TmpLength      = (ULONG)sprintf((char*)TmpBuffer,"\t%s",(char*)SENSORDIRNAME[(VarsUi.DatalogPort[VarsUi.Tmp] - MENU_SENSOR_EMPTY) - 1]);
                 VarsUi.DatalogError  |= pMapLoader->pFunc(WRITE,(UBYTE*)&VarsUi.TmpHandle,(UBYTE*)TmpBuffer,&VarsUi.TmpLength);
               }
             }
-            VarsUi.TmpLength      = (ULONG)sprintf((char*)TmpBuffer,"\r\n"); 
+            VarsUi.TmpLength      = (ULONG)sprintf((char*)TmpBuffer,"\r\n");
             VarsUi.DatalogError  |= pMapLoader->pFunc(WRITE,(UBYTE*)&VarsUi.TmpHandle,(UBYTE*)TmpBuffer,&VarsUi.TmpLength);
             if (!(VarsUi.DatalogError & 0x8000))
             {
@@ -1667,12 +1667,12 @@ UBYTE     cUiDataLogging(UBYTE Action)
             pMapDisplay->pMenuIcons[MENUICON_RIGHT]  = NULL;
 
             pMapDisplay->EraseMask                   = SCREEN_BIT(SCREEN_LARGE);
-            pMapDisplay->pBitmaps[BITMAP_1]          = (BMPMAP*)Display;
+            pMapDisplay->pBitmaps[BITMAP_1]          = &Display;
             pMapDisplay->UpdateMask                  = (BITMAP_BIT(BITMAP_1) | MENUICON_BITS | SPECIAL_BIT(TOPLINE) | SPECIAL_BIT(FRAME_SELECT));
 
-            pMapDisplay->pBitmaps[BITMAP_2]          = (BMPMAP*)VarsUi.PortBitmapLeft;
-            pMapDisplay->pBitmaps[BITMAP_3]          = (BMPMAP*)VarsUi.PortBitmapCenter;
-            pMapDisplay->pBitmaps[BITMAP_4]          = (BMPMAP*)VarsUi.PortBitmapRight;
+            pMapDisplay->pBitmaps[BITMAP_2]          = (BMPMAP*) VarsUi.PortBitmapLeft;
+            pMapDisplay->pBitmaps[BITMAP_3]          = (BMPMAP*) VarsUi.PortBitmapCenter;
+            pMapDisplay->pBitmaps[BITMAP_4]          = (BMPMAP*) VarsUi.PortBitmapRight;
 
             cUiDrawPortNo(VarsUi.PortBitmapCenter,MENUICON_CENTER,VarsUi.SelectedPort - MENU_PORT_EMPTY);
             pMapDisplay->UpdateMask                 |= BITMAP_BIT(BITMAP_3);
@@ -1743,7 +1743,7 @@ UBYTE     cUiDataLogging(UBYTE Action)
           {
             VarsUi.DatalogSampleTimer -= VarsUi.DatalogSampleTime;
 
-            VarsUi.TmpLength      = (ULONG)sprintf((char*)TmpBuffer,"%lu",VarsUi.DatalogTimer - VarsUi.DatalogSampleTime); 
+            VarsUi.TmpLength      = (ULONG)sprintf((char*)TmpBuffer,"%lu",VarsUi.DatalogTimer - VarsUi.DatalogSampleTime);
             VarsUi.DatalogError  |= pMapLoader->pFunc(WRITE,(UBYTE*)&VarsUi.TmpHandle,(UBYTE*)TmpBuffer,&VarsUi.TmpLength);
             for (VarsUi.Tmp = 0;(VarsUi.Tmp < DATALOGPORTS) && (!(VarsUi.DatalogError & 0x8000));VarsUi.Tmp++)
             {
@@ -1751,17 +1751,17 @@ UBYTE     cUiDataLogging(UBYTE Action)
               {
                 if (VarsUi.DatalogSampleValid[VarsUi.Tmp] == TRUE)
                 {
-                  VarsUi.TmpLength      = (ULONG)sprintf((char*)TmpBuffer,(char*)SENSORFORMAT2[(VarsUi.DatalogPort[VarsUi.Tmp] - MENU_SENSOR_EMPTY) - 1],(float)VarsUi.DatalogSampleValue[VarsUi.Tmp] / SENSORDIVIDER[VarsUi.DatalogPort[VarsUi.Tmp] - MENU_SENSOR_EMPTY]); 
+                  VarsUi.TmpLength      = (ULONG)sprintf((char*)TmpBuffer,(char*)SENSORFORMAT2[(VarsUi.DatalogPort[VarsUi.Tmp] - MENU_SENSOR_EMPTY) - 1],(float)VarsUi.DatalogSampleValue[VarsUi.Tmp] / SENSORDIVIDER[VarsUi.DatalogPort[VarsUi.Tmp] - MENU_SENSOR_EMPTY]);
                   VarsUi.DatalogError  |= pMapLoader->pFunc(WRITE,(UBYTE*)&VarsUi.TmpHandle,(UBYTE*)TmpBuffer,&VarsUi.TmpLength);
                 }
                 else
                 {
-                  VarsUi.TmpLength      = (ULONG)sprintf((char*)TmpBuffer,"\t-"); 
+                  VarsUi.TmpLength      = (ULONG)sprintf((char*)TmpBuffer,"\t-");
                   VarsUi.DatalogError  |= pMapLoader->pFunc(WRITE,(UBYTE*)&VarsUi.TmpHandle,(UBYTE*)TmpBuffer,&VarsUi.TmpLength);
                 }
               }
             }
-            VarsUi.TmpLength      = (ULONG)sprintf((char*)TmpBuffer,"\r\n"); 
+            VarsUi.TmpLength      = (ULONG)sprintf((char*)TmpBuffer,"\r\n");
             VarsUi.DatalogError  |= pMapLoader->pFunc(WRITE,(UBYTE*)&VarsUi.TmpHandle,(UBYTE*)TmpBuffer,&VarsUi.TmpLength);
           }
 // Refresh display
@@ -1855,7 +1855,7 @@ UBYTE     cUiDataLogging(UBYTE Action)
 
         case 3 : // Display memory full text
         {
-          if (!cUiFeedback((BMPMAP*)Fail,TXT_FB_DL_ERROR_MEMORY_FULL_1,TXT_FB_DL_ERROR_MEMORY_FULL_2,DISPLAY_SHOW_ERROR_TIME))
+          if (!cUiFeedback(&Fail,TXT_FB_DL_ERROR_MEMORY_FULL_1,TXT_FB_DL_ERROR_MEMORY_FULL_2,DISPLAY_SHOW_ERROR_TIME))
           {
             cUiMenuPrevFile();
             IOMapUi.State = NEXT_MENU;
@@ -1866,7 +1866,7 @@ UBYTE     cUiDataLogging(UBYTE Action)
 
         case 4 : // Display memory full text
         {
-          if (!cUiFeedback((BMPMAP*)Fail,TXT_FB_DL_ERROR_MEMORY_FULL_1,TXT_FB_DL_ERROR_MEMORY_FULL_2,DISPLAY_SHOW_ERROR_TIME))
+          if (!cUiFeedback(&Fail,TXT_FB_DL_ERROR_MEMORY_FULL_1,TXT_FB_DL_ERROR_MEMORY_FULL_2,DISPLAY_SHOW_ERROR_TIME))
           {
             VarsUi.State  = 2;
           }
@@ -1905,7 +1905,7 @@ UBYTE     cUiDataLogging(UBYTE Action)
 
         case 2 : // Display saved text
         {
-          if (!cUiFeedback((BMPMAP*)Info,TXT_FB_FILE_SAVED_INFO,0xFF,DISPLAY_SHOW_FILENAME_TIME))
+          if (!cUiFeedback(&Info,TXT_FB_FILE_SAVED_INFO,0xFF,DISPLAY_SHOW_FILENAME_TIME))
           {
             VarsUi.State++;
           }
@@ -2048,11 +2048,11 @@ void      cUiRunning(UBYTE Action)
         if (++VarsUi.RunTimer >= RUN_BITMAP_CHANGE_TIME)
         {
           VarsUi.RunTimer    = 0;
-          if (++VarsUi.RunBitmapPointer >= Running->ItemsY )
+          if (++VarsUi.RunBitmapPointer >= Running.ItemsY )
           {
             VarsUi.RunBitmapPointer      = 0;
           }
-          pMapDisplay->pMenuIcons[MENUICON_CENTER]  = (UBYTE*)&Running->Data[VarsUi.RunBitmapPointer * Running->ItemPixelsX * (Running->ItemPixelsY / 8)];
+          pMapDisplay->pMenuIcons[MENUICON_CENTER]  = &Running.Data[VarsUi.RunBitmapPointer * Running.ItemPixelsX * (Running.ItemPixelsY / 8)];
           pMapDisplay->EraseMask                   |= MENUICON_BIT(MENUICON_CENTER);
           pMapDisplay->UpdateMask                  |= MENUICON_BIT(MENUICON_CENTER);
         }
@@ -2062,7 +2062,7 @@ void      cUiRunning(UBYTE Action)
 
     case MENU_UPDATE :
     {
-      pMapDisplay->pMenuIcons[MENUICON_CENTER]  = (UBYTE*)&Running->Data[VarsUi.RunBitmapPointer * Running->ItemPixelsX * (Running->ItemPixelsY / 8)];
+      pMapDisplay->pMenuIcons[MENUICON_CENTER]  = &Running.Data[VarsUi.RunBitmapPointer * Running.ItemPixelsX * (Running.ItemPixelsY / 8)];
       pMapDisplay->UpdateMask                  |= MENUICON_BIT(MENUICON_CENTER);
     }
     break;
@@ -2104,7 +2104,7 @@ UBYTE     cUiOnBrickProgramming(UBYTE Action) // On brick programming
     {
       pMapDisplay->EraseMask             |=  SCREEN_BIT(SCREEN_LARGE);
 
-      VarsUi.pTmp = (UBYTE*)Cursor;
+      VarsUi.pTmp = (UBYTE*) &Cursor;
       for (VarsUi.Tmp = 0;(VarsUi.Tmp < SIZE_OF_CURSOR) && (VarsUi.Tmp < (UBYTE)sizeof(Cursor));VarsUi.Tmp++)
       {
         VarsUi.CursorTmp[VarsUi.Tmp] = *VarsUi.pTmp;
@@ -2144,13 +2144,13 @@ UBYTE     cUiOnBrickProgramming(UBYTE Action) // On brick programming
       {
         case 0 :
         {
-          VarsUi.pTmp = (UBYTE*)Cursor;
+          VarsUi.pTmp = (UBYTE*) &Cursor;
           for (VarsUi.Tmp = 0;(VarsUi.Tmp < SIZE_OF_CURSOR) && (VarsUi.Tmp < (UBYTE)sizeof(Cursor));VarsUi.Tmp++)
           {
             VarsUi.CursorTmp[VarsUi.Tmp] = *VarsUi.pTmp;
             VarsUi.pTmp++;
           }
-          pMapDisplay->pBitmaps[BITMAP_1]     = (BMPMAP*)VarsUi.CursorTmp;
+          pMapDisplay->pBitmaps[BITMAP_1]     = (const BMPMAP*) VarsUi.CursorTmp;
           cUiRunning(MENU_INIT);
           Action = MENU_DRAW;
           VarsUi.State++;
@@ -2283,7 +2283,7 @@ UBYTE     cUiOnBrickProgramming(UBYTE Action) // On brick programming
 
         case 2 :
         {
-          if (!cUiFeedback((BMPMAP*)Fail,TXT_FB_FILE_EXIST_FAIL,TXT_FB_OVERWRITE_FAIL,0))
+          if (!cUiFeedback(&Fail,TXT_FB_FILE_EXIST_FAIL,TXT_FB_OVERWRITE_FAIL,0))
           {
             VarsUi.State          = 0;
           }
@@ -2302,7 +2302,7 @@ UBYTE     cUiOnBrickProgramming(UBYTE Action) // On brick programming
 
         case 4 : // Display saved text
         {
-          if (!cUiFeedback((BMPMAP*)Info,TXT_FB_FILE_SAVED_INFO,0,DISPLAY_SHOW_TIME))
+          if (!cUiFeedback(&Info,TXT_FB_FILE_SAVED_INFO,0,DISPLAY_SHOW_TIME))
           {
             VarsUi.State++;
           }
@@ -2345,7 +2345,7 @@ UBYTE     cUiOnBrickProgramming(UBYTE Action) // On brick programming
 
         default : // Display saved text
         {
-          if (!cUiFeedback((BMPMAP*)Info,TXT_FB_FILE_SAVED_INFO,0,DISPLAY_SHOW_TIME))
+          if (!cUiFeedback(&Info,TXT_FB_FILE_SAVED_INFO,0,DISPLAY_SHOW_TIME))
           {
             VarsUi.State  = 0;
           }
@@ -2409,7 +2409,7 @@ UBYTE     cUiOnBrickProgramming(UBYTE Action) // On brick programming
 
         default : // Display memory error text
         {
-          if (!cUiFeedback((BMPMAP*)Fail,TXT_FB_OBP_MEMORY_FULL_FAIL,0,DISPLAY_SHOW_ERROR_TIME))
+          if (!cUiFeedback(&Fail,TXT_FB_OBP_MEMORY_FULL_FAIL,0,DISPLAY_SHOW_ERROR_TIME))
           {
             cUiMenuPrevFile();
             IOMapUi.State = NEXT_MENU;
@@ -2454,7 +2454,7 @@ UBYTE     cUiOnBrickProgramming(UBYTE Action) // On brick programming
     }
 
     // and cursor
-    pMapDisplay->pBitmaps[BITMAP_1]     = (BMPMAP*)VarsUi.CursorTmp;
+    pMapDisplay->pBitmaps[BITMAP_1]     = (const BMPMAP*) VarsUi.CursorTmp;
     if (VarsUi.ProgramStepPointer < ON_BRICK_PROGRAMSTEPS)
     {
       VarsUi.CursorTmp[4] = 13 + (VarsUi.ProgramStepPointer * 17);
@@ -2830,7 +2830,7 @@ UBYTE     cUiFileDelete(UBYTE Action)
 
       default : // Display deleted text
       {
-        if (!cUiFeedback((BMPMAP*)Info,TXT_FB_FD_FILE_DELETED_INFO,0,DISPLAY_SHOW_TIME))
+        if (!cUiFeedback(&Info,TXT_FB_FD_FILE_DELETED_INFO,0,DISPLAY_SHOW_TIME))
         {
           IOMapUi.State = EXIT_PRESSED;
           VarsUi.State  = 0;
@@ -2886,7 +2886,7 @@ UBYTE     cUiView(UBYTE Action) // MENU_INIT
 
             IOMapUi.Flags |= UI_BUSY;
             pMapDisplay->EraseMask             |= SCREEN_BIT(SCREEN_LARGE);
-            pMapDisplay->pBitmaps[BITMAP_1]     = (BMPMAP*)Display;
+            pMapDisplay->pBitmaps[BITMAP_1]     = &Display;
             pMapDisplay->UpdateMask             = BITMAP_BIT(BITMAP_1);
             IOMapUi.Flags                      |=  UI_REDRAW_STATUS;
             VarsUi.ReadoutTimer                 = 0;;
@@ -2975,7 +2975,7 @@ UBYTE     cUiBtOn(UBYTE Action)
 
         case 1 : // Display turning on text
         {
-          if (!cUiFeedback((BMPMAP*)Wait,TXT_FB_BT_TURNING_ON_WAIT,0,0))
+          if (!cUiFeedback(&Wait,TXT_FB_BT_TURNING_ON_WAIT,0,0))
           {
             VarsUi.State++;
           }
@@ -3000,7 +3000,7 @@ UBYTE     cUiBtOn(UBYTE Action)
 
         default : // Display fail text
         {
-          if (!cUiFeedback((BMPMAP*)Fail,TXT_FB_GENERIC_FAIL,0,DISPLAY_SHOW_ERROR_TIME))
+          if (!cUiFeedback(&Fail,TXT_FB_GENERIC_FAIL,0,DISPLAY_SHOW_ERROR_TIME))
           {
             Action = MENU_EXIT;
           }
@@ -3033,7 +3033,7 @@ UBYTE     cUiBtOn(UBYTE Action)
 
         case 1 : // Display turning off text
         {
-          if (!cUiFeedback((BMPMAP*)Wait,TXT_FB_BT_TURNING_OFF_WAIT,0,0))
+          if (!cUiFeedback(&Wait,TXT_FB_BT_TURNING_OFF_WAIT,0,0))
           {
             VarsUi.State++;
           }
@@ -3058,7 +3058,7 @@ UBYTE     cUiBtOn(UBYTE Action)
 
         default : // Display fail text
         {
-          if (!cUiFeedback((BMPMAP*)Fail,TXT_FB_GENERIC_FAIL,0,DISPLAY_SHOW_ERROR_TIME))
+          if (!cUiFeedback(&Fail,TXT_FB_GENERIC_FAIL,0,DISPLAY_SHOW_ERROR_TIME))
           {
             Action = MENU_EXIT;
           }
@@ -3184,7 +3184,7 @@ UBYTE     cUiBtSearch(UBYTE Action) // Search for devices
 
       case 1 : // Display wait text and start search
       {
-        if (!cUiFeedback((BMPMAP*)Wait,TXT_FB_BT_SEARCHING_WAIT,0,0))
+        if (!cUiFeedback(&Wait,TXT_FB_BT_SEARCHING_WAIT,0,0))
         {
           VarsUi.BTCommand  = (UBYTE)SEARCH;
           VarsUi.BTPar1     = (UBYTE)1;
@@ -3264,7 +3264,7 @@ UBYTE     cUiBtSearch(UBYTE Action) // Search for devices
 
       case 4 : // Display info text
       {
-        if (!cUiFeedback((BMPMAP*)Info,TXT_FB_BT_SEARCH_ABORTED_INFO,0,DISPLAY_SHOW_TIME))
+        if (!cUiFeedback(&Info,TXT_FB_BT_SEARCH_ABORTED_INFO,0,DISPLAY_SHOW_TIME))
         {
           VarsUi.State++;
         }
@@ -3297,7 +3297,7 @@ UBYTE     cUiBtSearch(UBYTE Action) // Search for devices
 
       default : // Display fail text
       {
-        if (!cUiFeedback((BMPMAP*)Fail,TXT_FB_GENERIC_FAIL,0,DISPLAY_SHOW_ERROR_TIME))
+        if (!cUiFeedback(&Fail,TXT_FB_GENERIC_FAIL,0,DISPLAY_SHOW_ERROR_TIME))
         {
           VarsUi.State  = 0;
           IOMapUi.State = EXIT_PRESSED;
@@ -3440,7 +3440,7 @@ UBYTE     cUiBtDeviceList(UBYTE Action) // Show devices
 
         default : // Display fail text
         {
-          if (!cUiFeedback((BMPMAP*)Fail,TXT_FB_GENERIC_FAIL,0,DISPLAY_SHOW_ERROR_TIME))
+          if (!cUiFeedback(&Fail,TXT_FB_GENERIC_FAIL,0,DISPLAY_SHOW_ERROR_TIME))
           {
             Action              = MENU_EXIT;
           }
@@ -3465,21 +3465,21 @@ UBYTE     cUiBtDeviceList(UBYTE Action) // Show devices
     {
       VarsUi.Tmp = VarsUi.DeviceLeft - 1;
       cUiBTCommand(UI_BT_GET_DEVICE_TYPE,VarsUi.DevicesKnown,&VarsUi.Tmp,&VarsUi.DeviceType);
-      pMapDisplay->pMenuIcons[MENUICON_LEFT]    = (UBYTE*)&Devices->Data[VarsUi.DeviceType * Devices->ItemPixelsX * (Devices->ItemPixelsY / 8)];
+      pMapDisplay->pMenuIcons[MENUICON_LEFT]    = (UBYTE*)&Devices.Data[VarsUi.DeviceType * Devices.ItemPixelsX * (Devices.ItemPixelsY / 8)];
       pMapDisplay->UpdateMask                  |= MENUICON_BIT(MENUICON_LEFT);
     }
     if (VarsUi.DeviceCenter)
     {
       VarsUi.Tmp = VarsUi.DeviceCenter - 1;
       cUiBTCommand(UI_BT_GET_DEVICE_TYPE,VarsUi.DevicesKnown,&VarsUi.Tmp,&VarsUi.DeviceType);
-      pMapDisplay->pMenuIcons[MENUICON_CENTER]  = (UBYTE*)&Devices->Data[VarsUi.DeviceType * Devices->ItemPixelsX * (Devices->ItemPixelsY / 8)];
+      pMapDisplay->pMenuIcons[MENUICON_CENTER]  = (UBYTE*)&Devices.Data[VarsUi.DeviceType * Devices.ItemPixelsX * (Devices.ItemPixelsY / 8)];
       pMapDisplay->UpdateMask                  |= MENUICON_BIT(MENUICON_CENTER);
     }
     if (VarsUi.DeviceRight)
     {
       VarsUi.Tmp = VarsUi.DeviceRight - 1;
       cUiBTCommand(UI_BT_GET_DEVICE_TYPE,VarsUi.DevicesKnown,&VarsUi.Tmp,&VarsUi.DeviceType);
-      pMapDisplay->pMenuIcons[MENUICON_RIGHT]   = (UBYTE*)&Devices->Data[VarsUi.DeviceType * Devices->ItemPixelsX * (Devices->ItemPixelsY / 8)];
+      pMapDisplay->pMenuIcons[MENUICON_RIGHT]   = (UBYTE*)&Devices.Data[VarsUi.DeviceType * Devices.ItemPixelsX * (Devices.ItemPixelsY / 8)];
       pMapDisplay->UpdateMask                  |= MENUICON_BIT(MENUICON_RIGHT);
     }
 
@@ -3536,7 +3536,7 @@ UBYTE     cUiBtConnectList(UBYTE Action) // Show connections and maybe disconnec
     case MENU_UPDATE : // Check connection valid
     {
       VarsUi.Tmp = VarsUi.SlotCenter - 1;
-      if (cUiBTCommand(UI_BT_GET_CONNECTION_VALID,NULL,&VarsUi.Tmp,NULL) != UI_BT_SUCCES)
+      if (cUiBTCommand(UI_BT_GET_CONNECTION_VALID,0,&VarsUi.Tmp,NULL) != UI_BT_SUCCES)
       {
         Action = MENU_EXIT;
       }
@@ -3582,7 +3582,7 @@ UBYTE     cUiBtConnectList(UBYTE Action) // Show connections and maybe disconnec
 
         default : // Display fail text
         {
-          if (!cUiFeedback((BMPMAP*)Fail,TXT_FB_GENERIC_FAIL,0,DISPLAY_SHOW_ERROR_TIME))
+          if (!cUiFeedback(&Fail,TXT_FB_GENERIC_FAIL,0,DISPLAY_SHOW_ERROR_TIME))
           {
             Action          = MENU_EXIT;
           }
@@ -3598,50 +3598,50 @@ UBYTE     cUiBtConnectList(UBYTE Action) // Show connections and maybe disconnec
   {
     cUiListCalc(VarsUi.Slots,&VarsUi.SlotCenter,&VarsUi.SlotLeft,&VarsUi.SlotRight);
 
-    pMapDisplay->pBitmaps[BITMAP_2]          = (BMPMAP*)VarsUi.PortBitmapLeft;
-    pMapDisplay->pBitmaps[BITMAP_3]          = (BMPMAP*)VarsUi.PortBitmapCenter;
-    pMapDisplay->pBitmaps[BITMAP_4]          = (BMPMAP*)VarsUi.PortBitmapRight;
+    pMapDisplay->pBitmaps[BITMAP_2]          = (const BMPMAP*) VarsUi.PortBitmapLeft;
+    pMapDisplay->pBitmaps[BITMAP_3]          = (const BMPMAP*) VarsUi.PortBitmapCenter;
+    pMapDisplay->pBitmaps[BITMAP_4]          = (const BMPMAP*) VarsUi.PortBitmapRight;
 
     VarsUi.Tmp = VarsUi.SlotLeft - 1;
-    if (cUiBTCommand(UI_BT_GET_CONNECTION_VALID,NULL,&VarsUi.Tmp,NULL) == UI_BT_SUCCES)
+    if (cUiBTCommand(UI_BT_GET_CONNECTION_VALID,0,&VarsUi.Tmp,NULL) == UI_BT_SUCCES)
     {
-      cUiBTCommand(UI_BT_GET_CONNECTION_TYPE,NULL,&VarsUi.Tmp,&VarsUi.DeviceType);
-      pMapDisplay->pMenuIcons[MENUICON_LEFT]    = (UBYTE*)&Devices->Data[VarsUi.DeviceType * Devices->ItemPixelsX * (Devices->ItemPixelsY / 8)];
+      cUiBTCommand(UI_BT_GET_CONNECTION_TYPE,0,&VarsUi.Tmp,&VarsUi.DeviceType);
+      pMapDisplay->pMenuIcons[MENUICON_LEFT]    = (UBYTE*)&Devices.Data[VarsUi.DeviceType * Devices.ItemPixelsX * (Devices.ItemPixelsY / 8)];
       cUiDrawPortNo(VarsUi.PortBitmapLeft,MENUICON_LEFT,VarsUi.Tmp);
       pMapDisplay->UpdateMask                  |= BITMAP_BIT(BITMAP_2);
     }
     else
     {
-      pMapDisplay->pMenuIcons[MENUICON_LEFT]    = (UBYTE*)&Connections->Data[VarsUi.Tmp * Connections->ItemPixelsX * (Connections->ItemPixelsY / 8)];
+      pMapDisplay->pMenuIcons[MENUICON_LEFT]    = (UBYTE*)&Connections.Data[VarsUi.Tmp * Connections.ItemPixelsX * (Connections.ItemPixelsY / 8)];
     }
 
     VarsUi.Tmp = VarsUi.SlotCenter - 1;
-    cUiBTCommand(UI_BT_GET_CONNECTION_NAME,NULL,&VarsUi.Tmp,VarsUi.DisplayBuffer);
+    cUiBTCommand(UI_BT_GET_CONNECTION_NAME,0,&VarsUi.Tmp,VarsUi.DisplayBuffer);
     pMapDisplay->EraseMask                     |=  TEXTLINE_BIT(TEXTLINE_5);
     pMapDisplay->pMenuText                      = VarsUi.DisplayBuffer;
 
-    if (cUiBTCommand(UI_BT_GET_CONNECTION_VALID,NULL,&VarsUi.Tmp,NULL) == UI_BT_SUCCES)
+    if (cUiBTCommand(UI_BT_GET_CONNECTION_VALID,0,&VarsUi.Tmp,NULL) == UI_BT_SUCCES)
     {
-      cUiBTCommand(UI_BT_GET_CONNECTION_TYPE,NULL,&VarsUi.Tmp,&VarsUi.DeviceType);
-      pMapDisplay->pMenuIcons[MENUICON_CENTER]  = (UBYTE*)&Devices->Data[VarsUi.DeviceType * Devices->ItemPixelsX * (Devices->ItemPixelsY / 8)];
+      cUiBTCommand(UI_BT_GET_CONNECTION_TYPE,0,&VarsUi.Tmp,&VarsUi.DeviceType);
+      pMapDisplay->pMenuIcons[MENUICON_CENTER]  = (UBYTE*)&Devices.Data[VarsUi.DeviceType * Devices.ItemPixelsX * (Devices.ItemPixelsY / 8)];
       cUiDrawPortNo(VarsUi.PortBitmapCenter,MENUICON_CENTER,VarsUi.Tmp);
       pMapDisplay->UpdateMask                  |= BITMAP_BIT(BITMAP_3);
     }
     else
     {
-      pMapDisplay->pMenuIcons[MENUICON_CENTER]  = (UBYTE*)&Connections->Data[VarsUi.Tmp * Connections->ItemPixelsX * (Connections->ItemPixelsY / 8)];
+      pMapDisplay->pMenuIcons[MENUICON_CENTER]  = (UBYTE*)&Connections.Data[VarsUi.Tmp * Connections.ItemPixelsX * (Connections.ItemPixelsY / 8)];
     }
     VarsUi.Tmp = VarsUi.SlotRight - 1;
-    if (cUiBTCommand(UI_BT_GET_CONNECTION_VALID,NULL,&VarsUi.Tmp,NULL) == UI_BT_SUCCES)
+    if (cUiBTCommand(UI_BT_GET_CONNECTION_VALID,0,&VarsUi.Tmp,NULL) == UI_BT_SUCCES)
     {
-      cUiBTCommand(UI_BT_GET_CONNECTION_TYPE,NULL,&VarsUi.Tmp,&VarsUi.DeviceType);
-      pMapDisplay->pMenuIcons[MENUICON_RIGHT]   = (UBYTE*)&Devices->Data[VarsUi.DeviceType * Devices->ItemPixelsX * (Devices->ItemPixelsY / 8)];
+      cUiBTCommand(UI_BT_GET_CONNECTION_TYPE,0,&VarsUi.Tmp,&VarsUi.DeviceType);
+      pMapDisplay->pMenuIcons[MENUICON_RIGHT]   = (UBYTE*)&Devices.Data[VarsUi.DeviceType * Devices.ItemPixelsX * (Devices.ItemPixelsY / 8)];
       cUiDrawPortNo(VarsUi.PortBitmapRight,MENUICON_RIGHT,VarsUi.Tmp);
       pMapDisplay->UpdateMask                  |= BITMAP_BIT(BITMAP_4);
     }
     else
     {
-      pMapDisplay->pMenuIcons[MENUICON_RIGHT]   = (UBYTE*)&Connections->Data[VarsUi.Tmp * Connections->ItemPixelsX * (Connections->ItemPixelsY / 8)];
+      pMapDisplay->pMenuIcons[MENUICON_RIGHT]   = (UBYTE*)&Connections.Data[VarsUi.Tmp * Connections.ItemPixelsX * (Connections.ItemPixelsY / 8)];
     }
     pMapDisplay->EraseMask                     &= ~SCREEN_BIT(SCREEN_LARGE);
     pMapDisplay->EraseMask                     |= MENUICON_BITS;
@@ -3707,7 +3707,7 @@ UBYTE     cUiBtConnect(UBYTE Action) // Select connection no and insert device
 
         case 1 : // Display wait text
         {
-          if (!cUiFeedback((BMPMAP*)Wait,TXT_FB_BT_CONNECTING_WAIT,0,0))
+          if (!cUiFeedback(&Wait,TXT_FB_BT_CONNECTING_WAIT,0,0))
           {
             if (cUiBTGetDeviceIndex(VarsUi.DevicesKnown,VarsUi.SelectedDevice - 1,&VarsUi.BTIndex))
             {
@@ -3779,7 +3779,7 @@ UBYTE     cUiBtConnect(UBYTE Action) // Select connection no and insert device
 
         case 4 : // Display wait text
         {
-          if (!cUiFeedback((BMPMAP*)Wait,TXT_FB_BT_CONNECTING_WAIT,0,0))
+          if (!cUiFeedback(&Wait,TXT_FB_BT_CONNECTING_WAIT,0,0))
           {
             VarsUi.State++;
           }
@@ -3804,7 +3804,7 @@ UBYTE     cUiBtConnect(UBYTE Action) // Select connection no and insert device
 
         case 6 : // Display busy text
         {
-          if (!cUiFeedback((BMPMAP*)Fail,TXT_FB_BT_CONNECT_BUSY_FAIL,0,DISPLAY_SHOW_ERROR_TIME))
+          if (!cUiFeedback(&Fail,TXT_FB_BT_CONNECT_BUSY_FAIL,0,DISPLAY_SHOW_ERROR_TIME))
           {
             Action = MENU_EXIT;
           }
@@ -3813,7 +3813,7 @@ UBYTE     cUiBtConnect(UBYTE Action) // Select connection no and insert device
 
         default : // Display fail text
         {
-          if (!cUiFeedback((BMPMAP*)Fail,TXT_FB_GENERIC_FAIL,0,DISPLAY_SHOW_ERROR_TIME))
+          if (!cUiFeedback(&Fail,TXT_FB_GENERIC_FAIL,0,DISPLAY_SHOW_ERROR_TIME))
           {
             Action = MENU_EXIT;
           }
@@ -3831,7 +3831,7 @@ UBYTE     cUiBtConnect(UBYTE Action) // Select connection no and insert device
         case 0 : // Check connection
         {
           VarsUi.SelectedSlot = (UBYTE)VarsUi.SlotCenter;
-          if (VarsUi.SelectedFilename[0] && (cUiBTCommand(UI_BT_GET_CONNECTION_NAME,NULL,&VarsUi.SelectedSlot,NULL) == UI_BT_SUCCES))
+          if (VarsUi.SelectedFilename[0] && (cUiBTCommand(UI_BT_GET_CONNECTION_NAME,0,&VarsUi.SelectedSlot,NULL) == UI_BT_SUCCES))
           {
             VarsUi.State += 2;
           }
@@ -3844,7 +3844,7 @@ UBYTE     cUiBtConnect(UBYTE Action) // Select connection no and insert device
 
         case 1 : // Display fail text
         {
-          if (!cUiFeedback((BMPMAP*)Fail,TXT_FB_BT_SENDING_NO_CONN_FAIL,0,DISPLAY_SHOW_ERROR_TIME))
+          if (!cUiFeedback(&Fail,TXT_FB_BT_SENDING_NO_CONN_FAIL,0,DISPLAY_SHOW_ERROR_TIME))
           {
             Action = MENU_EXIT;
           }
@@ -3853,7 +3853,7 @@ UBYTE     cUiBtConnect(UBYTE Action) // Select connection no and insert device
 
         case 2 : // Display wait text and send file
         {
-          if (!cUiFeedback((BMPMAP*)Wait,TXT_FB_BT_SENDING_WAIT,0,0))
+          if (!cUiFeedback(&Wait,TXT_FB_BT_SENDING_WAIT,0,0))
           {
             VarsUi.BTCommand  = (UBYTE)SENDFILE;
             VarsUi.BTPar1     = (UBYTE)VarsUi.SelectedSlot;
@@ -3890,7 +3890,7 @@ UBYTE     cUiBtConnect(UBYTE Action) // Select connection no and insert device
 
         case 4 : // Display fail text
         {
-          if (!cUiFeedback((BMPMAP*)Fail,TXT_FB_GENERIC_FAIL,0,DISPLAY_SHOW_ERROR_TIME))
+          if (!cUiFeedback(&Fail,TXT_FB_GENERIC_FAIL,0,DISPLAY_SHOW_ERROR_TIME))
           {
             Action = MENU_EXIT;
           }
@@ -3915,50 +3915,50 @@ UBYTE     cUiBtConnect(UBYTE Action) // Select connection no and insert device
   {
     cUiListCalc(VarsUi.Slots,&VarsUi.SlotCenter,&VarsUi.SlotLeft,&VarsUi.SlotRight);
 
-    pMapDisplay->pBitmaps[BITMAP_2]          = (BMPMAP*)VarsUi.PortBitmapLeft;
-    pMapDisplay->pBitmaps[BITMAP_3]          = (BMPMAP*)VarsUi.PortBitmapCenter;
-    pMapDisplay->pBitmaps[BITMAP_4]          = (BMPMAP*)VarsUi.PortBitmapRight;
+    pMapDisplay->pBitmaps[BITMAP_2]          = (const BMPMAP*) VarsUi.PortBitmapLeft;
+    pMapDisplay->pBitmaps[BITMAP_3]          = (const BMPMAP*) VarsUi.PortBitmapCenter;
+    pMapDisplay->pBitmaps[BITMAP_4]          = (const BMPMAP*) VarsUi.PortBitmapRight;
 
     VarsUi.Tmp = VarsUi.SlotLeft;
-    if (cUiBTCommand(UI_BT_GET_CONNECTION_VALID,NULL,&VarsUi.Tmp,NULL) == UI_BT_SUCCES)
+    if (cUiBTCommand(UI_BT_GET_CONNECTION_VALID,0,&VarsUi.Tmp,NULL) == UI_BT_SUCCES)
     {
-      cUiBTCommand(UI_BT_GET_CONNECTION_TYPE,NULL,&VarsUi.Tmp,&VarsUi.DeviceType);
-      pMapDisplay->pMenuIcons[MENUICON_LEFT]    = (UBYTE*)&Devices->Data[VarsUi.DeviceType * Devices->ItemPixelsX * (Devices->ItemPixelsY / 8)];
+      cUiBTCommand(UI_BT_GET_CONNECTION_TYPE,0,&VarsUi.Tmp,&VarsUi.DeviceType);
+      pMapDisplay->pMenuIcons[MENUICON_LEFT]    = (UBYTE*)&Devices.Data[VarsUi.DeviceType * Devices.ItemPixelsX * (Devices.ItemPixelsY / 8)];
       cUiDrawPortNo(VarsUi.PortBitmapLeft,MENUICON_LEFT,VarsUi.Tmp);
       pMapDisplay->UpdateMask                  |= BITMAP_BIT(BITMAP_2);
     }
     else
     {
-      pMapDisplay->pMenuIcons[MENUICON_LEFT]    = (UBYTE*)&Connections->Data[VarsUi.Tmp * Connections->ItemPixelsX * (Connections->ItemPixelsY / 8)];
+      pMapDisplay->pMenuIcons[MENUICON_LEFT]    = (UBYTE*)&Connections.Data[VarsUi.Tmp * Connections.ItemPixelsX * (Connections.ItemPixelsY / 8)];
     }
 
     VarsUi.Tmp = VarsUi.SlotCenter;
-    cUiBTCommand(UI_BT_GET_CONNECTION_NAME,NULL,&VarsUi.Tmp,VarsUi.DisplayBuffer);
+    cUiBTCommand(UI_BT_GET_CONNECTION_NAME,0,&VarsUi.Tmp,VarsUi.DisplayBuffer);
     pMapDisplay->EraseMask                     |=  TEXTLINE_BIT(TEXTLINE_5);
     pMapDisplay->pMenuText                      = VarsUi.DisplayBuffer;
 
-    if (cUiBTCommand(UI_BT_GET_CONNECTION_VALID,NULL,&VarsUi.Tmp,NULL) == UI_BT_SUCCES)
+    if (cUiBTCommand(UI_BT_GET_CONNECTION_VALID,0,&VarsUi.Tmp,NULL) == UI_BT_SUCCES)
     {
-      cUiBTCommand(UI_BT_GET_CONNECTION_TYPE,NULL,&VarsUi.Tmp,&VarsUi.DeviceType);
-      pMapDisplay->pMenuIcons[MENUICON_CENTER]  = (UBYTE*)&Devices->Data[VarsUi.DeviceType * Devices->ItemPixelsX * (Devices->ItemPixelsY / 8)];
+      cUiBTCommand(UI_BT_GET_CONNECTION_TYPE,0,&VarsUi.Tmp,&VarsUi.DeviceType);
+      pMapDisplay->pMenuIcons[MENUICON_CENTER]  = (UBYTE*)&Devices.Data[VarsUi.DeviceType * Devices.ItemPixelsX * (Devices.ItemPixelsY / 8)];
       cUiDrawPortNo(VarsUi.PortBitmapCenter,MENUICON_CENTER,VarsUi.Tmp);
       pMapDisplay->UpdateMask                  |= BITMAP_BIT(BITMAP_3);
     }
     else
     {
-      pMapDisplay->pMenuIcons[MENUICON_CENTER]  = (UBYTE*)&Connections->Data[VarsUi.Tmp * Connections->ItemPixelsX * (Connections->ItemPixelsY / 8)];
+      pMapDisplay->pMenuIcons[MENUICON_CENTER]  = (UBYTE*)&Connections.Data[VarsUi.Tmp * Connections.ItemPixelsX * (Connections.ItemPixelsY / 8)];
     }
     VarsUi.Tmp = VarsUi.SlotRight;
-    if (cUiBTCommand(UI_BT_GET_CONNECTION_VALID,NULL,&VarsUi.Tmp,NULL) == UI_BT_SUCCES)
+    if (cUiBTCommand(UI_BT_GET_CONNECTION_VALID,0,&VarsUi.Tmp,NULL) == UI_BT_SUCCES)
     {
-      cUiBTCommand(UI_BT_GET_CONNECTION_TYPE,NULL,&VarsUi.Tmp,&VarsUi.DeviceType);
-      pMapDisplay->pMenuIcons[MENUICON_RIGHT]   = (UBYTE*)&Devices->Data[VarsUi.DeviceType * Devices->ItemPixelsX * (Devices->ItemPixelsY / 8)];
+      cUiBTCommand(UI_BT_GET_CONNECTION_TYPE,0,&VarsUi.Tmp,&VarsUi.DeviceType);
+      pMapDisplay->pMenuIcons[MENUICON_RIGHT]   = (UBYTE*)&Devices.Data[VarsUi.DeviceType * Devices.ItemPixelsX * (Devices.ItemPixelsY / 8)];
       cUiDrawPortNo(VarsUi.PortBitmapRight,MENUICON_RIGHT,VarsUi.Tmp);
       pMapDisplay->UpdateMask                  |= BITMAP_BIT(BITMAP_4);
     }
     else
     {
-      pMapDisplay->pMenuIcons[MENUICON_RIGHT]   = (UBYTE*)&Connections->Data[VarsUi.Tmp * Connections->ItemPixelsX * (Connections->ItemPixelsY / 8)];
+      pMapDisplay->pMenuIcons[MENUICON_RIGHT]   = (UBYTE*)&Connections.Data[VarsUi.Tmp * Connections.ItemPixelsX * (Connections.ItemPixelsY / 8)];
     }
     pMapDisplay->EraseMask                     &= ~SCREEN_BIT(SCREEN_LARGE);
     pMapDisplay->EraseMask                     |= MENUICON_BITS;
@@ -3986,7 +3986,7 @@ UBYTE     cUiPowerOffTime(UBYTE Action) // MENU_INIT,MENU_LEFT,MENU_RIGHT,MENU_E
       VarsUi.Counter        = VarsUi.NVData.PowerdownCode + 1;
 
 #ifndef STRIPPED
-      VarsUi.pTmp           = (UBYTE*)Cursor;
+      VarsUi.pTmp           = (UBYTE*) &Cursor;
       for (VarsUi.Tmp = 0;(VarsUi.Tmp < SIZE_OF_CURSOR) && (VarsUi.Tmp < (UBYTE)sizeof(Cursor));VarsUi.Tmp++)
       {
         VarsUi.CursorTmp[VarsUi.Tmp] = *VarsUi.pTmp;
@@ -4035,7 +4035,7 @@ UBYTE     cUiPowerOffTime(UBYTE Action) // MENU_INIT,MENU_LEFT,MENU_RIGHT,MENU_E
     pMapDisplay->pTextLines[TEXTLINE_3] = VarsUi.DisplayBuffer;
 
 #ifndef STRIPPED
-    pMapDisplay->pBitmaps[BITMAP_1]     = (BMPMAP*)VarsUi.CursorTmp;
+    pMapDisplay->pBitmaps[BITMAP_1]     = (const BMPMAP*) VarsUi.CursorTmp;
     VarsUi.CursorTmp[4] = 46;
     VarsUi.CursorTmp[5] = 24;
 #endif
@@ -4191,7 +4191,7 @@ UBYTE     cUiFilesDelete(UBYTE Action)
 
         default : // Display Files deleted text
         {
-          if (!cUiFeedback((BMPMAP*)Info,TXT_FB_FD_FILES_INFO,TXT_FB_FD_DELETED_INFO,DISPLAY_SHOW_TIME))
+          if (!cUiFeedback(&Info,TXT_FB_FD_FILES_INFO,TXT_FB_FD_DELETED_INFO,DISPLAY_SHOW_TIME))
           {
             IOMapUi.State = EXIT_PRESSED;
             VarsUi.State  = 0;

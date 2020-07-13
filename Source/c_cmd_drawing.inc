@@ -378,11 +378,11 @@ NXT_STATUS cCmdWrapDrawCircle(UBYTE * ArgV[])
   SLONG radius = *(UBYTE*)ArgV[2];
   ULONG DrawOptions = *(ULONG*)ArgV[3];
   UBYTE pixelMode, fillMode;
-  
+
   cCmdClearScreenIfNeeded(DrawOptions);
   if (cCmdResolveDrawingMode(DrawOptions, &pixelMode, &fillMode))
     cCmdDrawCircle(pPt->X, pPt->Y, radius, pixelMode, fillMode);
-    
+
   pMapDisplay->UpdateMask |= SCREEN_BIT(SCREEN_BACKGROUND);
 
   // Set return value
@@ -442,12 +442,12 @@ NXT_STATUS cCmdWrapDrawPolygon(UBYTE * ArgV[])
     else
       cCmdDrawPolygon(Points, polyCorners, pixelMode, fillMode, bLine);
   }
-  
+
   pMapDisplay->UpdateMask |= SCREEN_BIT(SCREEN_BACKGROUND);
-  
+
   // Set return value
   *((SBYTE*)(ArgV[0])) = NO_ERR;
- 
+
   return NO_ERR;
 }
 
@@ -465,11 +465,11 @@ NXT_STATUS cCmdWrapDrawEllipse(UBYTE * ArgV[])
   SWORD radius2 = *(UBYTE*)ArgV[3];
   ULONG DrawOptions = *(ULONG*)ArgV[4];
   UBYTE pixelMode, fillMode;
-  
+
   cCmdClearScreenIfNeeded(DrawOptions);
   if (cCmdResolveDrawingMode(DrawOptions, &pixelMode, &fillMode))
     cCmdDrawEllipse(pPt->X, pPt->Y, radius1, radius2, pixelMode, fillMode);
-    
+
   pMapDisplay->UpdateMask |= SCREEN_BIT(SCREEN_BACKGROUND);
   // Set return value
   *((SBYTE*)(ArgV[0])) = NO_ERR;
@@ -505,7 +505,7 @@ SLONG cCmdResolveValue(SWORD Value)
     // then just return the original value
     if (IMG_SYMB_ARG(Value) >= gPassedVarsCount)
       return Value;
-      
+
     IMG_OP_VARMAP * pVarMap;
     SLONG Arg;
 
@@ -555,7 +555,7 @@ SLONG cCmdResolveValue(SWORD Value)
 
 NXT_STATUS cCmdDrawPictureHelper(IMG_OP_UNION** ppImage, IMG_PT* pPoint, SLONG* pVars, ULONG DataSize, ULONG Options)
 {
-  SLONG OpSize;
+  ULONG OpSize;
   UBYTE gFillMode, gInvertMode, gLogicalMode, gFontDir, gFontWrap;
   UBYTE pixelMode, fillMode;
   UBYTE invertMode, logicalMode;
@@ -693,7 +693,7 @@ NXT_STATUS cCmdDrawPictureHelper(IMG_OP_UNION** ppImage, IMG_PT* pPoint, SLONG* 
         {
           UBYTE NumStr[20];
           IMG_OP_NUMBOX * pNB = &(pImage->NumBox);
-          sprintf((PSZ)NumStr, "%d", cCmdResolveValue(pNB->Value));
+          sprintf((PSZ)NumStr, "%ld", cCmdResolveValue(pNB->Value));
           cCmdResolveBitmapMode(pNB->CopyOptions, &invertMode, &logicalMode, &fillMode);
           cCmdDrawString(
             NumStr,
@@ -746,7 +746,7 @@ NXT_STATUS cCmdDrawPictureHelper(IMG_OP_UNION** ppImage, IMG_PT* pPoint, SLONG* 
       {
         switch( pImage->Desc.Options )
         {
-          case DESC_FONTOUT : 
+          case DESC_FONTOUT :
             cCmdDrawFont((IMG_OP_SPRITE*)cCmdGetIMGData(1), pImage->Desc.Width,
               pImage->Desc.Height, Pt.X, Pt.Y, gFontDir, gFontWrap, gInvertMode,
               gLogicalMode, gFillMode);
@@ -766,7 +766,7 @@ NXT_STATUS cCmdDrawPictureHelper(IMG_OP_UNION** ppImage, IMG_PT* pPoint, SLONG* 
     DataSize -= OpSize;
     pImage = (IMG_OP_UNION*) ((UBYTE*)pImage + OpSize);
   }
-  gpPassedImgVars = NULL;  
+  gpPassedImgVars = NULL;
   memset(gpImgData,0,sizeof(gpImgData));
   pMapDisplay->UpdateMask |= SCREEN_BIT(SCREEN_BACKGROUND);
   return DStatus;
@@ -864,11 +864,11 @@ NXT_STATUS cCmdWrapDrawFont(UBYTE * ArgV[])
   DV_INDEX DVIndex3   = *(DV_INDEX*)ArgV[3];
   ULONG    Options    = *(ULONG *)ArgV[4];
   UWORD    DataSize   = DV_ARRAY[DVIndex2].Count;
-  
+
   //Resolve array arguments
   ArgV[2] = (UBYTE*)cCmdDVPtr(DVIndex2);
   ArgV[3] = (UBYTE*)cCmdDVPtr(DVIndex3);
-  
+
   if (DataSize <= 1) {
     // if font filename is empty then use draw text instead
     cCmdDrawTextHelper(Options, ArgV[3], pPt);
@@ -917,10 +917,10 @@ void cCmdDrawLine(
   //Clip line ends vertically - easier if y1<y2:
   if (y1 > y2) {tx=x1; x1=x2; x2=tx;
                 ty=y1; y1=y2; y2=ty;}
-  
+
   //Is line completely off screen?
   if (y2<0 || y1>=DISPLAY_HEIGHT) return;
-  
+
   //Trim y1 end:
   if (y1 < 0)
   {
@@ -935,14 +935,14 @@ void cCmdDrawLine(
       x2 = x2 - (((y2-(DISPLAY_HEIGHT-1))*dx)/dy);
     y2 = DISPLAY_HEIGHT-1;
   }
-    
+
   //Clip horizontally - easier if x1<x2
   if (x1 > x2) {tx=x1; x1=x2; x2=tx;
                 ty=y1; y1=y2; y2=ty;}
-                
+
   //Is line completely off screen?
   if (x2<0 || x1>=DISPLAY_WIDTH) return;
-  
+
   //Trim x1 end:
   if (x1 < 0)
     {
@@ -957,7 +957,7 @@ void cCmdDrawLine(
         y2 = y2 - (((x2-(DISPLAY_WIDTH-1))*dy)/dx);
       x2 = DISPLAY_WIDTH-1;
     }
-  
+
   if (x1 == x2) {
     // vertical line or a single point
     if (y1 == y2)
@@ -970,7 +970,7 @@ void cCmdDrawLine(
     }
   }
   else if (y1 == y2) {
-  
+
     // horizontal line (single point already dealt with)
       pMapDisplay->pFunc(DISPLAY_HORIZONTAL_LINE, PixelMode, x1, TRANSLATE_Y(y1), x2, 0);   //JJR
   }
@@ -1022,7 +1022,7 @@ void cCmdDrawLine(
 
 
 //-----------------------------------------------------------------
-// cCmdDrawRect - draw a rectangle. 
+// cCmdDrawRect - draw a rectangle.
 void cCmdDrawRect(
   SLONG left,
   SLONG bottom,
@@ -1034,7 +1034,7 @@ void cCmdDrawRect(
   SLONG x1, y1;
   SLONG x2, y2;
   SLONG t;
-  
+
   x1 = left;
   x2 = left + width;
 /*
@@ -1053,11 +1053,11 @@ void cCmdDrawRect(
   else if (height < 0)
     y2 = bottom + height + 1;
   else
-    y2 = y1; 
+    y2 = y1;
 */
 
   if (x1>x2) {t = x1; x1 = x2; x2 = t;}
-  if (y1>y2) {t = y1; y1 = y2; y2 = t;}  
+  if (y1>y2) {t = y1; y1 = y2; y2 = t;}
 
   if (y2 == y1 || x2 == x1) {
     // height == 0 so draw a single pixel horizontal line OR
@@ -1081,7 +1081,7 @@ void cCmdDrawRect(
     //functions so these get clipped properly.  These will fall straight
     //through to the faster functions anyway.
     //Also don't re-draw parts of slim rectangles since XOR might be on.
-  
+
     cCmdDrawLine(x1, y1, x2, y1, PixelMode);
     if (y2>y1)
     {
@@ -1094,13 +1094,13 @@ void cCmdDrawRect(
       }
     }
   }
-  
+
 }
 
 void cCmdDrawPolygon(IMG_PT* points, UWORD polyCorners, UBYTE PixelMode, UBYTE FillMode, UBYTE bLine)
 {
   // the fill mode overrides the polyline vs polygon setting
-  if (FillMode == DRAW_SHAPE_FILLED) 
+  if (FillMode == DRAW_SHAPE_FILLED)
   {
     int nodes;
     int nodeX[MAX_CORNERS];
@@ -1188,7 +1188,7 @@ void cCmdDrawEllipse(SWORD xc, SWORD yc, SWORD a, SWORD b, UBYTE PixelMode, UBYT
   SWORD rx = x, ry = y;
   UWORD width = 1;
   UWORD height = 1;
-  SLONG a2 = (SLONG)a*a; 
+  SLONG a2 = (SLONG)a*a;
   SLONG b2 = (SLONG)b*b;
   SLONG crit1 = -(a2/4 + a%2 + b2);
   SLONG crit2 = -(b2/4 + b%2 + a2);
@@ -1206,14 +1206,14 @@ void cCmdDrawEllipse(SWORD xc, SWORD yc, SWORD a, SWORD b, UBYTE PixelMode, UBYT
     return;
   }
 
-  while (y>=0 && x<=a) 
+  while (y>=0 && x<=a)
   {
     if (FillMode != DRAW_SHAPE_FILLED)
     {
       cCmdSetPixel(xc+x, yc+y,  PixelMode);
       if (x!=0 || y!=0)
         cCmdSetPixel(xc-x, yc-y,  PixelMode);
-      if (x!=0 && y!=0) 
+      if (x!=0 && y!=0)
       {
         cCmdSetPixel(xc+x, yc-y,  PixelMode);
         cCmdSetPixel(xc-x, yc+y,  PixelMode);
@@ -1226,14 +1226,14 @@ void cCmdDrawEllipse(SWORD xc, SWORD yc, SWORD a, SWORD b, UBYTE PixelMode, UBYT
       {
         if (height == 1)
           ; /* draw nothing */
-        else if (ry*2+1 > (height-1)*2) 
+        else if (ry*2+1 > (height-1)*2)
         {
           cCmdDrawRect(xc-rx, yc-ry, width-1, height-1, PixelMode, FillMode);
           cCmdDrawRect(xc-rx, yc+ry, width-1, -(height-1), PixelMode, FillMode);
           ry -= height-1;
           height = 1;
         }
-        else 
+        else
         {
           cCmdDrawRect(xc-rx, yc-ry, width-1, ry*2, PixelMode, FillMode);
           ry -= ry;
@@ -1242,19 +1242,19 @@ void cCmdDrawEllipse(SWORD xc, SWORD yc, SWORD a, SWORD b, UBYTE PixelMode, UBYT
         rx++;
         width += 2;
       }
-      x++; 
-      dxt += d2xt; 
+      x++;
+      dxt += d2xt;
       t += dxt;
     }
     else if (t - a2*y > crit2)   /* e(x+1/2,y-1) > 0 */
-    { 
-      y--; 
-      dyt += d2yt; 
+    {
+      y--;
+      dyt += d2yt;
       t += dyt;
       if (FillMode == DRAW_SHAPE_FILLED)
         height++;
     }
-    else 
+    else
     {
       if (FillMode == DRAW_SHAPE_FILLED)
       {
@@ -1263,7 +1263,7 @@ void cCmdDrawEllipse(SWORD xc, SWORD yc, SWORD a, SWORD b, UBYTE PixelMode, UBYT
           cCmdDrawRect(xc-rx, yc-ry, width-1, height-1, PixelMode, FillMode);
           cCmdDrawRect(xc-rx, yc+ry, width-1, -(height-1), PixelMode, FillMode);
         }
-        else 
+        else
         {
           cCmdDrawRect(xc-rx, yc-ry, width-1, ry*2, PixelMode, FillMode);
         }
@@ -1272,11 +1272,11 @@ void cCmdDrawEllipse(SWORD xc, SWORD yc, SWORD a, SWORD b, UBYTE PixelMode, UBYT
         height = 1;
         rx++;
       }
-      x++; 
-      dxt += d2xt; 
+      x++;
+      dxt += d2xt;
       t += dxt;
-      y--; 
-      dyt += d2yt; 
+      y--;
+      dyt += d2yt;
       t += dyt;
     }
   }
@@ -1307,20 +1307,20 @@ void cCmdDrawCircle(SLONG cx, SLONG cy, SLONG radius, UBYTE PixelMode, UBYTE Fil
 {
   SLONG f, ddF_x, ddF_y, x, y;
   SLONG ox, oy;                 //JJR
-  
+
   f = 1 - radius;
   ddF_x = 0;
   ddF_y = -2 * radius;
   x = 0;
   y = abs(radius);    //JJR
-  
+
 //JJR
   if (y==0)
   {
     cCmdSetPixel(cx, cy + radius,  PixelMode);
     return;
   }
-  
+
   if (FillMode == DRAW_SHAPE_FILLED)
   {
     cCmdDrawLine(cx-radius, cy, cx+radius, cy, PixelMode);
@@ -1330,21 +1330,21 @@ void cCmdDrawCircle(SLONG cx, SLONG cy, SLONG radius, UBYTE PixelMode, UBYTE Fil
     cCmdSetPixel(cx + radius, cy,  PixelMode);
     cCmdSetPixel(cx - radius, cy,  PixelMode);
   }
-  
+
   if (FillMode != DRAW_SHAPE_FILLED || y==1)
   {
     cCmdSetPixel(cx, cy + radius,  PixelMode);
     cCmdSetPixel(cx, cy - radius,  PixelMode);
   }
-  
+
   if (y==1) return;
-  
-  
+
+
   while (x < y)
   {
      ox = x;         //JJR
      oy = y;         //JJR
-     if(f >= 0) 
+     if(f >= 0)
      {
        y--;
        ddF_y += 2;
@@ -1352,11 +1352,11 @@ void cCmdDrawCircle(SLONG cx, SLONG cy, SLONG radius, UBYTE PixelMode, UBYTE Fil
      }
      x++;
      ddF_x += 2;
-     f += ddF_x + 1;    
-     
+     f += ddF_x + 1;
+
 //JJR
     //Need to avoid duplicating pixels if drawing with XOR:
-    
+
   if (FillMode == DRAW_SHAPE_FILLED)
   {
     //Fill by drawing successive horizontal lines above and below
@@ -1485,7 +1485,7 @@ void cCmdCopyBitMapBits(
         srcByte = 0xff;
       else
         srcByte =  *(pSrcByte + (sx >> 3));                     //JJR
-      
+
       //If invert mode is on, invert the source byte:
       if (InvertMode==DRAW_BITMAP_INVERT) srcByte = ~srcByte;   //JJR
 
@@ -1570,7 +1570,7 @@ void cDirtyDisplay(ULONG* DrawOptions)
   {
     VarsCmd.DirtyDisplay = TRUE;
     pMapUi->Flags &= ~UI_ENABLE_STATUS_UPDATE;
-    
+
     if (DrawOptions) {
       //Override DrawOptions because we have to clear anyway
       *DrawOptions = DRAW_OPT_CLEAR_WHOLE_SCREEN;
@@ -1598,7 +1598,7 @@ NXT_STATUS cCmdWrapDisplayExecuteFunction(UBYTE * ArgV[])
     Y1 = TRANSLATE_Y(Y1);
   if (Cmd == DISPLAY_VERTICAL_LINE)
     Y2 = TRANSLATE_Y(Y2);
-  pMapDisplay->pFunc(Cmd, 
+  pMapDisplay->pFunc(Cmd,
                      *(UBYTE*)(ArgV[2]),
                      *(UBYTE*)(ArgV[3]),
                      Y1,
@@ -1638,7 +1638,7 @@ void cCmdDrawString(UBYTE *pString, ULONG X, ULONG Y, UBYTE InvertMode, UBYTE Lo
   UBYTE   *pDestination1;
   UBYTE   *pDestination2;
   UBYTE   a;
-  FONT    *pFont;
+  const FONT    *pFont;
   ULONG   FontWidth;
   ULONG   Items;
   ULONG   Item;
@@ -1658,7 +1658,7 @@ void cCmdDrawString(UBYTE *pString, ULONG X, ULONG Y, UBYTE InvertMode, UBYTE Lo
   offset = (Y-7) % 8; // how many bits is the content shifted?
   if (offset)
     Line--;
-    
+
   mask = ~(0x00ff << offset);
 
   //If text line is out of bounds, do nothing.
@@ -1703,16 +1703,16 @@ void cCmdDrawString(UBYTE *pString, ULONG X, ULONG Y, UBYTE InvertMode, UBYTE Lo
             a = 0xff;
           else
             a = *pSource;
-            
+
           //Implement bitmap invert mode:
           if (InvertMode==DRAW_BITMAP_INVERT) a = ~a;
 
-          // grab data from 1 or 2 lines 
+          // grab data from 1 or 2 lines
           a2 = (pDestination2 ? ((UWORD)(*pDestination2) << 8) : 0x0000) |
                (pDestination1 ? (UWORD)(*pDestination1) : 0x0000);
 
           font = (UWORD) a << offset;
-          
+
           //Implement bitmap logical mode when writing on screen:
           switch (LogicalMode)
           {
@@ -1778,10 +1778,10 @@ UBYTE cCmdResolveDrawingMode(UWORD DrawingOptions, UBYTE* pPixelMode, UBYTE* pFi
     *pFillMode = DRAW_SHAPE_FILLED;
   else
     *pFillMode = DRAW_SHAPE_HOLLOW;
-  
+
   // Extract pixel drawing options:
   if (DrawingOptions & DRAW_OPT_INVERT)
-  {  
+  {
     //Drawing with white pixels:
     switch (DrawingOptions & DRAW_OPT_LOGICAL_OPERATIONS)
     {
@@ -1793,9 +1793,9 @@ UBYTE cCmdResolveDrawingMode(UWORD DrawingOptions, UBYTE* pPixelMode, UBYTE* pFi
       default:
         break;
     }
-  }  
+  }
   else
-  {  
+  {
     //Drawing with black pixels:
     switch (DrawingOptions & DRAW_OPT_LOGICAL_OPERATIONS)
     {
@@ -1815,7 +1815,7 @@ UBYTE cCmdResolveDrawingMode(UWORD DrawingOptions, UBYTE* pPixelMode, UBYTE* pFi
   // If no operation is required, set defaults and return FALSE.
   // e.g. 'AND' on its own is meaningless for line drawing,
   // 'INVERT + OR' and 'INVERT + XOR'  do nothing either.
-  
+
   *pPixelMode = DRAW_PIXELS_SET;
   *pFillMode = DRAW_SHAPE_HOLLOW;
   return FALSE;
@@ -1850,13 +1850,13 @@ void cCmdResolveBitmapMode(UWORD DrawingOptions, UBYTE* pInvertMode, UBYTE* pLog
       *pLogicalMode = DRAW_LOGICAL_COPY;
       break;
   }
-  
+
   // Extract shape fill option (overrides source bitmap with all pixels set):
   if (DrawingOptions & DRAW_OPT_FILL_SHAPE)
     *pFillMode = DRAW_SHAPE_FILLED;
   else
     *pFillMode = DRAW_SHAPE_HOLLOW;
-  
+
 }
 
 //------------------------------------------------------------------
@@ -1929,52 +1929,52 @@ void cCmdDrawFont(IMG_OP_SPRITE *pSprite, SLONG sW, SLONG sH, SLONG startx, SLON
   int    desty;                           // Y-Destination position on screen
   SWORD  stdw;                            // Standard font width
   SWORD  stdh;                            // Standard font height
-  
+
   if (!gpPassedImgVars) // exit early if we do not have parameters
     return;
-    
+
   stdw = MIN( sW, DISPLAY_WIDTH );        // calculate the standard width
   stdh = MIN( sH, DISPLAY_HEIGHT );       // calculate the standard height
-  
+
   index=0;                                // Reset the start position
   xpos=startx;                            // Initial start position X
   ypos=starty;                            // Initial start position Y
-  
+
   while( index < gPassedVarsCount )
   {
     // terminate the loop at our first null
-    if (gpPassedImgVars[index] == 0) 
+    if (gpPassedImgVars[index] == 0)
       break;
     sourcex=cCmdResolveValue(0xF200|index);   // Get dynamic xpos of pattern
     sourcey=cCmdResolveValue(0xF300|index);   // Get dynamic ypos of pattern
     sourcew=cCmdResolveValue(0xF400|index);   // Get dynamic width of pattern
     sourceh=cCmdResolveValue(0xF500|index);   // Get dynamic height of pattern
-  
-    //--Calculate the rectangle for source (inside the sprite) and destination 
-    //--on the screen (related to the fontdirection) for performing the 
+
+    //--Calculate the rectangle for source (inside the sprite) and destination
+    //--on the screen (related to the fontdirection) for performing the
     //--BitCopy function
-    
+
     switch( fontDir )
     {
        case DRAW_FONT_DIR_L2RB : // Left to right with bottom align----------------
-       
+
                             if( fontWrap )
                             {
                                if( ( xpos + sourcew ) > DISPLAY_WIDTH )
                                {
                                    xpos = startx;
                                    ypos -= stdh;
-                               }    
+                               }
                             }
-                            
-                            destx = xpos;               
+
+                            destx = xpos;
                             desty = ypos;
                             xpos  = xpos + sourcew;
-                                                          
+
                             break;
-                            
+
        case DRAW_FONT_DIR_L2RT : // Left to right with align to top----------------
-  
+
                             if( fontWrap )
                             {
                                 if( ( xpos + sourcew ) > DISPLAY_WIDTH )
@@ -1982,15 +1982,15 @@ void cCmdDrawFont(IMG_OP_SPRITE *pSprite, SLONG sW, SLONG sH, SLONG startx, SLON
                                     xpos = startx;
                                     ypos += stdh;
                                 }
-                            }     
-  
-                            destx = xpos;                
+                            }
+
+                            destx = xpos;
                             desty = ypos - sourceh + 1;
                             xpos  = xpos + sourcew;
                             break;
-  
+
        case DRAW_FONT_DIR_R2LB : // Right to left with align to bottom-------------
-       
+
                             if( fontWrap )
                             {
                                 if( ( xpos - sourcew ) < 0 )
@@ -1999,14 +1999,14 @@ void cCmdDrawFont(IMG_OP_SPRITE *pSprite, SLONG sW, SLONG sH, SLONG startx, SLON
                                     ypos -= stdh;
                                 }
                             }
-                                    
-                            destx = xpos - sourcew + 1;   
+
+                            destx = xpos - sourcew + 1;
                             desty = ypos;
                             xpos  = xpos - sourcew;
                             break;
-                            
+
        case DRAW_FONT_DIR_R2LT : // Right to left with align to top----------------
-       
+
                             if( fontWrap )
                             {
                                 if( ( xpos - sourcew ) < 0 )
@@ -2015,14 +2015,14 @@ void cCmdDrawFont(IMG_OP_SPRITE *pSprite, SLONG sW, SLONG sH, SLONG startx, SLON
                                     ypos += stdh;
                                 }
                             }
-                            
-                            destx = xpos - sourcew + 1;   
-                            desty = ypos - sourceh + 1;     
+
+                            destx = xpos - sourcew + 1;
+                            desty = ypos - sourceh + 1;
                             xpos  = xpos - sourcew;
                             break;
-                            
-       case DRAW_FONT_DIR_B2TL : // Bottom to top with allign to left-------------- 
-       
+
+       case DRAW_FONT_DIR_B2TL : // Bottom to top with allign to left--------------
+
                             if( fontWrap )
                             {
                                 if( ( ypos + sourceh ) > DISPLAY_HEIGHT )
@@ -2031,14 +2031,14 @@ void cCmdDrawFont(IMG_OP_SPRITE *pSprite, SLONG sW, SLONG sH, SLONG startx, SLON
                                     ypos = starty;
                                 }
                             }
-                            
+
                             destx = xpos;
                             desty = ypos;
                             ypos  = ypos + sourceh;
                             break;
-                            
+
        case DRAW_FONT_DIR_B2TR : // Bottom to top with allign to right-------------
-       
+
                             if( fontWrap )
                             {
                                 if( ( ypos + sourceh ) > DISPLAY_HEIGHT )
@@ -2047,14 +2047,14 @@ void cCmdDrawFont(IMG_OP_SPRITE *pSprite, SLONG sW, SLONG sH, SLONG startx, SLON
                                     ypos = starty;
                                 }
                             }
-                            
-                            destx = xpos - sourcew + 1;     
+
+                            destx = xpos - sourcew + 1;
                             desty = ypos;
                             ypos  = ypos + sourceh;
                             break;
-                            
-       case DRAW_FONT_DIR_T2BL : // Top to bottom with allign to right------------- 
-       
+
+       case DRAW_FONT_DIR_T2BL : // Top to bottom with allign to right-------------
+
                             if( fontWrap )
                             {
                                 if( ( ypos - sourceh ) < 0 )
@@ -2063,14 +2063,14 @@ void cCmdDrawFont(IMG_OP_SPRITE *pSprite, SLONG sW, SLONG sH, SLONG startx, SLON
                                     ypos = starty;
                                 }
                             }
-                            
-                            destx = xpos;   
+
+                            destx = xpos;
                             desty = ypos - sourceh + 1;
                             ypos  = ypos - sourceh;
                             break;
-                            
-       case DRAW_FONT_DIR_T2BR : // Top to bottom with allign to right------------- 
-       
+
+       case DRAW_FONT_DIR_T2BR : // Top to bottom with allign to right-------------
+
                             if( fontWrap )
                             {
                                 if( ( ypos - sourceh ) < 0 )
@@ -2079,19 +2079,19 @@ void cCmdDrawFont(IMG_OP_SPRITE *pSprite, SLONG sW, SLONG sH, SLONG startx, SLON
                                     ypos = starty;
                                 }
                             }
-                            
+
                             destx = xpos - sourcew + 1;
-                            desty = ypos - sourceh + 1;  
+                            desty = ypos - sourceh + 1;
                             ypos  = ypos - sourceh;
                             break;
     }
-  
+
     //--Output of the calculated pattern to the screen------------------------
     cCmdCopyBitMapBits(destx, desty, sourcex, sourcey, sourcew, sourceh,
                        pSprite, invertMode, logicalMode, fillMode);
-  
+
     // move on to next character
     index++;
-  }   
+  }
 }
 

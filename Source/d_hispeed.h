@@ -23,8 +23,4 @@ void      dHiSpeedReceivedData(UWORD *ByteCnt);
 void      dHiSpeedExit(void);
 void      dHiSpeedBytesToSend(UWORD *bts);
 
-/*
-int hs_send(U8 address, U8 control, U8 *data, int offset, int len, U16 *CRCTab);
-int hs_recv(U8 *data, int len, U16 *CRCTab, int reset);
-*/
 #endif

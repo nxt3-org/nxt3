@@ -15,10 +15,14 @@
 #ifndef   D_BUTTON
 #define   D_BUTTON
 
-void      dButtonInit(UBYTE Prescaler);
-void      dButtonExit(void);
 
-void      dButtonRead(UBYTE *pButton);
+typedef struct {
+  const char *Name;
+  void  (*Init)(void *pHeaders, UBYTE Prescaler);
+  void  (*Exit)(void);
+  void  (*Read)(UBYTE *pOutMask);
+} BUTTON_INPUT;
 
+extern BUTTON_INPUT *pButton;
 
 #endif

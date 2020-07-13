@@ -32,11 +32,15 @@ void      dSoundExit(void);
 #define   SOUNDVOLUMESTEPS              4
 
 #define   DURATION_MIN                  10        // [mS]
-#define   FREQUENCY_MIN                 220       // [Hz]
-#define   FREQUENCY_MAX                 14080     // [Hz]
+#define   FREQUENCY_MIN                 250       // [Hz]
+#define   FREQUENCY_MAX                 10000     // [Hz]
 
 #define   SAMPLERATE_MIN                2000      // Min sample rate [sps]
 #define   SAMPLERATE_DEFAULT            8000      // Default sample rate [sps]
 #define   SAMPLERATE_MAX                16000     // Max sample rate [sps]
+
+#define   SOUNDBUFFERSIZE_ADPCM         120
+#define   SOUNDBUFFERSIZE               240
+#define   SOUNDBUFFERS                  3
 
 #endif

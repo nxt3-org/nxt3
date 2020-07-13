@@ -1,5 +1,5 @@
 //
-// Programmer      
+// Programmer
 //
 // Date init       14.12.2004
 //
@@ -23,8 +23,17 @@
 
 typedef   struct
 {
+  UBYTE   StartX;
+  UBYTE   StartY;
+  UBYTE   PixelsX;
+  UBYTE   PixelsY;
+}
+SCREEN_CORDINATE;
+
+typedef   struct
+{
   UBYTE   *DisplaySave;
-  BMPMAP  *pOldBitmaps[BITMAPS];
+  const BMPMAP  *pOldBitmaps[BITMAPS];
   UBYTE   ErasePointer;
   UBYTE   UpdatePointer;
 }VARSDISPLAY;

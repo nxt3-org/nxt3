@@ -32,7 +32,7 @@
 
 #define   NO_OF_INTROBITMAPS            16          // Intro bitmaps
 #define   INTRO_START_TIME              1000        // Intro startup time                     [mS]
-#define   INTRO_SHIFT_TIME              100         // Intro inter bitmap time                [mS] 
+#define   INTRO_SHIFT_TIME              100         // Intro inter bitmap time                [mS]
 #define   INTRO_STOP_TIME               1000        // Intro stop time                        [mS]
 #define   INTRO_LOWBATT_TIME            2000        // Low battery show time at power up      [mS]
 
@@ -49,7 +49,7 @@
 #define   RUN_BITMAP_CHANGE_TIME        125         // Running bimap update time              [mS]
 #define   RUN_STATUS_CHANGE_TIME        167         // Running status update time             [mS]
 
-#define   DISPLAY_SHOW_ERROR_TIME       2500        // Error string show time                 [mS] 
+#define   DISPLAY_SHOW_ERROR_TIME       2500        // Error string show time                 [mS]
 #define   DISPLAY_SHOW_TIME             1500        // Min. response display time             [mS]
 #define   DISPLAY_VIEW_UPDATE           200         // Display update time                    [mS]
 #define   MIN_DISPLAY_UPDATE_TIME       50          // OBP min graphics update time           [mS]
@@ -151,8 +151,8 @@
 #define   MENU_OVERWRITE                0xED        // Overwrite file
 #define   MENU_CALCULATE                0xEE        // Calculate
 #define   MENU_ENTER                    0xEF        // Enter
-#define   MENU_DISCONNECT               0xF0        // Disconnect BT  
-#define   MENU_DELETE                   0xF1        // Delete  
+#define   MENU_DISCONNECT               0xF0        // Disconnect BT
+#define   MENU_DELETE                   0xF1        // Delete
 #define   MENU_SELECT                   0xF2        // Select
 #define   MENU_RUN_SILENT               0xF3        // Run without graphics
 #define   MENU_TOGGLE                   0xF4        // Toggle
@@ -176,7 +176,7 @@
 #define   MENUFILELEVELS                3           // Max deept in menu file pool
 
 typedef   struct                                    // VarsUi.MenuFiles[VarsUi.MenuFileLevel].MenuLevels[VarsUi.MenuLevel].
-{                                                   
+{
   ULONG   Id;                                       // Menu item id
   UBYTE   *IconText;                                // Menu item icon text  pointer
   ULONG   SpecialFlags;                             // Menu item special behaivor
@@ -237,13 +237,13 @@ typedef   struct
   UBYTE   NewStatusIcons[NO_OF_STATUSICONS];        // New status icons (used to detect changes)
 
   // Low battery voltage
-  UBYTE   *LowBattSavedBitmap;                      // Low battery overwritten bitmap placeholder
+  const BMPMAP   *LowBattSavedBitmap;               // Low battery overwritten bitmap placeholder
   UBYTE   LowBatt;                                  // Low battery volatge flag
   UBYTE   LowBattHasOccured;                        // Low battery voltage has occured
   UBYTE   LowBattSavedState;                        // Low battery current state placeholder
 
   // General used variables
-  UBYTE   *MenuIconTextSave;                        // Menu icon text save
+  const UBYTE   *MenuIconTextSave;                  // Menu icon text save
 
   UBYTE   *pTmp;                                    // General UBYTE pointer
   ULONG   TmpLength;                                // General filelength  (used in filelist)
@@ -296,7 +296,7 @@ typedef   struct
   UBYTE   *FeedBackText;                            // Program end text
   UWORD   OBPTimer;                                 // Graphic update timer
 #endif
-  
+
   // BT search menu
   UBYTE   NoOfDevices;                              // BT search no of devices found
   UBYTE   NoOfNames;                                // BT search no of names found
@@ -330,12 +330,12 @@ typedef   struct
   ULONG   CRPasskey;                                // Passkey to fake wrong pin code
   UBYTE   CRState;                                  // Seperate state for "Connect request"
   UBYTE   CRTmp;                                    // Seperate tmp for "Connect request"
-  
+
   // Run files
-  UBYTE   *RunIconSave;                             // Menu center icon save
+  const UBYTE  *RunIconSave;                              // Menu center icon save
   UWORD   RunTimer;                                 // Bitmap change timer
   UBYTE   RunBitmapPointer;                         // Bitmap pointer
-  
+
   // Delete files
   UBYTE   SelectedType;                             // Type of selected files for delete
 
@@ -356,7 +356,7 @@ typedef   struct
   UBYTE   DatalogPort[DATALOGPORTS];                // Logging sensor
   UBYTE   Update;                                   // Update icons flag
 #endif
-  
+
   // NV storage
   ULONG   NVTmpLength;                              // Non volatile filelength
   SWORD   NVTmpHandle;                              // Non volatile filehandle
@@ -378,7 +378,7 @@ typedef   struct
   UWORD   BTResult;                                 // Last lached BT command result
 
   // Error display
-  UBYTE   ErrorTimer;                               // Error show timer  
+  UBYTE   ErrorTimer;                               // Error show timer
   UBYTE   ErrorFunction;                            // Error latched function
   UBYTE   ErrorParameter;                           // Error latched parameter
   UBYTE   ErrorState;                               // Error latched state

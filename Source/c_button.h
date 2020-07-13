@@ -19,7 +19,7 @@
 extern    const HEADER cButton;
 #endif
 
-#include  "c_button.iom"
+#include  "c_button.iom.h"
 
 
 typedef   struct

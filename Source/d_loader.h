@@ -15,20 +15,6 @@
 #ifndef   D_LOADER
 #define   D_LOADER
 
-#define   FILETABLE_SIZE                ((2 * SECTORSIZE)/4)
-#define   STARTOFFILETABLE              (0x140000L - (FILETABLE_SIZE*4))
-#define   FILEPTRTABLE                  ((const ULONG*)(0x140000L - (FILETABLE_SIZE*4)))
-#ifndef STRIPPED
-#define   STARTOFUSERFLASH              (0x126400L)//(0x124600L) 1.31 == (0x122100L)
-#else
-#define   STARTOFUSERFLASH              (0x122C00L)//(0x124600L) 1.31 == (0x122100L)
-#endif
-#define   SIZEOFUSERFLASH               ((ULONG)STARTOFFILETABLE - STARTOFUSERFLASH)
-
-#define   SIZEOFFLASH                   262144L
-#define   SECTORSIZE                    256L
-#define   SECTORSIZESHIFT               8
-#define   NOOFSECTORS                   (SIZEOFFLASH/SECTORSIZE)
 #define   HEADERFIXEDSIZE               (FILENAME_SIZE + 4 + 4 + 4 + 2 + 2)
 #define   FILENAME_SIZE                 (FILENAME_LENGTH + 1)
 
@@ -47,13 +33,6 @@ enum
   DLERROR
 };
 
-/* Enum related to HandleTable WriteBufNo */
-enum
-{
-  FREEBUFNO = 0xFF
-};
-
-
 /* Constants related to filetype */
 enum
 {
@@ -71,20 +50,7 @@ enum
   SEEK_FROMEND
 };
 
-typedef   struct
-{
-  UBYTE   FileName[FILENAME_SIZE];
-  ULONG   FileStartAdr;
-  ULONG   FileSize;
-  ULONG   DataSize;
-  UWORD   CheckSum;
-  UWORD   FileType;
-  UWORD   FileSectorTable[(SIZEOFUSERFLASH/SECTORSIZE)];
-}FILEHEADER;
-
 void      dLoaderInit(void);
-__ramfunc UWORD dLoaderWritePage(ULONG Flash_Address, UWORD Size, ULONG *pBuf);
-UWORD     dLoaderInsertPtrTable(const UBYTE *pAdr, UWORD Handle);
 UWORD     dLoaderCreateFileHeader(ULONG FileSize, UBYTE *pName, UBYTE LinearState, UBYTE FileType);
 UWORD     dLoaderWriteData(UWORD Handle, UBYTE *pBuf, UWORD *pLen);
 UWORD     dLoaderCloseHandle(UWORD Handle);
@@ -95,7 +61,6 @@ UWORD     dLoaderRead(UBYTE Handle, UBYTE *pBuf, ULONG *pLength);
 UWORD     dLoaderDelete(UBYTE *pFile);
 UWORD     dLoaderFind(UBYTE *pFind, UBYTE *pFound, ULONG *pFileLength, ULONG *pDataLength, UBYTE Session);
 UWORD     dLoaderFindNext(UWORD Handle, UBYTE *pFound, ULONG *pFileLength, ULONG *pDataLength);
-UWORD     dLoaderDeleteFilePtr(UWORD Handle);
 void      dLoaderDeleteAllFiles(void);
 UWORD     dLoaderGetFilePtr(UBYTE *pFileName, UBYTE *pPtrToFile, ULONG *pFileLength);
 void      dLoaderCopyFileName(UBYTE *pDst, UBYTE *pSrc);

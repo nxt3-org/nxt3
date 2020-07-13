@@ -1,5 +1,5 @@
 //
-// Programmer      
+// Programmer
 //
 // Date init       14.12.2004
 //
@@ -19,21 +19,14 @@
 #ifndef   D_DISPLAY
 #define   D_DISPLAY
 
-void      dDisplayInit(void);
-void      dDisplayOn(UBYTE On, UBYTE Contrast);
-UBYTE     dDisplayUpdate(UWORD Height,UWORD Width,UBYTE *pImage);
-void      dDisplayExit(void);
+typedef struct {
+  const char *Name;
+  void  (*Init)    (void *pHeaders);
+  void  (*Exit)    (void);
+  void  (*SetPower)(UBYTE On, UBYTE Contrast);
+  UBYTE (*Update)  (UWORD Height,UWORD Width,UBYTE *pImage, UBYTE Scaling);
+} DISPLAY_OUTPUT;
 
-
-
-typedef   struct    
-{
-  UBYTE   StartX;
-  UBYTE   StartY;
-  UBYTE   PixelsX;
-  UBYTE   PixelsY;
-}
-SCREEN_CORDINATE;
-
+extern DISPLAY_OUTPUT *pDisplay;
 
 #endif

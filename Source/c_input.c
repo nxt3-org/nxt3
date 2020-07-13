@@ -17,9 +17,9 @@
 #include  "modules.h"
 #include  "c_input.h"
 #include  "d_input.h"
-#include  "c_cmd.iom"
-#include  "c_output.iom"
-#include  "c_loader.iom"
+#include  "c_cmd.iom.h"
+#include  "c_output.iom.h"
+#include  "c_loader.iom.h"
 #include  <string.h>
 
 
@@ -247,9 +247,9 @@ void      cInputCtrl(void)
 
       VarsInput.InvalidTimer[Tmp] = INVALID_RELOAD_NORMAL;
       /* If old type is color sensor in color lamp mode then turn off leds */
-      if ((sType == NO_SENSOR) && 
-          (oldType == COLORRED  || oldType == COLORGREEN || 
-           oldType == COLORBLUE || oldType == COLORFULL || 
+      if ((sType == NO_SENSOR) &&
+          (oldType == COLORRED  || oldType == COLORGREEN ||
+           oldType == COLORBLUE || oldType == COLORFULL ||
            oldType == COLOREXIT))
       {
         VarsInput.InvalidTimer[Tmp] = INVALID_RELOAD_COLOR;
@@ -268,11 +268,11 @@ void      cInputCtrl(void)
 
         /* A type change has been carried out earlier - waiting for valid data   */
         /* The color sensor requires special startup sequence with communication */
-        if ((sType == COLORFULL) || 
+        if ((sType == COLORFULL) ||
             (sType == COLORRED)  ||
-            (sType == COLORGREEN)|| 
+            (sType == COLORGREEN)||
             (sType == COLORBLUE) ||
-            (sType == COLOREXIT) || 
+            (sType == COLOREXIT) ||
             (sType == COLORNONE))
         {
           cInputCalcSensorValues(Tmp);
@@ -328,10 +328,10 @@ void      cInputCalcSensorValues(UBYTE No)
         dInputRead0(No, &(pIn->DigiPinsIn));
         dInputRead1(No, &(pIn->DigiPinsIn));
       }
-      
+
       dInputGetRawAd(&InputVal, No);
       pIn->ADRaw = InputVal;
-      
+
       if (sType == REFLECTION)
       {
         cInputCalcFullScale(&InputVal, REFLECTIONSENSORMIN, REFLECTIONSENSORPCTDYN, TRUE);
@@ -1375,7 +1375,7 @@ UBYTE cInputPinFunc(UBYTE Cmd, UBYTE Port, UBYTE Pin, UBYTE *pData)
   UBYTE ReturnState = NO_ERR;
   if (IOMapInput.Inputs[Port].SensorType != CUSTOM)
     return (UBYTE)ERR_INVALID_PORT;
-  
+
   UBYTE WaitUSEC = (Cmd&0xFC)>>2;
   UBYTE Dir = (Pin&0xFC)>>2;
   Pin &= 0x03;
@@ -1427,6 +1427,6 @@ UBYTE cInputPinFunc(UBYTE Cmd, UBYTE Port, UBYTE Pin, UBYTE *pData)
   }
   if (WaitUSEC)
     dInputWaitUS(WaitUSEC);
-  
+
   return (ReturnState);
 }

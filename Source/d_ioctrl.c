@@ -14,34 +14,33 @@
 
 
 #include  <string.h>
+#include  <stdlib.h>
 #include  "stdconst.h"
 #include  "m_sched.h"
 #include  "d_ioctrl.h"
-#include  "d_ioctrl.r"
+#include  "c_cmd.iom.h"
 
 
-void      dIOCtrlInit(void)
-{
-  IOCTRLInit;
+static    HEADER    **pHeaders;
+
+
+void      dIOCtrlInit(void* pHeader) {
+  pHeaders = pHeader;
 }
 
 void      dIOCtrlSetPower(UBYTE Power)
 {
-  INSERTPower(Power);
+  if (Power != 0) {
+    pMapCmd->Awake = FALSE;
+  }
 }
 
 void      dIOCtrlSetPwm(UBYTE Pwm)
-{
-  INSERTPwm(Pwm);
-}
+{}
 
 void      dIOCtrlTransfer(void)
-{
-  I2CTransfer;
-}
+{}
 
 void      dIOCtrlExit(void)
-{
-  IOCTRLExit;
-}
+{}
 

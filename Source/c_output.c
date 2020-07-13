@@ -16,10 +16,10 @@
 #include  "stdbool.h"
 #include  "stdconst.h"
 #include  "modules.h"
-#include  "c_output.iom"
+#include  "c_output.iom.h"
 #include  "c_output.h"
 #include  "d_output.h"
-#include  "c_display.iom"
+#include  "c_display.iom.h"
 
 static    IOMAPOUTPUT   IOMapOutput;
 static    VARSOUTPUT    VarsOutput;
@@ -78,24 +78,24 @@ void cOutputCtrl(void)
       {
         pOut->Flags &= ~UPDATE_RESET_ROTATION_COUNT;
         dOutputResetRotationCaptureCount(Tmp);
-      }      
+      }
       if (pOut->Flags & UPDATE_RESET_COUNT)
 		  {
 		    pOut->Flags &= ~UPDATE_RESET_COUNT;
-		    dOutputResetTachoLimit(Tmp);		
+		    dOutputResetTachoLimit(Tmp);
 		  }
       if (pOut->Flags & UPDATE_RESET_BLOCK_COUNT)
       {
         pOut->Flags &= ~UPDATE_RESET_BLOCK_COUNT;
-		    dOutputResetBlockTachoLimit(Tmp);		
+		    dOutputResetBlockTachoLimit(Tmp);
       }
       if (pOut->Flags & UPDATE_SPEED)
 		  {
 		    pOut->Flags &= ~UPDATE_SPEED;
 		    if (pOut->Mode & MOTORON)
-        {  	
+        {
 		      dOutputSetSpeed (Tmp, pOut->RunState, pOut->Speed, pOut->SyncTurnParameter);
-		    }		
+		    }
 		  }
 		  if (pOut->Flags & UPDATE_MODE)
 		  {
@@ -111,7 +111,7 @@ void cOutputCtrl(void)
           dOutputSetMode(Tmp, 0x00);
         }
 		    if (pOut->Mode & MOTORON)
-        {	
+        {
 		      if (pOut->Mode & REGULATED)
 		      {
 		        dOutputEnableRegulation(Tmp, pOut->RegMode);
@@ -124,14 +124,14 @@ void cOutputCtrl(void)
 		    else
 		    {
 		      dOutputSetSpeed(Tmp, 0x00, 0x00, 0x00);
-          dOutputDisableRegulation(Tmp);		
-		    }	
-		  }		  		  		
+          dOutputDisableRegulation(Tmp);
+		    }
+		  }
       if (pOut->Flags & UPDATE_TACHO_LIMIT)
 		  {
 		    pOut->Flags &= ~UPDATE_TACHO_LIMIT;
 		    dOutputSetTachoLimit(Tmp, pOut->TachoLimit, pOut->Options);
-		  }	
+		  }
       if (pOut->Flags & UPDATE_PID_VALUES)
 		  {
 	      pOut->Flags &= ~UPDATE_PID_VALUES;
@@ -149,21 +149,21 @@ void cOutputCtrl(void)
 void cOutputUpdateIomap(void)
 {
 	UBYTE TempCurrentMotorSpeed[NO_OF_OUTPUTS];
-	UBYTE TempRunState[NO_OF_OUTPUTS];	
+	UBYTE TempRunState[NO_OF_OUTPUTS];
   UBYTE TempMotorOverloaded[NO_OF_OUTPUTS];
 	SLONG TempTachoCount[NO_OF_OUTPUTS];
   SLONG TempBlockTachoCount[NO_OF_OUTPUTS];
   SLONG TempRotationCount[NO_OF_OUTPUTS];
 
   UBYTE Tmp;
-  
+
 	dOutputGetMotorParameters(TempCurrentMotorSpeed, TempTachoCount, TempBlockTachoCount, TempRunState, TempMotorOverloaded,TempRotationCount);
 
 	for(Tmp = 0; Tmp < NO_OF_OUTPUTS; Tmp++)
   {
 	  OUTPUT * pOut = &(IOMapOutput.Outputs[Tmp]);
 	  pOut->ActualSpeed = TempCurrentMotorSpeed[Tmp];
-    pOut->TachoCnt = TempTachoCount[Tmp];	
+    pOut->TachoCnt = TempTachoCount[Tmp];
     pOut->BlockTachoCount = TempBlockTachoCount[Tmp];
 	  pOut->RotationCount = TempRotationCount[Tmp];
     pOut->Overloaded = TempMotorOverloaded[Tmp];

@@ -16,151 +16,95 @@
 #include  "m_sched.h"
 #include  "c_input.h"
 #include  "d_input.h"
-#include  "d_input.r"
+#include  <unistd.h>
+#include  <time.h>
 
 
-void      dInputInit(void)
-{
-  INPUTInit;
+void      dInputInit(void) {
 }
 
-void      dInputSetColorClkInput(void)
-{
-  COLORClkInput;
+void      dInputSetColorClkInput(void) {
 }
 
-void      dInputGetAllColors(COLORSTRUCT *pRaw, UBYTE Status)
-{
-  UPDATEAllColors(pRaw, Status);
+void      dInputGetAllColors(COLORSTRUCT *pRaw, UBYTE Status) {
 }
 
-void      dInputGetRawAd(UWORD *pValues, UBYTE No)
-{
-  INPUTGetVal(pValues, No);
+void      dInputGetRawAd(UWORD *pValues, UBYTE No) {
 }
 
-void      dInputSetDirOutDigi0(UBYTE Port)
-{
-  INPUTSetOutDigi0(Port);
+void      dInputSetDirOutDigi0(UBYTE Port) {
 }
 
-void      dInputSetDirOutDigi1(UBYTE Port)
-{
-  INPUTSetOutDigi1(Port);
+void      dInputSetDirOutDigi1(UBYTE Port) {
 }
 
-void      dInputSetDirInDigi0(UBYTE Port)
-{
-  INPUTSetInDigi0(Port);
+void      dInputSetDirInDigi0(UBYTE Port) {
 }
 
-void      dInputSetDirInDigi1(UBYTE Port)
-{
-  INPUTSetInDigi1(Port);
+void      dInputSetDirInDigi1(UBYTE Port) {
 }
 
-void      dInputClearDigi0(UBYTE Port)
-{
-  INPUTClearDigi0(Port);
-  INPUTSetOutDigi0(Port);
+void      dInputClearDigi0(UBYTE Port) {
 }
 
-void      dInputClearDigi1(UBYTE Port)
-{
-  INPUTClearDigi1(Port);
-  INPUTSetOutDigi1(Port);
+void      dInputClearDigi1(UBYTE Port) {
 }
 
-void      dInputSetDigi0(UBYTE Port)
-{
-  INPUTSetDigi0(Port);
-  INPUTSetOutDigi0(Port);
+void      dInputSetDigi0(UBYTE Port) {
 }
 
-void      dInputSetDigi1(UBYTE Port)
-{
-  INPUTSetDigi1(Port);
-  INPUTSetOutDigi1(Port);
+void      dInputSetDigi1(UBYTE Port) {
 }
 
-void      dInputRead0(UBYTE Port, UBYTE *pData)
-{
-  INPUTReadDigi0(Port, pData);
+void      dInputRead0(UBYTE Port, UBYTE *pData) {
 }
 
-void      dInputRead1(UBYTE Port, UBYTE * pData)
-{
-  INPUTReadDigi1(Port, pData);
+void      dInputRead1(UBYTE Port, UBYTE * pData) {
 }
 
-void      dInputSetActive(UBYTE Port)
-{
-  INPUTSetActive(Port);
+void      dInputSetActive(UBYTE Port) {
 }
 
-void      dInputSet9v(UBYTE Port)
-{
-  INPUTSet9v(Port);
+void      dInputSet9v(UBYTE Port) {
 }
 
-void      dInputSetInactive(UBYTE Port)
-{
-  INPUTSetInactive(Port);
+void      dInputSetInactive(UBYTE Port) {
 }
 
-UBYTE     dInputGetColor(UBYTE No, UWORD *pCol)
-{
-  UBYTE   Status;
-  UPDATELed(No, pCol, Status);
-  return(Status);
+UBYTE     dInputGetColor(UBYTE No, UWORD *pCol) {
+  return FALSE;
 }
 
-void      dInputColorTx(UBYTE Port, UBYTE Data)
-{
-  COLORTx(Port, Data);
+void      dInputColorTx(UBYTE Port, UBYTE Data) {
 }
 
-void      dInputReadCal(UBYTE Port, UBYTE *pData)
-{
-  CALDataRead(Port, pData);
+void      dInputReadCal(UBYTE Port, UBYTE *pData) {
 }
 
-UBYTE     dInputCheckColorStatus(UBYTE Port)
-{
-  UBYTE   Status;
-
-  CHECKColorState(Port,Status);
-  return(Status);
+UBYTE     dInputCheckColorStatus(UBYTE Port) {
+  return TRUE;
 }
 
-void      dInputClearColor100msTimer(UBYTE No)
-{
-  CLEARColor100msTimer(No);
+void      dInputClearColor100msTimer(UBYTE No) {
 }
 
-UBYTE     dInputChkColor100msTimer(UBYTE No)
-{
-  UBYTE   State;
-  COLOR100msStatus(No, State);
-  return(State);
+UBYTE     dInputChkColor100msTimer(UBYTE No) {
+  return TRUE;
 }
 
-void      dInputExit(void)
-{
-  INPUTExit;
+void      dInputExit(void) {
 }
 
-void      dInputClockHigh(UBYTE Port)
-{
-  INPUTClkHigh(Port);
+void      dInputClockHigh(UBYTE Port) {
 }
 
-void      dInputClockLow(UBYTE Port)
-{
-  INPUTClkLow(Port);
+void      dInputClockLow(UBYTE Port) {
 }
 
-void      dInputWaitUS(UBYTE usec)
-{
-  rInputWaitUS(usec);
+void      dInputWaitUS(UBYTE usec) {
+  struct timespec wait = {
+    .tv_sec  = 0,
+    .tv_nsec = 1000 * usec
+  };
+  while (nanosleep(&wait, &wait) < 0);
 }

@@ -38,16 +38,7 @@ void      cCmdInit(void* pHeader);
 void      cCmdCtrl(void);
 void      cCmdExit(void);
 
-//
-//ARM_NXT vs SIM_NXT
-//These definitions are set up to allow compiling this code for use in a simulated (non-ARM7) environment.
-//If your toolchain doesn't automatically use the __ICCARM__ token, define it to ensure normal compilation.
-//
-#ifdef __ICCARM__
 #define ARM_NXT
-#else
-#define SIM_NXT
-#endif
 
 //
 //ENABLE_VM toggles compilation the main body of VM code.
@@ -63,7 +54,7 @@ void      cCmdExit(void);
 #define WRITE_IOMAP_OFFSETS 0
 
 #if WRITE_IOMAP_OFFSETS
-void cCmdWriteIOMapOffsetsFile(); 
+void cCmdWriteIOMapOffsetsFile();
 #endif
 
 //
@@ -405,7 +396,7 @@ typedef struct
 // Clump Breakpoints
 //
 typedef struct
-{ 
+{
   CODE_INDEX Location;
   UBYTE Enabled;
 } CLUMP_BREAK_REC;
@@ -571,11 +562,11 @@ typedef struct
   UBYTE Debugging;
   UBYTE PauseClump;
   CODE_INDEX PausePC;
-  
+
   // add a buffer for storing the last response raw content (64 bytes)
   UBYTE LastResponseBuffer[64];
   UBYTE LastResponseLength;
-  
+
 #if VM_BENCHMARK
   ULONG InstrCount;
   ULONG Average;

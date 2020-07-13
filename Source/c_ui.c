@@ -21,19 +21,19 @@
 #include  "ctype.h"
 #include  "stdconst.h"
 #include  "modules.h"
-#include  "c_ui.iom"
+#include  "c_ui.iom.h"
 #include  "c_ui.h"
 #include  "m_sched.h"
-#include  "c_display.iom"
-#include  "c_loader.iom"
-#include  "c_button.iom"
-#include  "c_sound.iom"
-#include  "c_input.iom"
-#include  "c_output.iom"
-#include  "c_ioctrl.iom"
-#include  "c_cmd.iom"
-#include  "c_comm.iom"
-#include  "c_lowspeed.iom"
+#include  "c_display.iom.h"
+#include  "c_loader.iom.h"
+#include  "c_button.iom.h"
+#include  "c_sound.iom.h"
+#include  "c_input.iom.h"
+#include  "c_output.iom.h"
+#include  "c_ioctrl.iom.h"
+#include  "c_cmd.iom.h"
+#include  "c_comm.iom.h"
+#include  "c_lowspeed.iom.h"
 
 static    IOMAPUI   IOMapUi;
 static    VARSUI    VarsUi;
@@ -93,22 +93,22 @@ const     HEADER  cUi =
 
 const     BMPMAP *Intro[NO_OF_INTROBITMAPS] = // Picture sequence for the intro animation
 {
-  (BMPMAP*)RCXintro_1,
-  (BMPMAP*)RCXintro_2,
-  (BMPMAP*)RCXintro_3,
-  (BMPMAP*)RCXintro_4,
-  (BMPMAP*)RCXintro_5,
-  (BMPMAP*)RCXintro_6,
-  (BMPMAP*)RCXintro_7,
-  (BMPMAP*)RCXintro_8,
-  (BMPMAP*)RCXintro_9,
-  (BMPMAP*)RCXintro_10,
-  (BMPMAP*)RCXintro_11,
-  (BMPMAP*)RCXintro_12,
-  (BMPMAP*)RCXintro_13,
-  (BMPMAP*)RCXintro_14,
-  (BMPMAP*)RCXintro_15,
-  (BMPMAP*)RCXintro_16
+  &RCXintro_1,
+  &RCXintro_2,
+  &RCXintro_3,
+  &RCXintro_4,
+  &RCXintro_5,
+  &RCXintro_6,
+  &RCXintro_7,
+  &RCXintro_8,
+  &RCXintro_9,
+  &RCXintro_10,
+  &RCXintro_11,
+  &RCXintro_12,
+  &RCXintro_13,
+  &RCXintro_14,
+  &RCXintro_15,
+  &RCXintro_16
 };
 #endif
 
@@ -173,7 +173,7 @@ enum                          // String index in text string file
 {
   TXT_GENERAL_EMPTY,
   TXT_FB_GENERIC_FAIL,                      // "Failed!"
-  
+
                                             // BlueTooth connect
   TXT_FB_BT_CONNECTING_WAIT,                // "Connecting"
   TXT_FB_BT_CONNECT_BUSY_FAIL,              // "Line is busy"
@@ -251,7 +251,7 @@ enum                          // String index in text string file
   TXT_FB_BT_ERROR_LR_UNKOWN_ADDR_2,         //
 
                                             // Datalog errors
-  TXT_FB_DL_ERROR_MEMORY_FULL_1,            // Memory is full! 
+  TXT_FB_DL_ERROR_MEMORY_FULL_1,            // Memory is full!
   TXT_FB_DL_ERROR_MEMORY_FULL_2,            //
 
                                             // Power of time
@@ -352,17 +352,15 @@ UBYTE*    cUiGetMenuPointer(UBYTE FileNo)
 UBYTE*    cUiGetString(UBYTE No)        // Get string in text string file
 {
   UBYTE   *Result = NULL;
-  TXT     *pUi;
   UWORD   Tmp;
 
-  pUi = (TXT*)Ui;
   if (No)
   {
-    if (No <= pUi->ItemsY)
+    if (No <= Ui.ItemsY)
     {
       Tmp  = No - 1;
-      Tmp *= pUi->ItemCharsX;
-      Result = &(pUi->Data[Tmp]);
+      Tmp *= Ui.ItemCharsX;
+      Result = (UBYTE*) &(Ui.Data[Tmp]);
     }
   }
 
@@ -541,7 +539,7 @@ UBYTE     cUiMenuSearchSensorIcon(UBYTE Sensor)
   MENUITEM *MenuItem;
   UBYTE    Index;
 
-  for (Index = 0;(Index < IOMapUi.pMenu->Items) && (Result == NULL);Index++)
+  for (Index = 0;(Index < IOMapUi.pMenu->Items) && (Result == 0);Index++)
   {
     MenuItem = &IOMapUi.pMenu->Data[Index];
     if (MenuItem->FunctionParameter == Sensor)
@@ -589,9 +587,9 @@ UBYTE*    cUiMenuGetIconImage(UBYTE No)
   UBYTE   *Image;
 
   Image = NULL;
-  if (No < (Icons->ItemsX * Icons->ItemsY))
+  if (No < (Icons.ItemsX * Icons.ItemsY))
   {
-    Image = (UBYTE*)&Icons->Data[No * Icons->ItemPixelsX * (Icons->ItemPixelsY / 8)];
+    Image = (UBYTE*)&Icons.Data[No * Icons.ItemPixelsX * (Icons.ItemPixelsY / 8)];
   }
 
   return (Image);
@@ -886,7 +884,7 @@ void      cUiUpdateStatus(void)
       pMapDisplay->pStatusText   =  (UBYTE*)VarsUi.StatusText;
 
       // Status line update nessesary
-      if (IOMapUi.BatteryState < Status->ItemsX)
+      if (IOMapUi.BatteryState < Status.ItemsX)
       {
         // Update battery status icons
         if (IoFromAvr.Battery & 0x8000)
@@ -900,7 +898,7 @@ void      cUiUpdateStatus(void)
       }
 
       // Update bluetooth status icons
-      if ((IOMapUi.BluetoothState & (BT_STATE_VISIBLE | BT_STATE_CONNECTED | BT_STATE_OFF)) < Status->ItemsX)
+      if ((IOMapUi.BluetoothState & (BT_STATE_VISIBLE | BT_STATE_CONNECTED | BT_STATE_OFF)) < Status.ItemsX)
       {
         VarsUi.NewStatusIcons[STATUSICON_BLUETOOTH] = STATUS_NO_BLUETOOTH_0 + (IOMapUi.BluetoothState & (BT_STATE_VISIBLE | BT_STATE_CONNECTED | BT_STATE_OFF));
       }
@@ -1273,7 +1271,7 @@ void      cUiCtrl(void)
   if ((!(IOMapUi.Flags & UI_EXECUTE_LMS_FILE)) && (IOMapUi.State == INIT_INTRO)/* && ((pMapButton->State[BTN1] & PRESSED_STATE)!=PRESSED_STATE)*/)
   {
     UWORD LStatus;
-    if (LOADER_ERR(LStatus = pMapLoader->pFunc(FINDFIRST, UI_STARTUP_PROGRAM, NULL, NULL)) == SUCCESS)
+    if (LOADER_ERR(LStatus = pMapLoader->pFunc(FINDFIRST, (UBYTE*) UI_STARTUP_PROGRAM, NULL, NULL)) == SUCCESS)
     {
       //Close file handle returned by FINDFIRST
       pMapLoader->pFunc(CLOSE, LOADER_HANDLE_P(LStatus), NULL, NULL);
@@ -1304,11 +1302,11 @@ void      cUiCtrl(void)
       VarsUi.LowBatt                                  =  0;
       VarsUi.LowBattHasOccured                        =  0;
 
-      pMapDisplay->pFont                              =  (FONT*)Font;
-      pMapDisplay->pStatusIcons                       =  (ICON*)Status;
+      pMapDisplay->pFont                              =  &Font;
+      pMapDisplay->pStatusIcons                       =  &Status;
       pMapDisplay->pStatusText                        =  (UBYTE*)VarsUi.StatusText;
 #ifndef STRIPPED
-      pMapDisplay->pStepIcons                         =  (ICON*)Step;
+      pMapDisplay->pStepIcons                         =  &Step;
 #endif
 
       VarsUi.State                                    =  0;
@@ -1329,7 +1327,7 @@ void      cUiCtrl(void)
 
       pMapDisplay->EraseMask                          =  SCREEN_BIT(SCREEN_BACKGROUND);
 #ifndef STRIPPED
-      pMapDisplay->pBitmaps[BITMAP_1]                 =  (BMPMAP*)Intro[VarsUi.Pointer];
+      pMapDisplay->pBitmaps[BITMAP_1]                 =  Intro[VarsUi.Pointer];
 #endif
       pMapDisplay->UpdateMask                         =  BITMAP_BIT(BITMAP_1);
       pMapDisplay->Flags                             |=  DISPLAY_ON;
@@ -1347,7 +1345,7 @@ void      cUiCtrl(void)
         VarsUi.LowBattHasOccured        = 2;
         pMapDisplay->EraseMask          =  SCREEN_BIT(SCREEN_BACKGROUND);
 #ifndef STRIPPED
-        pMapDisplay->pBitmaps[BITMAP_1] =  (BMPMAP*)Intro[VarsUi.Pointer];
+        pMapDisplay->pBitmaps[BITMAP_1] =  Intro[VarsUi.Pointer];
 #endif
         pMapDisplay->UpdateMask         =  BITMAP_BIT(BITMAP_1);
         IOMapUi.Flags                  &= ~UI_ENABLE_STATUS_UPDATE;
@@ -1375,7 +1373,7 @@ void      cUiCtrl(void)
         {
           if (VarsUi.LowBatt)
           {
-            pMapDisplay->pBitmaps[BITMAP_1] = (BMPMAP*)LowBattery;
+            pMapDisplay->pBitmaps[BITMAP_1] = &LowBattery;
             pMapDisplay->UpdateMask         =  BITMAP_BIT(BITMAP_1);
             VarsUi.LowBattHasOccured = 1;
           }
@@ -1399,7 +1397,7 @@ void      cUiCtrl(void)
                 if (VarsUi.Pointer < NO_OF_INTROBITMAPS)
                 {
                   pMapDisplay->EraseMask          |= BITMAP_BIT(BITMAP_1);
-                  pMapDisplay->pBitmaps[BITMAP_1]  = (BMPMAP*)Intro[VarsUi.Pointer];
+                  pMapDisplay->pBitmaps[BITMAP_1]  = Intro[VarsUi.Pointer];
                   pMapDisplay->UpdateMask          = BITMAP_BIT(BITMAP_1);
                   if (VarsUi.Pointer == 11)
                   {
@@ -1808,7 +1806,7 @@ void      cUiCtrl(void)
         if (cUiReadButtons() != BUTTON_NONE)
         {
           pMapDisplay->Flags              &= ~DISPLAY_POPUP;
-          pMapDisplay->pBitmaps[BITMAP_1]  = (BMPMAP*)VarsUi.LowBattSavedBitmap;
+          pMapDisplay->pBitmaps[BITMAP_1]  = VarsUi.LowBattSavedBitmap;
           IOMapUi.State                    = VarsUi.LowBattSavedState;
           IOMapUi.Flags                   &= ~UI_BUSY;
         }
@@ -1840,7 +1838,7 @@ void      cUiCtrl(void)
 
       }
 
-      if (!cUiFeedback((BMPMAP*)Fail,Tmp,Tmp + 1,DISPLAY_SHOW_ERROR_TIME))
+      if (!cUiFeedback(&Fail,Tmp,Tmp + 1,DISPLAY_SHOW_ERROR_TIME))
       {
         IOMapUi.BluetoothState &= ~BT_ERROR_ATTENTION;
         cUiLoadLevel(0,1,1);
@@ -1864,8 +1862,8 @@ void      cUiCtrl(void)
           pMapDisplay->Flags                |= DISPLAY_POPUP;
           VarsUi.LowBattHasOccured           = 1;
           VarsUi.LowBattSavedState           = IOMapUi.State;
-          VarsUi.LowBattSavedBitmap          = (UBYTE*)pMapDisplay->pBitmaps[BITMAP_1];
-          pMapDisplay->pBitmaps[BITMAP_1]    = (BMPMAP*)LowBattery;
+          VarsUi.LowBattSavedBitmap          = pMapDisplay->pBitmaps[BITMAP_1];
+          pMapDisplay->pBitmaps[BITMAP_1]    = &LowBattery;
           pMapDisplay->UpdateMask            = BITMAP_BIT(BITMAP_1);
           IOMapUi.Flags                     |= UI_REDRAW_STATUS;
           IOMapUi.Flags                     |= UI_BUSY;

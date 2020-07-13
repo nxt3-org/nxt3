@@ -15,7 +15,7 @@
 #ifndef   D_AVRCOMM
 #define   D_AVRCOMM
 
-void      dIOCtrlInit(void);
+void      dIOCtrlInit(void* pHeader);
 void      dIOCtrlExit(void);
 
 void      dIOCtrlSetPower(UBYTE Power);

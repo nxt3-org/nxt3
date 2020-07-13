@@ -15,11 +15,10 @@
 
 #define   INCLUDE_OS
 
-#define   MODULEHEADERS                 32
-
 #include  "stdconst.h"
 #include  "modules.h"
 #include  "m_sched.h"
+#include  <stdlib.h>
 
 #include  "c_comm.h"
 #include  "c_input.h"
@@ -30,12 +29,12 @@
 #include  "c_lowspeed.h"
 #include  "c_output.h"
 #include  "c_cmd.h"
-#include  "c_cmd.iom"
+#include  "c_cmd.iom.h"
 #include  "c_ioctrl.h"
 #include  "c_ui.h"
 
 
-static    const HEADER*  pModuleHeaders[MODULEHEADERS] = 
+static    const HEADER*  pModuleHeaders[] =
 {
   &cComm,
   &cInput,
@@ -51,11 +50,12 @@ static    const HEADER*  pModuleHeaders[MODULEHEADERS] =
   0
 };
 
+IOFROMAVR IoFromAvr;
 
 void      mSchedInit(void)
 {
   UWORD   Tmp;
- 
+
   Tmp = 0;
   while(pModuleHeaders[Tmp])
   {
@@ -92,3 +92,16 @@ void      mSchedExit(void)
   }
 }
 
+int main(void)
+{
+#ifdef STOP_LMS2012
+  system("killall -STOP lms2012");
+#endif
+  mSchedInit();
+  while (TRUE == mSchedCtrl()) {}
+  mSchedExit();
+#ifdef STOP_LMS2012
+  system("killall -CONT lms2012");
+#endif
+  return 0;
+}

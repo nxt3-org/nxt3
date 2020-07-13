@@ -15,7 +15,7 @@
 #include  "stdconst.h"
 #include  "modules.h"
 #include  "c_button.h"
-#include  "c_button.iom"
+#include  "c_button.iom.h"
 #include  "c_button.h"
 #include  "d_button.h"
 
@@ -60,7 +60,7 @@ void      cButtonInit(void* pHeader)
   }
   VarsButton.OldState = 0;
   BtnCnt              = 0;
-  dButtonInit(BTN_PRESCALER);
+  pButton->Init(pHeader, BTN_PRESCALER);
 }
 
 void      cButtonCtrl(void)
@@ -74,7 +74,7 @@ void      cButtonCtrl(void)
   if (++BtnCnt >= BTN_PRESCALER)
   {
     BtnCnt = 0;
-    dButtonRead(&ButtonState);
+    pButton->Read(&ButtonState);
 
     ButtonNo = 0x01;
     for (Tmp = 0; Tmp < NO_OF_BTNS; Tmp++)
@@ -124,11 +124,11 @@ void      cButtonCtrl(void)
       ButtonNo <<= 1;
       IOMapButton.BtnCnt[Tmp].RelCnt = ((IOMapButton.BtnCnt[Tmp].ShortRelCnt) + (IOMapButton.BtnCnt[Tmp].LongRelCnt));
     }
-    VarsButton.OldState = ButtonState;    
+    VarsButton.OldState = ButtonState;
   }
 }
 
 void      cButtonExit(void)
 {
-  dButtonExit();
+  pButton->Exit();
 }

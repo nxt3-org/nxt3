@@ -14,8 +14,8 @@
 
 #include  "stdconst.h"
 #include  "modules.h"
-#include  "c_loader.iom"
-#include  "c_ioctrl.iom"
+#include  "c_loader.iom.h"
+#include  "c_ioctrl.iom.h"
 #include  "d_loader.h"
 #include  "c_loader.h"
 #include <string.h>
@@ -61,7 +61,7 @@ void      cLoaderInit(void* pHeader)
 
 void      cLoaderCtrl(void)
 {
-  if (VarsLoader.Resizing) 
+  if (VarsLoader.Resizing)
   {
     // keep resizing the file currently in the file resize operation
     // copy 1024 bytes from old file handle to new file handle
@@ -90,7 +90,7 @@ UWORD cLoaderRenameFile(UBYTE *pFileName, UBYTE *pBuffer, ULONG *pLength)
 {
   UWORD ReturnState;
   UBYTE FoundName[FILENAME_LENGTH + 1];
-  
+
   /* Check for file exists*/
   ReturnState = dLoaderFind(pBuffer, FoundName, pLength, pLength, (UBYTE) SEARCHING);
   dLoaderCloseHandle(LOADER_HANDLE(ReturnState));
@@ -142,9 +142,9 @@ UWORD cLoaderDeleteFile(UBYTE *pFileName)
 UWORD cLoaderResizeFile(UBYTE *pFileName, ULONG pLength)
 {
   UWORD ReturnState = SUCCESS;
-  /* 
+  /*
     All that this method can do is start the process of
-    resizing a file.  To do that we will 
+    resizing a file.  To do that we will
     a) rename the file
     b) open old file for reading
     c) create new file for writing
@@ -300,7 +300,7 @@ UWORD     cLoaderFileRq(UBYTE Cmd, UBYTE *pFileName, UBYTE *pBuffer, ULONG *pLen
       ULONG DataLength;
 
       ReturnState = dLoaderFind(pFileName, pBuffer, pLength, &DataLength, (UBYTE) SEARCHING);
-      if (0x8000 <= ReturnState)
+      if (ReturnState >= 0x8000)
       {
         dLoaderCloseHandle(ReturnState);
       }

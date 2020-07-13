@@ -15,60 +15,30 @@
 #include  "stdconst.h"
 #include  "m_sched.h"
 #include  "d_hispeed.h"
-#include  "d_hispeed.r"
 #include  <string.h>
 
-const ULONG SPEED_TO_BAUD[16] = {
-  1200L,
-  2400L,
-  3600L,
-  4800L,
-  7200L,
-  9600L,
-  14400L,
-  19200L,
-  28800L,
-  38400L,
-  57600L,
-  76800L,
-  115200L,
-  230400L,
-  460800L,
-  BAUD_RATE
-};
 
 void dHiSpeedInit(void)
 {
-  HIGHSPEEDInit;  
+  // stub-only for now
 }
 
 void dHiSpeedSendData(UBYTE *OutputBuffer, UBYTE BytesToSend)
-{
-  HIGHSPEEDSendDmaData(OutputBuffer,BytesToSend);
-}
+{}
 
 void dHiSpeedSetupUart(UBYTE speed, UWORD mode, UBYTE umode)
-{
-  ULONG baud = SPEED_TO_BAUD[speed];
-  HIGHSPEEDSetupUart(speed, baud, ((unsigned int)mode), umode);
-}
+{}
 
 void dHiSpeedInitReceive(UBYTE *InputBuffer)
-{
-  HIGHSPEEDInitReceiver(InputBuffer);  
-}
+{}
 
-void dHiSpeedReceivedData(UWORD *ByteCnt)
-{
-  HIGHSPEEDReceivedData(ByteCnt);  
+void dHiSpeedReceivedData(UWORD *ByteCnt) {
+  *ByteCnt = 0;
 }
 
 void dHiSpeedExit(void)
-{
-  HIGHSPEEDExit;
-}
+{}
 
-void dHiSpeedBytesToSend(UWORD *bts)
-{
-  BYTESToSend(*bts);
+void dHiSpeedBytesToSend(UWORD *bts) {
+  *bts = 0;
 }
