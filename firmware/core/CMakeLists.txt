@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(NXT3  VERSION 0.1
-              DESCRIPTION "NXT firmware for EV3"
-              LANGUAGES C)
+project(NXTcore  VERSION 1.32.1
+                 DESCRIPTION "NXT firmware core"
+                 LANGUAGES C)
 
 add_executable(nxt3.elf
     ${CMAKE_CURRENT_SOURCE_DIR}/c_button.c
