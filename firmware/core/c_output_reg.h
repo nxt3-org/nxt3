@@ -12,8 +12,8 @@
 // Platform        C
 //
 
-#ifndef   D_OUTPUT
-#define   D_OUTPUT
+#ifndef   C_OUTPUT_REG
+#define   C_OUTPUT_REG
 
 #define   NEW_MOTOR
 

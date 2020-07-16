@@ -14,8 +14,9 @@
 
 #include  "stdconst.h"
 #include  "m_sched.h"
-#include  "d_output.h"
-#include  "d_output_ev3.h"
+#include  "c_output_reg.h"
+#include  "hal_motor.h"
+#include  "hal_general.h"
 
 #include  <math.h>
 
@@ -85,6 +86,7 @@ typedef struct
   UBYTE RampDownToLimit;
   UBYTE Spare2;
   UBYTE Spare3;
+  SLONG LastTacho;
 }MOTORDATA;
 
 typedef struct
@@ -123,7 +125,8 @@ void      dOutputInit(void)
 {
   UBYTE Temp;
 
-  ev3OutputInit();
+  if (!Hal_Motor_RefAdd())
+      Hal_General_AbnormalExit("Cannot initialize motor output");
 
   RegulationTime = REGULATION_TIME;
 
@@ -150,8 +153,8 @@ void      dOutputInit(void)
     pMD->MotorOverloaded = 0;
     pMD->RunStateAtLimit = MOTOR_RUN_STATE_IDLE;
     pMD->RampDownToLimit = 0;
-    ev3OutputSetStopMode((ev3_motor_port) Temp, ev3_stop_coast);
-    ev3OutputSetPwmDuty((ev3_motor_port) Temp, pMD->MotorSetSpeed);
+    Hal_Motor_SetStopMode(Temp, STOP_MODE_COAST);
+    Hal_Motor_PushPwm(Temp, 0);
   }
 }
 
@@ -166,11 +169,14 @@ void dOutputCtrl(void)
   UBYTE MotorNr;
   SLONG NewTachoCount[3];
 
-  ev3OutputCtrl();
+  Hal_Motor_Tick();
 
   for (MotorNr = 0; MotorNr < 3; MotorNr++)
   {
-    ev3OutputCalcTachoDelta((ev3_motor_port) MotorNr, &NewTachoCount[MotorNr]);
+    int32_t newTacho = 0;
+    Hal_Motor_GetTacho(MotorNr, &newTacho);
+    NewTachoCount[MotorNr] = newTacho - MotorData[MotorNr].LastTacho;
+    MotorData[MotorNr].LastTacho = newTacho;
   }
 
   for (MotorNr = 0; MotorNr < 3; MotorNr++)
@@ -216,14 +222,15 @@ void dOutputCtrl(void)
     }
   }
 
-  ev3OutputSetPwmDuty(ev3_motor_a, MotorData[MOTOR_A].MotorActualSpeed);
-  ev3OutputSetPwmDuty(ev3_motor_b, MotorData[MOTOR_B].MotorActualSpeed);
-  ev3OutputSetPwmDuty(ev3_motor_c, MotorData[MOTOR_C].MotorActualSpeed);
+  Hal_Motor_PushPwm(MOTOR_PORT_A, MotorData[MOTOR_A].MotorActualSpeed);
+  Hal_Motor_PushPwm(MOTOR_PORT_B, MotorData[MOTOR_B].MotorActualSpeed);
+  Hal_Motor_PushPwm(MOTOR_PORT_C, MotorData[MOTOR_C].MotorActualSpeed);
+  //Hal_Motor_PushPwm(MOTOR_PORT_D, MotorData[MOTOR_D].MotorActualSpeed);
 }
 
 void      dOutputExit(void)
 {
-  ev3OutputExit();
+  Hal_Motor_RefDel();
 }
 
 /* Called eveyr 1 mS */
@@ -247,9 +254,9 @@ void dOutputGetMotorParameters(UBYTE *CurrentMotorSpeed, SLONG *TachoCount, SLON
 void dOutputSetMode(UBYTE Motor, UBYTE Mode)     //Set motor mode (break, Float)
 {
   if (Mode & 0x02) {
-    ev3OutputSetStopMode((ev3_motor_port) Motor, ev3_stop_brake);
+    Hal_Motor_SetStopMode(Motor, STOP_MODE_BRAKE);
   } else {
-    ev3OutputSetStopMode((ev3_motor_port) Motor, ev3_stop_coast);
+    Hal_Motor_SetStopMode(Motor, STOP_MODE_COAST);
   }
 }
 
@@ -412,7 +419,7 @@ void dOutputSetSpeed (UBYTE MotorNr, UBYTE NewMotorRunState, SBYTE Speed, SBYTE 
       pMD->PositionFracError = 0;
       pMD->RegulationTimeCount = 0;
       pMD->DeltaCaptureCount = 0;
-      ev3OutputResetTacho((ev3_motor_port) MotorNr);
+      Hal_Motor_ResetTacho(MotorNr);
     }
     switch (NewMotorRunState)
     {

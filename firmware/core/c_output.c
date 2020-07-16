@@ -18,7 +18,7 @@
 #include  "modules.h"
 #include  "c_output.iom.h"
 #include  "c_output.h"
-#include  "d_output.h"
+#include  "c_output_reg.h"
 #include  "c_display.iom.h"
 
 static    IOMAPOUTPUT   IOMapOutput;

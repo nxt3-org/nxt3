@@ -14,7 +14,9 @@ add_executable(nxt3.elf
     ${CMAKE_CURRENT_SOURCE_DIR}/c_loader.c
     ${CMAKE_CURRENT_SOURCE_DIR}/c_lowspeed.c
     ${CMAKE_CURRENT_SOURCE_DIR}/c_output.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/c_output_reg.c
     ${CMAKE_CURRENT_SOURCE_DIR}/c_sound.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/c_sound_adpcm.c
     ${CMAKE_CURRENT_SOURCE_DIR}/c_ui.c
     ${CMAKE_CURRENT_SOURCE_DIR}/d_bt.c
     ${CMAKE_CURRENT_SOURCE_DIR}/d_hispeed.c
@@ -22,9 +24,6 @@ add_executable(nxt3.elf
     ${CMAKE_CURRENT_SOURCE_DIR}/d_loader.c
     ${CMAKE_CURRENT_SOURCE_DIR}/d_loader_ev3.c
     ${CMAKE_CURRENT_SOURCE_DIR}/d_lowspeed.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/d_output.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/d_output_ev3.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/c_sound_adpcm.c
     ${CMAKE_CURRENT_SOURCE_DIR}/d_usb.c
     ${CMAKE_CURRENT_SOURCE_DIR}/m_sched.c
 )
