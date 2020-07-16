@@ -16,63 +16,43 @@
 #include  "stdconst.h"
 #include  "modules.h"
 #include  "c_ioctrl.iom.h"
+#include  "c_cmd.iom.h"
 #include  "c_ioctrl.h"
-#include  "d_ioctrl.h"
 
-static    IOMAPIOCTRL   IOMapIOCtrl;
-static    VARSIOCTRL    VarsIOCtrl;
+static IOMAPIOCTRL IOMapIOCtrl;
+static VARSIOCTRL  VarsIOCtrl;
+static HEADER      **pHeaders;
 
-const     HEADER  cIOCtrl =
-{
-  0x00060001L,
-  "IOCtrl",
-  cIOCtrlInit,
-  cIOCtrlCtrl,
-  cIOCtrlExit,
-  (void *)&IOMapIOCtrl,
-  (void *)&VarsIOCtrl,
-  (UWORD)sizeof(IOMapIOCtrl),
-  (UWORD)sizeof(VarsIOCtrl),
-  0x0000                      //Code size - not used so far
+const HEADER cIOCtrl = {
+    0x00060001L,
+    "IOCtrl",
+    cIOCtrlInit,
+    cIOCtrlCtrl,
+    cIOCtrlExit,
+    (void *) &IOMapIOCtrl,
+    (void *) &VarsIOCtrl,
+    (UWORD) sizeof(IOMapIOCtrl),
+    (UWORD) sizeof(VarsIOCtrl),
+    0x0000                      //Code size - not used so far
 };
 
 
-void      cIOCtrlInit(void* pHeader)
-{
-  dIOCtrlInit(pHeader);
-  dIOCtrlSetPower(0);
+void cIOCtrlInit(void *pHeader) {
+    pHeaders = pHeader;
 }
 
 
-void     cIOCtrlCtrl(void)
-{
-  switch(IOMapIOCtrl.PowerOn)
-  {
+void cIOCtrlCtrl(void) {
+    switch (IOMapIOCtrl.PowerOn) {
     case POWERDOWN:
-    {
-      dIOCtrlSetPower((POWERDOWN>>8));
-    }
-    break;
     case BOOT:
-    {
-      dIOCtrlSetPower((UBYTE)(BOOT>>8));
-      dIOCtrlSetPwm((UBYTE)BOOT);
-    }
-    break;
+        pMapCmd->Awake = FALSE;
+        break;
     default:
-    {
-      /* No need to change the default value      */
-      /* if value is boot or reset it should come */
-      /* back from reset - setting the value to 0 */
+        break;
     }
-    break;
-  }
-  dIOCtrlTransfer();
 }
 
 
-void      cIOCtrlExit(void)
-{
-  dIOCtrlExit();
-}
+void cIOCtrlExit(void) {}
 

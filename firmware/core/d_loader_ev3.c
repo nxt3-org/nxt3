@@ -10,6 +10,14 @@
 #include <stdio.h>
 #include <errno.h>
 
+#ifndef O_CLOEXEC
+#define O_CLOEXEC   02000000
+#endif
+
+#ifndef O_DIRECTORY
+#define O_DIRECTORY  0200000
+#endif
+
 static const char *DataRootPath  = ".";
 static int         DataRootFD    = -1;
 static const char *MetaRootPath  = ".";

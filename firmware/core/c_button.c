@@ -12,12 +12,14 @@
 // Platform        C
 //
 
+#include <hal_general.h>
 #include  "stdconst.h"
 #include  "modules.h"
 #include  "c_button.h"
 #include  "c_button.iom.h"
 #include  "c_button.h"
-#include  "d_button.h"
+#include  "hal_button.h"
+#include  "hal_led.h"
 
 #define   BTN_PRESCALER      2
 
@@ -60,12 +62,16 @@ void      cButtonInit(void* pHeader)
   }
   VarsButton.OldState = 0;
   BtnCnt              = 0;
-  pButton->Init(pHeader, BTN_PRESCALER);
+  if (!Hal_Button_RefAdd())
+      Hal_General_AbnormalExit("Cannot initialize buttons");
+  if (!Hal_Led_RefAdd())
+      Hal_General_AbnormalExit("Cannot initialize LEDs");
 }
 
 void      cButtonCtrl(void)
 {
-  UBYTE ButtonState, Tmp, ButtonNo;
+  uint32_t ButtonState;
+  UBYTE Tmp, ButtonNo;
 
   for (Tmp = 0; Tmp < NO_OF_BTNS; Tmp++)
   {
@@ -74,7 +80,7 @@ void      cButtonCtrl(void)
   if (++BtnCnt >= BTN_PRESCALER)
   {
     BtnCnt = 0;
-    pButton->Read(&ButtonState);
+    Hal_Button_Read(&ButtonState);
 
     ButtonNo = 0x01;
     for (Tmp = 0; Tmp < NO_OF_BTNS; Tmp++)
@@ -130,5 +136,6 @@ void      cButtonCtrl(void)
 
 void      cButtonExit(void)
 {
-  pButton->Exit();
+  Hal_Led_RefDel();
+  Hal_Button_RefDel();
 }

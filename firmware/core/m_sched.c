@@ -18,6 +18,7 @@
 #include  "stdconst.h"
 #include  "modules.h"
 #include  "m_sched.h"
+#include  "hal_general.h"
 #include  <stdlib.h>
 
 #include  "c_comm.h"
@@ -97,6 +98,7 @@ int main(void)
 #ifdef STOP_LMS2012
   system("killall -STOP lms2012");
 #endif
+  Hal_General_SetupSignals(&((IOMAPCMD*)(pModuleHeaders[ENTRY_CMD]->pIOMap))->Awake);
   mSchedInit();
   while (TRUE == mSchedCtrl()) {}
   mSchedExit();

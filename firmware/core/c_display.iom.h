@@ -34,14 +34,6 @@ enum
   DISPLAY_FRAME             = 0x07      // W - draw a frame (on/off) (CMD,TRUE/FALSE,X1,Y1,X2,Y2)
 };
 
-// EV3 display scaling modes
-enum
-{
-  SCALING_OFF,
-  SCALING_STRETCH,
-  SCALING_CROP
-};
-
 //JJR
 // Constants related to drawing operations.
 

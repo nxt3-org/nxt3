@@ -17,11 +17,13 @@
 //
 
 #include  <string.h>
+#include  <stdint.h>
 #include  "stdconst.h"
 #include  "modules.h"
 #include  "c_display.iom.h"
 #include  "c_display.h"
-#include  "d_display.h"
+#include  "hal_general.h"
+#include  "hal_display.h"
 
 
 static    IOMAPDISPLAY  IOMapDisplay;
@@ -541,7 +543,8 @@ void cDisplayDraw(UBYTE Cmd,UBYTE PixelMode,UBYTE X1,UBYTE Y1,UBYTE X2,UBYTE Y2)
 
 void      cDisplayInit(void* pHeader)
 {
-  pDisplay->Init(pHeader);
+  if (!Hal_Display_RefAdd())
+    return Hal_General_AbnormalExit("Cannot initialize display output");
   IOMapDisplay.Display              =  (UBYTE*)IOMapDisplay.Normal;
   IOMapDisplay.pFunc                =  &cDisplayDraw;
   IOMapDisplay.EraseMask            =  0;
@@ -549,9 +552,11 @@ void      cDisplayInit(void* pHeader)
   IOMapDisplay.TextLinesCenterFlags =  0;
   IOMapDisplay.Flags                =  DISPLAY_REFRESH | DISPLAY_ON;
   IOMapDisplay.Contrast             =  0x5A; // 90
-  IOMapDisplay.Scaling              =  SCALING_OFF; //SCALING_STRETCH;
+  IOMapDisplay.Scaling              =  DISPLAY_SCALE_CENTER;
   VarsDisplay.ErasePointer          =  0;
-  VarsDisplay.UpdatePointer         =  0;
+  VarsDisplay.UpdatePointer =   0;
+  VarsDisplay.RefreshStage  =   0;
+  VarsDisplay.RefreshMillis = 100;
 }
 
 
@@ -898,29 +903,33 @@ void      cDisplayCtrl(void)
     }
     VarsDisplay.ErasePointer = 0;
   }
+
   if (!(IOMapDisplay.Flags & DISPLAY_POPUP))
   {
     if (!(IOMapDisplay.Flags & DISPLAY_REFRESH_DISABLED))
     {
-      if ((IOMapDisplay.Flags & DISPLAY_ON))
-      {
-        pDisplay->SetPower(TRUE, IOMapDisplay.Contrast);
-      }
-      else
-      {
-        pDisplay->SetPower(FALSE, IOMapDisplay.Contrast);
-      }
-      if (!(pDisplay->Update(DISPLAY_HEIGHT,DISPLAY_WIDTH,(UBYTE*)IOMapDisplay.Normal,IOMapDisplay.Scaling)))
-      {
-        IOMapDisplay.Flags &= ~DISPLAY_BUSY;
-        if (!(IOMapDisplay.Flags & DISPLAY_REFRESH))
-        {
-          IOMapDisplay.Flags |= DISPLAY_REFRESH_DISABLED;
-        }
-      }
-      else
-      {
-        IOMapDisplay.Flags |=  DISPLAY_BUSY;
+      Hal_Display_SetPower(IOMapDisplay.Flags & DISPLAY_ON);
+      Hal_Display_SetContrast(IOMapDisplay.Contrast);
+      Hal_Display_SetScaling(IOMapDisplay.Scaling);
+
+      if (VarsDisplay.RefreshStage == 0) {
+          VarsDisplay.LastRefresh = Hal_Timer_Now();
+          if (!Hal_Display_Write((const uint8_t *) IOMapDisplay.Normal)) {
+              Hal_General_AbnormalExit("Cannot refresh display");
+          }
+          IOMapDisplay.Flags |=  DISPLAY_BUSY;
+          VarsDisplay.RefreshStage++;
+
+      } else {
+          if (Hal_Timer_MillisSince(VarsDisplay.LastRefresh) < VarsDisplay.RefreshMillis) {
+              IOMapDisplay.Flags |=  DISPLAY_BUSY;
+
+          } else {
+              IOMapDisplay.Flags &= ~DISPLAY_BUSY;
+              if (!(IOMapDisplay.Flags & DISPLAY_REFRESH))
+                  IOMapDisplay.Flags |= DISPLAY_REFRESH_DISABLED;
+              VarsDisplay.RefreshStage = 0;
+          }
       }
     }
     else
@@ -929,17 +938,16 @@ void      cDisplayCtrl(void)
       {
         IOMapDisplay.Flags &= ~DISPLAY_REFRESH_DISABLED;
       }
+     }
     }
-  }
-  else
-  {
-    pDisplay->Update(DISPLAY_HEIGHT,DISPLAY_WIDTH,(UBYTE*)IOMapDisplay.Popup,IOMapDisplay.Scaling);
-  }
+    else
+    {
+      Hal_Display_Write((const uint8_t *) IOMapDisplay.Popup);
+    }
 }
 
 
 void      cDisplayExit(void)
 {
-  pDisplay->Exit();
+  Hal_Display_RefDel();
 }
-

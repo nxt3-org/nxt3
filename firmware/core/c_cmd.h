@@ -26,6 +26,7 @@
 #define MAX_HANDLES 16
 #endif
 
+#include <hal_timer.h>
 #include "c_cmd_bytecodes.h"
 #define SYSCALL_COUNT 100
 
@@ -565,7 +566,8 @@ typedef struct
 
   // add a buffer for storing the last response raw content (64 bytes)
   UBYTE LastResponseBuffer[64];
-  UBYTE LastResponseLength;
+  UBYTE           LastResponseLength;
+  hal_timestamp_t LastPass;
 
 #if VM_BENCHMARK
   ULONG InstrCount;

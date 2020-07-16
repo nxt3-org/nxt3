@@ -38,7 +38,7 @@
 
 #include "c_cmd.h"
 #include "c_cmd_bytecodes.h"
-#include "d_timer.h"
+#include "hal_timer.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -58,7 +58,8 @@ static  SLONG gPCDelta;
 // important to cast since most args are assigned from signed value, and locals may be ULONG
 #define GetDataArg(arg) ((UWORD)(arg))
 #if VMProfilingCode
-static  ULONG     ExecutedInstrs= 0, CmdCtrlTime= 0, OverheadTime= 0, CmdCtrlCalls= 0, LeaveTime= 0, NotFirstCall= 0, LastAvgCount= 0;
+static  ULONG     ExecutedInstrs= 0, CmdCtrlTime= 0, OverheadTime= 0, CmdCtrlCalls= 0, NotFirstCall= 0, LastAvgCount= 0;
+static hal_timestamp_t LeaveTime = {0, 0};
 static ULONG CmdCtrlClumpTime[256];
 typedef struct  {
   ULONG Time;
@@ -1082,7 +1083,7 @@ UWORD cCmdHandleRemoteCommands(UBYTE * pInBuf, UBYTE * pOutBuf, UBYTE * pLen)
 #ifndef STRIPPED
         //SyncTime SLONG
         memcpy((PSZ)&IOMapCmd.SyncTime, (PSZ)&(pInBuf[1]), 4);
-        IOMapCmd.SyncTick= dTimerReadNoPoll();
+          IOMapCmd.SyncTick= Hal_Timer_ElapsedMillis();
 #endif
       }
       break;
@@ -1460,8 +1461,8 @@ void      cCmdInit(void* pHeader)
   strncpy((PSZ)(IOMapCmd.FormatString), VM_FORMAT_STRING, VM_FORMAT_STRING_SIZE);
   memset(IOMapCmd.FileName, 0, sizeof(IOMapCmd.FileName));
 
-  dTimerInit();
-  IOMapCmd.Tick = dTimerRead();
+    Hal_Timer_RefAdd();
+    IOMapCmd.Tick = Hal_Timer_ElapsedMillis();
   IOMapCmd.SyncTime= 0;
   IOMapCmd.SyncTick= 0;
 
@@ -1479,7 +1480,8 @@ void cCmdCtrl(void)
     case VM_RUN_SINGLE:
     {
  #if VMProfilingCode
-    ULONG EnterTime= dTimerReadHiRes(), FinishTime;
+    hal_timestamp_t EnterTime = Hal_Timer_Now();
+    hal_timestamp_t FinishTime;
     CmdCtrlCalls ++;
 #endif
     ULONG Continue;
@@ -1523,12 +1525,12 @@ void cCmdCtrl(void)
         //Execute instructions from a clump up to INSTR_MAX, to end of millisec,
         //Finishing/suspending a clump, BREAKOUT_REQ, or any errors will cause a return
 #if VMProfilingCode
-          ULONG ClumpEnterTime= dTimerReadHiRes();
+          hal_timestamp_t ClumpEnterTime = Hal_Timer_Now();
           CLUMP_ID clump= VarsCmd.RunQ.Head;
 #endif
           Status = cCmdInterpFromClump();
 #if VMProfilingCode
-          CmdCtrlClumpTime[clump] += dTimerReadHiRes() - ClumpEnterTime;
+          CmdCtrlClumpTime[clump] += Hal_Timer_DeltaUS(ClumpEnterTime, Hal_Timer_Now());
 #endif
         // automatically switch from RUN_SINGLE to RUN_PAUSE after a single step
         if (VarsCmd.VMState == VM_RUN_SINGLE)
@@ -1571,16 +1573,14 @@ void cCmdCtrl(void)
         }
       } while (Continue == TRUE && VarsCmd.VMState == VM_RUN_FREE);
 #if VMProfilingCode
-      FinishTime= dTimerReadHiRes();
+      FinishTime = Hal_Timer_Now();
       if(NotFirstCall)
-        OverheadTime += EnterTime - LeaveTime;
+        OverheadTime += Hal_Timer_DeltaUS(EnterTime, LeaveTime);
       else
         NotFirstCall= 1;
-      CmdCtrlTime += FinishTime - EnterTime;
+      CmdCtrlTime += Hal_Timer_DeltaUS(EnterTime, FinishTime);
       LeaveTime= FinishTime;
 #endif
-      // May busy wait to postpone to 1ms schedule
-      while (IOMapCmd.Tick == dTimerRead());
     }
     break;
     case VM_IDLE:
@@ -1627,7 +1627,6 @@ void cCmdCtrl(void)
           pMapUi->Flags |= (UI_DISABLE_LEFT_RIGHT_ENTER | UI_DISABLE_EXIT);
         }
       }
-    while (IOMapCmd.Tick == dTimerRead()); // delay until scheduled time
     }
     break;
 
@@ -1670,7 +1669,6 @@ void cCmdCtrl(void)
       VarsCmd.CommStatReset = (SWORD)BTBUSY;
 
       cCmdSetVMState(VM_RESET2);
-      while (IOMapCmd.Tick == dTimerRead()); // delay until scheduled time
     }
     break;
 
@@ -1698,29 +1696,26 @@ void cCmdCtrl(void)
         cCmdSetVMState(VM_IDLE);
         IOMapCmd.ProgStatus = PROG_IDLE;
       }
-    while (IOMapCmd.Tick == dTimerRead()); // delay until scheduled time
     }
       break;
 
     case VM_RUN_PAUSE:
-    {
-      while (IOMapCmd.Tick == dTimerRead()); // delay until scheduled time
-    }
     break;
   }//END state machine switch
 
   //Set tick to new value for next time 'round
-  IOMapCmd.Tick = dTimerReadNoPoll();
-
+  Hal_Timer_WaitForMillisecond(VarsCmd.LastPass);
+  VarsCmd.LastPass = Hal_Timer_Now();
+  IOMapCmd.Tick = Hal_Timer_ElapsedMillis();
   return;
 }
 
 
 void cCmdExit(void)
 {
-  dTimerExit();
+    Hal_Timer_RefDel();
 
-  return;
+    return;
 }
 
 
@@ -2802,7 +2797,7 @@ NXT_STATUS cCmdDSArrayAlloc(DS_ELEMENT_ID DSElementID, UWORD Offset, UWORD NewCo
   UWORD OldCount;
   UWORD i;
 #if VMProfilingCode
-  ULONG enterTime= dTimerReadHiRes();
+  hal_timestamp_t enterTime = Hal_Timer_Now();
 #endif
   NXT_ASSERT(cCmdIsDSElementIDSane(DSElementID));
 
@@ -2847,7 +2842,7 @@ NXT_STATUS cCmdDSArrayAlloc(DS_ELEMENT_ID DSElementID, UWORD Offset, UWORD NewCo
   NXT_ASSERT(cCmdVerifyMemMgr());
 allocExit:
 #if VMProfilingCode
-  memMgrTime += dTimerReadHiRes() - enterTime;
+  memMgrTime += Hal_Timer_DeltaUS(enterTime, Hal_Timer_Now());
 #endif
   return Status;
 }
@@ -4644,7 +4639,6 @@ NXT_STATUS cCmdInterpFromClump()
     i = pClumpRec->Priority;
   else
     i = 1;
-  time_point startTS = dTimerGetNow();
   do
   {
     // are we debugging and are free running and reach a breakpoint/autopause?
@@ -4674,8 +4668,7 @@ NXT_STATUS cCmdInterpFromClump()
     }
 
 #if VMProfilingCode
-    ULONG instrStartTime;
-    instrStartTime= dTimerReadHiRes();
+    hal_timestamp_t instrStartTime = Hal_Timer_Now();
 #endif
 
     ULONG instrWord= *(UWORD*)pInstr;
@@ -4689,7 +4682,8 @@ NXT_STATUS cCmdInterpFromClump()
     }
 
 #if VMProfilingCode
-    UpdateProfileInfo(shortOp, pInstr, dTimerReadHiRes() - instrStartTime, InstrSize);
+    uint32_t dT = Hal_Timer_DeltaUS(instrStartTime, Hal_Timer_Now());
+    UpdateProfileInfo(shortOp, pInstr, dT, InstrSize);
 #endif
 
 afterCompaction:
@@ -4751,7 +4745,7 @@ afterCompaction:
 #endif
 
     //Count one more instruction for this pass
-    if (dTimerNowHasElapsedMillis(&startTS, 1)) // HWTimer has passed ms tick limit
+      if (Hal_Timer_MillisecondElapsed(VarsCmd.LastPass)) // HWTimer has passed ms tick limit
       Status= TIMES_UP;
     else if(--i <= 0)
       Status= ROTATE_QUEUE;
@@ -4863,7 +4857,7 @@ NXT_STATUS cCmdInterpUnop1(CODE_WORD * const pCode)
 
     case OP_GETTICK:
     {
-      cCmdSetScalarValFromDataArg(Arg1, dTimerReadNoPoll());
+        cCmdSetScalarValFromDataArg(Arg1, Hal_Timer_ElapsedMillis());
     }
     break;
 
@@ -5350,8 +5344,9 @@ NXT_STATUS cCmdInterpUnop2(CODE_WORD * const pCode)
         Status= ROTATE_QUEUE;
       else
         Status = cCmdSleepClump(wait + IOMapCmd.Tick); // put to sleep, to wake up wait ms in future
-      if(Arg1 != NOT_A_DS_ID)
-        cCmdSetScalarValFromDataArg(Arg1, dTimerReadNoPoll());
+      if(Arg1 != NOT_A_DS_ID) {
+          cCmdSetScalarValFromDataArg(Arg1, Hal_Timer_ElapsedMillis());
+      }
     }
     break;
 
@@ -8438,8 +8433,9 @@ NXT_STATUS cCmdWrapRandomNumber(UBYTE * ArgV[])
   static UBYTE count = 0;
   SWORD random;
 
-  if (count == 0)
-    srand(dTimerRead());
+  if (count == 0) {
+      srand(Hal_Timer_ElapsedMillis());
+  }
 
   if (count > 20)
     count = 0;
@@ -9980,7 +9976,7 @@ NXT_STATUS cCmdWrapRandomEx(UBYTE * ArgV[])
   {
     // reseed
     if (*pSeed == 0) {
-      *pSeed = (SLONG)dTimerRead();
+        *pSeed = (SLONG) Hal_Timer_ElapsedMillis();
       if (*pSeed < 0)
         *pSeed = 1;
     }

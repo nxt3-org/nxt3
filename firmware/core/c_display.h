@@ -21,6 +21,8 @@
 
 #ifndef   INCLUDE_OS
 
+#include "hal_timer.h"
+
 typedef   struct
 {
   UBYTE   StartX;
@@ -35,8 +37,12 @@ typedef   struct
   UBYTE   *DisplaySave;
   const BMPMAP  *pOldBitmaps[BITMAPS];
   UBYTE   ErasePointer;
-  UBYTE   UpdatePointer;
+  UBYTE           UpdatePointer;
+  UBYTE           RefreshStage;
+  hal_timestamp_t LastRefresh;
+  UBYTE   RefreshMillis;
 }VARSDISPLAY;
+
 
 #endif
 
