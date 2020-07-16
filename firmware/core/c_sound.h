@@ -20,7 +20,8 @@
 #ifndef   C_SOUND
 #define   C_SOUND
 
-#include "d_sound.h"
+#include "hal_sound.h"
+#include "c_sound_adpcm.h"
 
 typedef   struct
 {
@@ -31,11 +32,16 @@ typedef   struct
   UBYTE   BufferIn;
   UBYTE   BufferOut;
   UBYTE   BufferTmp;
+  ADPCM_State AdpcmState;
 }VARSSOUND;
 
 void      cSoundInit(void* pHeaders);
 void      cSoundCtrl(void);
 void      cSoundExit(void);
+
+void cSoundDecodeAdpcm(UBYTE bufferNo);
+
+#define BUFFER_SIZE(format) ((format) == FILEFORMAT_SOUND_COMPRESSED ? SOUNDBUFFERSIZE_ADPCM : SOUNDBUFFERSIZE)
 
 extern    const HEADER cSound;
 

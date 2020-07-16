@@ -45,7 +45,7 @@
 // Platform        C
 //
 
-#include  "d_sound_adpcm.h"
+#include  "c_sound_adpcm.h"
 
 static SWORD IndexTable[16] =
 {

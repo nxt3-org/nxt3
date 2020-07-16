@@ -1,5 +1,5 @@
-#ifndef   D_SOUND_ADPCM
-#define   D_SOUND_ADPCM
+#ifndef   C_SOUND_ADPCM
+#define   C_SOUND_ADPCM
 
 #include  "stdconst.h"
 #include  "modules.h"

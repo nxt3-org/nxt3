@@ -18,12 +18,15 @@
 
 #include  <stdlib.h>
 #include  <string.h>
+#include <hal_sound.h>
+#include <hal_general.h>
 #include  "stdconst.h"
 #include  "modules.h"
 #include  "c_sound.iom.h"
 #include  "c_loader.iom.h"
 #include  "c_sound.h"
-#include  "d_sound.h"
+#include "c_sound_adpcm.h"
+#include  <stdio.h>
 
 static    IOMAPSOUND   IOMapSound;
 static    VARSSOUND    VarsSound;
@@ -62,7 +65,8 @@ void      cSoundInit(void* pHeader)
   IOMapSound.SoundFilename[0] =  0;
   VarsSound.BufferIn          =  0;
   VarsSound.BufferOut         =  0;
-  dSoundInit();
+  if (!Hal_Sound_RefAdd())
+      Hal_General_AbnormalExit("Cannot initialize sound output");
 }
 
 void      cSoundCtrl(void)
@@ -73,6 +77,8 @@ void      cSoundCtrl(void)
   ULONG   Length;
   UBYTE   Header[FILEHEADER_LENGTH];
   UBYTE   In,Out,Tmp;
+
+  Hal_Sound_Tick();
 
   In  = VarsSound.BufferIn;
   Out = VarsSound.BufferOut;
@@ -105,14 +111,14 @@ void      cSoundCtrl(void)
 
       if ((SOUND_TONE & IOMapSound.Mode))
       {
-        dSoundFreq(IOMapSound.Freq,IOMapSound.Duration,IOMapSound.Volume);
+        Hal_Sound_StartTone(IOMapSound.Freq, IOMapSound.Duration, IOMapSound.Volume);
         IOMapSound.State  = SOUND_FREQ;
       }
       else
       {
         if (IOMapSound.Flags & SOUND_RUNNING)
         {
-          dSoundStop();
+          Hal_Sound_Stop();
           IOMapSound.Flags  &= ~SOUND_RUNNING;
         }
         VarsSound.File = pMapLoader->pFunc(OPENREAD,SoundFilename,NULL,&Length);
@@ -135,19 +141,18 @@ void      cSoundCtrl(void)
               {
                 VarsSound.SampleRate  = ((UWORD)Header[4] << 8) + (UWORD)Header[5];
               }
-              dSoundVolume(IOMapSound.Volume);
-              if (FileFormat == FILEFORMAT_SOUND_COMPRESSED)
-                Length = SOUNDBUFFERSIZE_ADPCM;
-              else
-                Length = SOUNDBUFFERSIZE;
+              Length = BUFFER_SIZE(FileFormat);
               pMapLoader->pFunc(READ,(UBYTE*)&VarsSound.File,VarsSound.Buffer[In],&Length);
               VarsSound.Length[In] = (UWORD)Length;
+              if (FileFormat == FILEFORMAT_SOUND_COMPRESSED)
+                  cSoundDecodeAdpcm(In);
               In++;
               if (In >= SOUNDBUFFERS)
               {
                 In = 0;
               }
               IOMapSound.State  = SOUND_BUSY;
+              VarsSound.AdpcmState = ADPCM_START;
             }
             else
             {
@@ -183,24 +188,35 @@ void      cSoundCtrl(void)
       {
         if ((FILEFORMAT_SOUND == FileFormat) || (FILEFORMAT_SOUND_COMPRESSED == FileFormat))
         {
-          if (dSoundStart(VarsSound.Buffer[Out],VarsSound.Length[Out],VarsSound.SampleRate,(UBYTE)(FileFormat & 0x00FF)) == TRUE)
+          int result = Hal_Sound_StartPcm(VarsSound.Buffer[Out],
+                                          VarsSound.Length[Out],
+                                          VarsSound.SampleRate,
+                                          IOMapSound.Volume);
+          if (result == SOUND_RESULT_SENT)
           {
             Out++;
             if (Out >= SOUNDBUFFERS)
             {
               Out = 0;
             }
+          } else if (result == SOUND_RESULT_ERROR) {
+              fputs("ERR: cannot send pcm\n", stderr);
           }
         }
         else
         {
-          if (dSoundTone(VarsSound.Buffer[Out],VarsSound.Length[Out],IOMapSound.Volume) == TRUE)
+          int result = Hal_Sound_StartMelody(VarsSound.Buffer[Out],
+                                             VarsSound.Length[Out],
+                                             IOMapSound.Volume);
+          if (result == SOUND_RESULT_SENT)
           {
             Out++;
             if (Out >= SOUNDBUFFERS)
             {
               Out = 0;
             }
+          } else if (result == SOUND_RESULT_ERROR) {
+              fputs("ERR: cannot send melody\n", stderr);
           }
         }
       }
@@ -221,10 +237,7 @@ void      cSoundCtrl(void)
         }
         if (Tmp != Out)
         {
-          if (FileFormat == FILEFORMAT_SOUND_COMPRESSED)
-            Length = SOUNDBUFFERSIZE_ADPCM;
-          else
-            Length = SOUNDBUFFERSIZE;
+          Length = BUFFER_SIZE(FileFormat);
           Handle = cSoundFile(READ,(UBYTE*)&VarsSound.File,VarsSound.Buffer[In],&Length);
           if ((Handle & 0x8000))
           {
@@ -239,19 +252,19 @@ void      cSoundCtrl(void)
               {
                 cSoundFile(CLOSE,(UBYTE*)&VarsSound.File,NULL,NULL);
                 VarsSound.File = cSoundFile(OPENREAD,SoundFilename,NULL,&Length);
-                if (FileFormat == FILEFORMAT_SOUND_COMPRESSED)
-                  Length = SOUNDBUFFERSIZE_ADPCM;
-                else
-                  Length = SOUNDBUFFERSIZE;
+                Length = FILEHEADER_LENGTH;
                 cSoundFile(READ,(UBYTE*)&VarsSound.File,Header,&Length);
-                Length = SOUNDBUFFERSIZE;
+                Length = BUFFER_SIZE(FileFormat);
                 cSoundFile(READ,(UBYTE*)&VarsSound.File,VarsSound.Buffer[In],&Length);
                 VarsSound.Length[In] = (UWORD)Length;
+                VarsSound.AdpcmState = ADPCM_START;
               }
             }
           }
           if (VarsSound.Length[In] != 0)
           {
+            if (FileFormat == FILEFORMAT_SOUND_COMPRESSED)
+              cSoundDecodeAdpcm(In);
             In++;
             if (In >= SOUNDBUFFERS)
             {
@@ -276,11 +289,11 @@ void      cSoundCtrl(void)
     case SOUND_FREQ :
     {
       IOMapSound.Flags |= SOUND_RUNNING;
-      if (dSoundReady() == TRUE)
+      if (Hal_Sound_ToneFinished())
       {
         if (SOUND_LOOP & IOMapSound.Mode)
         {
-          dSoundFreq(IOMapSound.Freq,IOMapSound.Duration,IOMapSound.Volume);
+          Hal_Sound_StartTone(IOMapSound.Freq, IOMapSound.Duration, IOMapSound.Volume);
         }
         else
         {
@@ -293,7 +306,7 @@ void      cSoundCtrl(void)
 
     case SOUND_STOP :
     {
-      dSoundStop();
+      Hal_Sound_Stop();
       if (!(VarsSound.File & 0x8000))
       {
         pMapLoader->pFunc(CLOSE,(UBYTE*)&VarsSound.File,NULL,NULL);
@@ -311,8 +324,29 @@ void      cSoundCtrl(void)
   VarsSound.BufferOut = Out;
 }
 
+void cSoundDecodeAdpcm(UBYTE bufferNo) {
+    UWORD inLength = VarsSound.Length[bufferNo];
+    if (inLength > SOUNDBUFFERSIZE/2)
+        inLength = SOUNDBUFFERSIZE/2;
+    UWORD outLength = inLength * 2;
+
+    UBYTE tmpBuffer[SOUNDBUFFERSIZE];
+
+    UBYTE *inPtr = &VarsSound.Buffer[bufferNo][0];
+    UBYTE *outPtr = &tmpBuffer[0];
+    while (inLength) {
+        DecodeADPCM(*inPtr, outPtr, &VarsSound.AdpcmState);
+        inPtr += 1;
+        outPtr += 2;
+        inLength--;
+    }
+
+    memcpy(&VarsSound.Buffer[bufferNo][0], tmpBuffer, outLength);
+    VarsSound.Length[bufferNo] = outLength;
+}
 
 void      cSoundExit(void)
 {
-  dSoundExit();
+  Hal_Sound_RefDel();
 }
+
