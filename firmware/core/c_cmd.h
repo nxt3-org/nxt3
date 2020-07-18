@@ -287,6 +287,8 @@ typedef struct
 #define NOT_AN_OFFSET 0xFFFF
 //Check for legal index into DVA
 #define IS_DV_INDEX_SANE(X) (((X) > 0) && ((X) < DV_ARRAY[0].Count))
+//Check for uninitialized array
+#define IS_DV_ALLOCATED(idx) (DV_ARRAY[(idx)].Offset != NOT_AN_OFFSET)
 
 //
 // Message Queuing
