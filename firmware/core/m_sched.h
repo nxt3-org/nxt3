@@ -12,10 +12,6 @@
 // Platform        C
 //
 
-
-/* Defines related to loader */
-#define   MAX_HANDLES                   16
-
 enum
 {
   NOS_OF_AVR_OUTPUTS  = 4,

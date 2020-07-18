@@ -19,6 +19,8 @@
 #ifndef   MODULE_HEADER
 #define   MODULE_HEADER
 
+#include "hal_errorcodes.h"
+
 #define   FILENAME_LENGTH         19    // zero termination not included
 #define   FILEHEADER_LENGTH       8     // all simple file headers
 #define   DISPLAYLINE_LENGTH      16    // zero termination not included
@@ -32,43 +34,6 @@
 #define   TXT_DATA_EXT            "log" // Datalog filename extension
 #define   TXT_SYS_EXT             "sys" // System filename extension      (hidden)
 #define   TXT_TMP_EXT             "tmp" // Temporary filename extension   (hidden)
-
-
-/* Error codes from then Loader */
-enum
-{
-  SUCCESS             = 0x0000,
-  INPROGRESS          = 0x0001,
-  REQPIN              = 0x0002,
-  NOMOREHANDLES       = 0x8100,
-  NOSPACE             = 0x8200,
-  NOMOREFILES         = 0x8300,
-  EOFEXSPECTED        = 0x8400,
-  ENDOFFILE           = 0x8500,
-  NOTLINEARFILE       = 0x8600,
-  FILENOTFOUND        = 0x8700,
-  HANDLEALREADYCLOSED = 0x8800,
-  NOLINEARSPACE       = 0x8900,
-  UNDEFINEDERROR      = 0x8A00,
-  FILEISBUSY          = 0x8B00,
-  NOWRITEBUFFERS      = 0x8C00,
-  APPENDNOTPOSSIBLE   = 0x8D00,
-  FILEISFULL          = 0x8E00,
-  FILEEXISTS          = 0x8F00,
-  MODULENOTFOUND      = 0x9000,
-  OUTOFBOUNDERY       = 0x9100,
-  ILLEGALFILENAME     = 0x9200,
-  ILLEGALHANDLE       = 0x9300,
-  BTBUSY              = 0x9400,
-  BTCONNECTFAIL       = 0x9500,
-  BTTIMEOUT           = 0x9600,
-  FILETX_TIMEOUT      = 0x9700,
-  FILETX_DSTEXISTS    = 0x9800,
-  FILETX_SRCMISSING   = 0x9900,
-  FILETX_STREAMERROR  = 0x9A00,
-  FILETX_CLOSEERROR   = 0x9B00,
-  INVALIDSEEK         = 0x9C00
-};
 
 
 /* interface between comm and BC4           */

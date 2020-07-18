@@ -19,6 +19,7 @@
 #include  "stdconst.h"
 #include  "m_sched.h"
 #include  "d_usb.h"
+#include  "hal_filesystem.h"
 
 static    UBYTE UsbHandleList[MAX_HANDLES];
 static    UBYTE UsbHandleCnt;

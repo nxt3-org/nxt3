@@ -15,6 +15,8 @@
 #ifndef   C_LOADER
 #define   C_LOADER
 
+#include "hal_filesystem.h"
+
 enum
 {
   LOADER_BUSY,
@@ -25,9 +27,8 @@ enum
 
 typedef   struct
 {
-  UBYTE   ModSearchStr[FILENAME_LENGTH + 1];
+  search_query_t ModSearch;
   UBYTE   ModSearchIndex;
-  UBYTE   ModSearchType;
   UBYTE   UsbStatus;
   UBYTE   IoMapHandle;
   UBYTE   Resizing;

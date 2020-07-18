@@ -15,6 +15,8 @@
 #ifndef   CLOADER_IOM
 #define   CLOADER_IOM
 
+#include <stdint.h>
+
 #define   pMapLoader ((IOMAPLOADER*)(pHeaders[ENTRY_LOADER]->pIOMap))
 
 //Version numbers are two bytes, MAJOR.MINOR (big-endian)
@@ -90,7 +92,7 @@ typedef UWORD LOADER_STATUS;
 typedef   struct
 {
   UWORD   (*pFunc)(UBYTE, UBYTE *, UBYTE *, ULONG *);
-  ULONG   FreeUserFlash;
+  uint32_t   FreeUserFlash;
 }IOMAPLOADER;
 
 

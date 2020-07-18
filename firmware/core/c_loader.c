@@ -16,7 +16,8 @@
 #include  "modules.h"
 #include  "c_loader.iom.h"
 #include  "c_ioctrl.iom.h"
-#include  "d_loader.h"
+#include  "hal_general.h"
+#include  "hal_filesystem.h"
 #include  "c_loader.h"
 #include <string.h>
 
@@ -42,7 +43,7 @@ UWORD     cLoaderFileRq(UBYTE Cmd, UBYTE *pFileName, UBYTE *pBuffer, ULONG *pLen
 UWORD     cLoaderGetIoMapInfo(ULONG ModuleId, UBYTE *pIoMap, UWORD *pIoMapSize);
 UWORD     cLoaderFindModule(UBYTE *pBuffer);
 void      cLoaderGetModuleName(UBYTE *pDst, UBYTE *pModule);
-UWORD     cLoaderCreateFile(UBYTE *pFileName, ULONG *pLength, UBYTE bLinear, UBYTE fType);
+UWORD     cLoaderCreateFile(UBYTE *pFileName, ULONG *pLength);
 UWORD     cLoaderRenameFile(UBYTE *pFileName, UBYTE *pBuffer, ULONG *pLength);
 UWORD     cLoaderOpenRead(UBYTE *pFileName, UBYTE *pBuffer, ULONG *pLength, UBYTE bLinear);
 UWORD     cLoaderDeleteFile(UBYTE *pFileName);
@@ -55,159 +56,94 @@ void      cLoaderInit(void* pHeader)
   VarsLoader.IoMapHandle  = FALSE;
   VarsLoader.Resizing     = FALSE;
   pHeaders = pHeader;
-  dLoaderInit();
-  IOMapLoader.FreeUserFlash = dLoaderReturnFreeUserFlash();
+  if (!Hal_Fs_RefAdd())
+      Hal_General_AbnormalExit("Cannot initialize file system");
+
+  Hal_Fs_GetFreeStorage(&IOMapLoader.FreeUserFlash);
 }
 
 void      cLoaderCtrl(void)
 {
-  if (VarsLoader.Resizing)
-  {
-    // keep resizing the file currently in the file resize operation
-    // copy 1024 bytes from old file handle to new file handle
-    // if no more bytes to copy then set Resizing to FALSE,
-    // close both files, and delete the old file.
-  }
 }
 
-UWORD cLoaderCreateFile(UBYTE *pFileName, ULONG *pLength, UBYTE bLinear, UBYTE fType)
+UWORD cLoaderCreateFile(UBYTE *pFileName, ULONG *pLength)
 {
-  UWORD ReturnState;
-  /* This is to create a new file */
-  ReturnState = dLoaderCreateFileHeader(*pLength, pFileName, bLinear, fType);
-  if (0x8000 <= ReturnState)
-  {
-    dLoaderCloseHandle(ReturnState);
+  errhnd_t state = Hal_Fs_CreateWrite((const char *) pFileName, *pLength);
+  if (FS_ISERR(state)) {
+    Hal_Fs_Close(state);
+  } else {
+    Hal_Fs_GetFreeStorage(&IOMapLoader.FreeUserFlash);
   }
-  else
-  {
-    IOMapLoader.FreeUserFlash = dLoaderReturnFreeUserFlash();
-  }
-  return ReturnState;
+  return state;
 }
 
 UWORD cLoaderRenameFile(UBYTE *pFileName, UBYTE *pBuffer, ULONG *pLength)
 {
-  UWORD ReturnState;
-  UBYTE FoundName[FILENAME_LENGTH + 1];
+  if (!Hal_Fs_CheckForbiddenFilename((const char*) pFileName))
+      return ILLEGALFILENAME;
+  if (!Hal_Fs_CheckForbiddenFilename((const char*) pBuffer))
+      return ILLEGALFILENAME;
 
-  /* Check for file exists*/
-  ReturnState = dLoaderFind(pBuffer, FoundName, pLength, pLength, (UBYTE) SEARCHING);
-  dLoaderCloseHandle(LOADER_HANDLE(ReturnState));
-  if (FILENOTFOUND == LOADER_ERR(ReturnState))
-  {
-    ReturnState = dLoaderFind(pFileName, FoundName, pLength, pLength, (UBYTE) SEARCHING);
-    if (ReturnState < 0x8000)
-    {
-      ReturnState = dLoaderCheckFiles((UBYTE) ReturnState);
-      if (ReturnState < 0x8000)
-      {
-        dLoaderRenameFile((UBYTE) ReturnState, pBuffer);
-      }
-    }
-    dLoaderCloseHandle(LOADER_HANDLE(ReturnState));
+  /* check if dst file exists */
+  errhnd_t hnd = Hal_Fs_Locate((char*) pBuffer, NULL, NULL);
+  Hal_Fs_Close(hnd);
+  if (FILENOTFOUND != FS_ERR(hnd)) {
+    return SUCCESS == LOADER_ERR(hnd) ? FILEEXISTS : FS_ERR(hnd);
   }
-  else
-  {
-    if (SUCCESS == LOADER_ERR(ReturnState))
-    {
-      ReturnState |= FILEEXISTS;
-    }
+
+  hnd = Hal_Fs_Locate((char *)pFileName, NULL, NULL);
+  if (FS_ISERR(hnd)) {
+    Hal_Fs_Close(hnd);
+    return hnd;
   }
-  return ReturnState;
+
+  error_t err = Hal_Fs_CheckHandleIsExclusive(hnd, true);
+  if (FS_ISERR(err)) {
+    Hal_Fs_Close(hnd);
+    return hnd | err;
+  }
+
+  err = Hal_Fs_RenameFile(hnd, (const char *) pBuffer);
+  Hal_Fs_Close(hnd);
+  return hnd | err;
 }
 
 UWORD cLoaderOpenRead(UBYTE *pFileName, UBYTE *pBuffer, ULONG *pLength, UBYTE bLinear)
 {
-  UWORD ReturnState;
-  if (bLinear)
-    ReturnState = dLoaderGetFilePtr(pFileName, pBuffer, pLength);
+  error_t err;
+  errhnd_t hnd = Hal_Fs_Locate((char*) pFileName, NULL, NULL);
+  if (FS_ISERR(hnd))
+      return hnd;
+
+  if (!bLinear)
+    err = Hal_Fs_OpenRead(hnd);
   else
-    ReturnState = dLoaderOpenRead(pFileName, pLength);
-  if (0x8000 <= ReturnState)
-  {
-    dLoaderCloseHandle(ReturnState);
+    err = Hal_Fs_MapFile(hnd, (const uint8_t**) pBuffer, (uint32_t*) pLength);
+
+  if (FS_ISERR(err)) {
+    Hal_Fs_Close(hnd);
+    return err;
+  } else {
+    return hnd;
   }
-  return ReturnState;
 }
 
 UWORD cLoaderDeleteFile(UBYTE *pFileName)
 {
-  UWORD ReturnState;
-  ReturnState = dLoaderDelete(pFileName);
-  IOMapLoader.FreeUserFlash = dLoaderReturnFreeUserFlash();
-  return ReturnState;
+  errhnd_t hnd = Hal_Fs_Locate((const char*) pFileName, NULL, NULL);
+  if (!FS_ISERR(hnd))
+      hnd = Hal_Fs_DeleteFile(FS_HND(hnd));
+  Hal_Fs_GetFreeStorage(&IOMapLoader.FreeUserFlash);
+  return hnd;
 }
 
 UWORD cLoaderResizeFile(UBYTE *pFileName, ULONG pLength)
 {
-  UWORD ReturnState = SUCCESS;
-  /*
-    All that this method can do is start the process of
-    resizing a file.  To do that we will
-    a) rename the file
-    b) open old file for reading
-    c) create new file for writing
-    d) store both handles in VarsLoader & set resizing flag
-    e) if any errors occur in a, b, or c then restore original file
-    f) return LOADER_BUSY (maybe?)
-  */
-/*
-  // rename file to _tmpoldname
-  strcat __frsFRArgs.NewFilename, '_tmp', __frsOldName
-  mov __frsFRArgs.OldFilename, __frsOldName
-  syscall FileRename, __frsFRArgs
-  mov __frsResult, __frsFRArgs.Result
-  brtst NEQ, __frsEnd, __frsResult
-  // old file has been renamed successfully
-  mov __frsFOReadArgs.Filename, __frsFRArgs.NewFilename
-  syscall FileOpenRead, __frsFOReadArgs
-  mov __frsResult, __frsFOReadArgs.Result
-  brtst NEQ, __frsOpenReadFailed, __frsResult
-  // renamed file is open for reading
-  mov __frsFOWriteArgs.Filename, __frsOldName
-  mov __frsFOWriteArgs.Length, __frsNewSize
-  syscall FileOpenWrite, __frsFOWriteArgs
-  mov __frsResult, __frsFOWriteArgs.Result
-  brtst NEQ, __frsOpenWriteFailed, __frsResult
-  // both files are open
-  mov __frsFReadArgs.FileHandle, __frsFOReadArgs.FileHandle
-  mov __frsFWriteArgs.FileHandle, __frsFOWriteArgs.FileHandle
-__frsCopyLoop:
-  set __frsFReadArgs.Length, 1024
-  syscall FileRead, __frsFReadArgs
-  brtst NEQ, __frsEndLoop, __frsFReadArgs.Result
-  brtst LTEQ, __frsEndLoop, __frsFReadArgs.Length
-  mov __frsFWriteArgs.Buffer, __frsFReadArgs.Buffer
-  mov __frsFWriteArgs.Length, __frsFReadArgs.Length
-  syscall FileWrite, __frsFWriteArgs
-  brtst NEQ, __frsEndLoop, __frsFWriteArgs.Result
-  jmp __frsCopyLoop
-__frsEndLoop:
-  // close read file
-  mov __frsFCArgs.FileHandle, __frsFOReadArgs.FileHandle
-  syscall FileClose, __frsFCArgs
-  // close write file
-  mov __frsFCArgs.FileHandle, __frsFOWriteArgs.FileHandle
-  syscall FileClose, __frsFCArgs
-  // delete read file
-  mov __frsFDArgs.Filename, __frsFOReadArgs.Filename
-  syscall FileDelete, __frsFDArgs
-  jmp __frsEnd
-__frsOpenWriteFailed:
-  // close read file
-  mov __frsFCArgs.FileHandle, __frsFOReadArgs.FileHandle
-  syscall FileClose, __frsFCArgs
-//  jmp __frsEnd
-__frsOpenReadFailed:
-  // if the open read failed rename tmp back to original and exit
-  mov __frsFRArgs.OldFilename, __frsFRArgs.NewFilename
-  mov __frsFRArgs.NewFilename, __frsOldName
-  syscall FileRename, __frsFRArgs
-__frsEnd:
-  return
-*/
-  return ReturnState;
+  errhnd_t hnd = Hal_Fs_Locate((const char*) pFileName, NULL, NULL);
+  if (!FS_ISERR(hnd))
+    hnd = Hal_Fs_Resize(FS_HND(hnd), pLength);
+  Hal_Fs_GetFreeStorage(&IOMapLoader.FreeUserFlash);
+  return hnd;
 }
 
 UWORD     cLoaderFileRq(UBYTE Cmd, UBYTE *pFileName, UBYTE *pBuffer, ULONG *pLength)
@@ -220,112 +156,112 @@ UWORD     cLoaderFileRq(UBYTE Cmd, UBYTE *pFileName, UBYTE *pBuffer, ULONG *pLen
   {
     case OPENREAD:
     {
-      ReturnState = cLoaderOpenRead(pFileName, pBuffer, pLength, FALSE);
+      ReturnState = cLoaderOpenRead(pFileName, pBuffer, pLength, false);
     }
     break;
     case OPENREADLINEAR:
     {
-      ReturnState = cLoaderOpenRead(pFileName, pBuffer, pLength, TRUE);
+      ReturnState = cLoaderOpenRead(pFileName, pBuffer, pLength, true);
     }
     break;
     case OPENWRITE:
-    {
-
-      /* This is to create a new file */
-      ReturnState = cLoaderCreateFile(pFileName, pLength, (UBYTE) NONLINEAR, SYSTEMFILE);
-    }
-    break;
     case OPENWRITELINEAR:
-    {
-      ReturnState = cLoaderCreateFile(pFileName, pLength, (UBYTE) LINEAR, SYSTEMFILE);
-    }
-    break;
     case OPENWRITEDATA:
     {
-      ReturnState = cLoaderCreateFile(pFileName, pLength, (UBYTE) NONLINEAR, DATAFILE);
+      /* This is to create a new file */
+      ReturnState = cLoaderCreateFile(pFileName, pLength);
     }
     break;
     case OPENAPPENDDATA:
     {
-      ReturnState = dLoaderOpenAppend(pFileName, pLength);
-      if (LOADER_ERR(ReturnState) != SUCCESS)
-      {
-        dLoaderCloseHandle(ReturnState);
+      errhnd_t hnd = Hal_Fs_Locate((const char*) pFileName, NULL, (uint32_t*) pLength);
+      if (!FS_ISERR(hnd)) {
+          error_t err = Hal_Fs_OpenAppend(hnd);
+          if (FS_ISERR(err))
+              Hal_Fs_Close(hnd);
+          ReturnState = hnd | err;
+      } else {
+          ReturnState = hnd;
       }
     }
     break;
     case CLOSE:
     {
-      ReturnState = dLoaderCloseHandle(*pFileName);
+      ReturnState = Hal_Fs_Close(*pFileName);
     }
     break;
     case CROPDATAFILE:
     {
-      ReturnState = dLoaderCropDatafile(*pFileName);
-      IOMapLoader.FreeUserFlash = dLoaderReturnFreeUserFlash();
+      handle_t hnd = *pFileName;
+      error_t err;
+      err = Hal_Fs_Truncate(hnd);
+      ReturnState = hnd | err;
+      Hal_Fs_GetFreeStorage(&IOMapLoader.FreeUserFlash);
     }
     break;
     case RESIZEDATAFILE:
     {
       ReturnState = cLoaderResizeFile(pFileName, *pLength);
-      IOMapLoader.FreeUserFlash = dLoaderReturnFreeUserFlash();
+      Hal_Fs_GetFreeStorage(&IOMapLoader.FreeUserFlash);
     }
     break;
     case SEEKFROMSTART:
     case SEEKFROMCURRENT:
     case SEEKFROMEND:
     {
-      // *pFileName is the handle, *pLength is the offset, Cmd-SEEKFROMSTART is the origin
-      ReturnState = dLoaderSeek(*pFileName, *(SLONG*)pLength, Cmd-SEEKFROMSTART);
+      handle_t hnd = *pFileName;
+      error_t err;
+      err = Hal_Fs_Seek(hnd, *(int32_t*)pLength, Cmd-SEEKFROMSTART);
+      ReturnState = hnd | err;
     }
     break;
     case FILEPOSITION:
     {
-      // *pFileName is the handle, pLength is the returned file position
-      ReturnState = dLoaderTell(*pFileName, pLength);
+        handle_t hnd = *pFileName;
+        error_t err;
+        err = Hal_Fs_Tell(hnd, (uint32_t*)pLength);
+        ReturnState = hnd | err;
     }
     break;
     case READ:
     {
-      ReturnState = dLoaderRead(*pFileName, pBuffer, pLength);
+      handle_t hnd = *pFileName;
+      error_t err;
+      err = Hal_Fs_Read(hnd, pBuffer, (uint32_t*)pLength);
+      ReturnState = hnd | err;
     }
     break;
     case WRITE:
     {
-      ReturnState = dLoaderWriteData(*pFileName, pBuffer, (UWORD*)pLength);
+      handle_t hnd = *pFileName;
+      error_t err;
+      err = Hal_Fs_Write(hnd, pBuffer, (uint32_t*)pLength);
+      ReturnState = hnd | err;
     }
     break;
     case FINDFIRST:
     {
-      ULONG DataLength;
-
-      ReturnState = dLoaderFind(pFileName, pBuffer, pLength, &DataLength, (UBYTE) SEARCHING);
-      if (ReturnState >= 0x8000)
-      {
-        dLoaderCloseHandle(ReturnState);
+      ReturnState = Hal_Fs_Locate((const char*) pFileName, (char*) pBuffer, (uint32_t*)pLength);
+      if (FS_ISERR(ReturnState)) {
+          Hal_Fs_Close(ReturnState);
       }
     }
     break;
     case FINDNEXT:
     {
-      UWORD Handle;
-      ULONG DataLength;
-
-      Handle = *pFileName;
-      ReturnState = dLoaderFindNext(Handle, pBuffer, pLength, &DataLength);
+      handle_t hnd = *pFileName;
+      ReturnState = Hal_Fs_LocateNext(hnd, (char*) pBuffer, (uint32_t*) pLength);
     }
     break;
     case DELETE:
     {
       ReturnState = cLoaderDeleteFile(pFileName);
-
     }
     break;
     case DELETEUSERFLASH:
     {
-      dLoaderDeleteAllFiles();
-      IOMapLoader.FreeUserFlash = dLoaderReturnFreeUserFlash();
-
+      ReturnState = Hal_Fs_DeleteAll();
+      Hal_Fs_GetFreeStorage(&IOMapLoader.FreeUserFlash);
     }
     break;
 
@@ -335,7 +271,7 @@ UWORD     cLoaderFileRq(UBYTE Cmd, UBYTE *pFileName, UBYTE *pBuffer, ULONG *pLen
       {
         VarsLoader.IoMapHandle    = TRUE;
         VarsLoader.ModSearchIndex = 0;
-        dLoaderInsertSearchStr(VarsLoader.ModSearchStr, pFileName, &(VarsLoader.ModSearchType));
+        Hal_Fs_ParseQuery((const char*) pFileName, &VarsLoader.ModSearch);
         ReturnState = cLoaderFindModule(pBuffer);
       }
       else
@@ -519,12 +455,10 @@ UWORD     cLoaderFindModule(UBYTE *pBuffer)
   {
     if (pHeaders[Tmp] != 0)
     {
-
       cLoaderGetModuleName(ModuleName, ((*(pHeaders[Tmp])).ModuleName));
-      if (SUCCESS == dLoaderCheckName(ModuleName, VarsLoader.ModSearchStr, VarsLoader.ModSearchType))
+      if (SUCCESS == Hal_Fs_CheckQuery((const char*) ModuleName, &VarsLoader.ModSearch))
       {
-
-        dLoaderCopyFileName(pBuffer, ModuleName);
+        strncpy((char*) pBuffer, (const char*) ModuleName, FS_NAME_MAX_CHARS);
 
         pBuffer[FILENAME_SIZE] = (UBYTE) ((*(pHeaders[Tmp])).ModuleID);
         pBuffer[FILENAME_SIZE + 1] = (UBYTE)(((*(pHeaders[Tmp])).ModuleID) >> 8);
@@ -550,28 +484,12 @@ UWORD     cLoaderFindModule(UBYTE *pBuffer)
 
 void      cLoaderGetModuleName(UBYTE *pDst, UBYTE *pModule)
 {
-  UBYTE   Tmp;
-
-  for(Tmp = 0; Tmp < FILENAME_SIZE; Tmp++)
-  {
-    if (0 != pModule[Tmp])
-    {
-      pDst[Tmp] = pModule[Tmp];
-    }
-    else
-    {
-      pDst[Tmp++] = '.';
-      pDst[Tmp++] = 'm';
-      pDst[Tmp++] = 'o';
-      pDst[Tmp++] = 'd';
-      pDst[Tmp] = '\0';
-      Tmp = FILENAME_SIZE;
-    }
-  }
+  const char *modName = (const char *) pModule;
+  char *nameEnd = stpncpy((char*) pDst, modName, FS_NAME_MAX_CHARS);
+  stpncpy(nameEnd, ".mod", FS_NAME_MAX_CHARS - (nameEnd - modName));
 }
 
 void      cLoaderExit(void)
 {
+    Hal_Fs_RefDel();
 }
-
-
