@@ -27,7 +27,7 @@ add_executable(nxt3.elf
 )
 
 target_include_directories(nxt3.elf PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(nxt3.elf NXT3::Hal NXT3::Hal::Lms2012 -lm -lrt)
+target_link_libraries(nxt3.elf nxthal nxthal_lms2012 -lm -lrt)
 
 set_target_properties(nxt3.elf PROPERTIES
     C_STANDARD 99
