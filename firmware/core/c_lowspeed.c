@@ -17,275 +17,301 @@
 #include  "c_lowspeed.iom.h"
 #include  "c_input.iom.h"
 #include  "c_lowspeed.h"
-#include  "d_lowspeed.h"
 #include <string.h>
+#include <hal_general.h>
 
-static    IOMAPLOWSPEED   IOMapLowSpeed;
-static    VARSLOWSPEED    VarsLowSpeed;
-static    HEADER          **pHeaders;
+static IOMAPLOWSPEED IOMapLowSpeed;
+static VARSLOWSPEED  VarsLowSpeed;
+static HEADER        **pHeaders;
 
-const UBYTE LOWSPEED_CH_NUMBER[4] = {0x01, 0x02, 0x04, 0x08};
-
-const     HEADER          cLowSpeed =
-{
-  0x000B0001L,
-  "Low Speed",
-  cLowSpeedInit,
-  cLowSpeedCtrl,
-  cLowSpeedExit,
-  (void *)&IOMapLowSpeed,
-  (void *)&VarsLowSpeed,
-  (UWORD)sizeof(IOMapLowSpeed),
-  (UWORD)sizeof(VarsLowSpeed),
-  0x0000                      //Code size - not used so far
+const HEADER cLowSpeed = {
+    0x000B0001L,
+    "Low Speed",
+    cLowSpeedInit,
+    cLowSpeedCtrl,
+    cLowSpeedExit,
+    (void *) &IOMapLowSpeed,
+    (void *) &VarsLowSpeed,
+    (UWORD) sizeof(IOMapLowSpeed),
+    (UWORD) sizeof(VarsLowSpeed),
+    0x0000                      //Code size - not used so far
 };
 
-SBYTE      cLowSpeedFastI2C(UBYTE ch);
+SBYTE cLowSpeedFastI2C(UBYTE ch);
 
-void      cLowSpeedInit(void* pHeader)
-{
-  pHeaders        = pHeader;
+void cLowSpeedInit(void *pHeader) {
+    pHeaders = pHeader;
 
-  dLowSpeedInit();
-  IOMapLowSpeed.State = COM_CHANNEL_NONE_ACTIVE;
-  IOMapLowSpeed.NoRestartOnRead = COM_CHANNEL_RESTART_ALL;
-  IOMapLowSpeed.Speed = COM_CHANNEL_NONE_FAST;
-  IOMapLowSpeed.pFunc = &cLowSpeedFastI2C;
-  VarsLowSpeed.TimerState = TIMER_STOPPED;
+    IOMapLowSpeed.Active        = 0x00;
+    IOMapLowSpeed.NoRestartMask = 0x00;
+    IOMapLowSpeed.FastMask      = 0x00;
+    IOMapLowSpeed.pFunc         = &cLowSpeedFastI2C;
+    if (!Hal_IicMgr_RefAdd())
+        Hal_General_AbnormalExit("Cannot initialize I2C port manager");
 }
 
-void      cLowSpeedCompleteRead(UBYTE ch)
-{
-  for (VarsLowSpeed.InputBuf[ch].OutPtr = 0; VarsLowSpeed.InputBuf[ch].OutPtr < IOMapLowSpeed.InBuf[ch].BytesToRx; VarsLowSpeed.InputBuf[ch].OutPtr++)
-  {
-    IOMapLowSpeed.InBuf[ch].Buf[IOMapLowSpeed.InBuf[ch].InPtr] = VarsLowSpeed.InputBuf[ch].Buf[VarsLowSpeed.InputBuf[ch].OutPtr];
-    IOMapLowSpeed.InBuf[ch].InPtr++;
-    if (IOMapLowSpeed.InBuf[ch].InPtr >= SIZE_OF_LSBUF)
-    {
-      IOMapLowSpeed.InBuf[ch].InPtr = 0;
+void cLowSpeedLoadWriteBuffer(UBYTE ch) {
+    VarsLowSpeed.OutputBuf[ch].OutPtr = 0;
+    VarsLowSpeed.OutputBuf[ch].InPtr  = IOMapLowSpeed.OutBuf[ch].InPtr;
+
+    memcpy(VarsLowSpeed.OutputBuf[ch].Buf,
+           IOMapLowSpeed.OutBuf[ch].Buf,
+           IOMapLowSpeed.OutBuf[ch].InPtr);
+
+    IOMapLowSpeed.OutBuf[ch].OutPtr = IOMapLowSpeed.OutBuf[ch].InPtr;
+}
+
+void cLowSpeedCompleteRead(UBYTE ch) {
+    UBYTE *iPos = &VarsLowSpeed.InputBuf[ch].Buf[0];
+    UBYTE *iEnd = &VarsLowSpeed.InputBuf[ch].Buf[IOMapLowSpeed.InBuf[ch].BytesToRx];
+
+    UBYTE *oBeg = &IOMapLowSpeed.InBuf[ch].Buf[0];
+    UBYTE *oPos = &IOMapLowSpeed.InBuf[ch].Buf[IOMapLowSpeed.InBuf[ch].InPtr];
+    UBYTE *oWrp = &IOMapLowSpeed.InBuf[ch].Buf[SIZE_OF_LSBUF];
+
+    while (iPos != iEnd) {
+        *oPos = *iPos;
+
+        ++iPos;
+        ++oPos;
+        if (oPos == oWrp)
+            oPos = oBeg;
     }
-    VarsLowSpeed.InputBuf[ch].Buf[VarsLowSpeed.InputBuf[ch].OutPtr] = 0;
-  }
+
+    IOMapLowSpeed.InBuf[ch].InPtr = oPos - oBeg;
 }
 
-void      cLowSpeedLoadWriteBuffer(UBYTE ch)
-{
-  VarsLowSpeed.OutputBuf[ch].OutPtr = 0;
-  memcpy(VarsLowSpeed.OutputBuf[ch].Buf, IOMapLowSpeed.OutBuf[ch].Buf, IOMapLowSpeed.OutBuf[ch].InPtr);
-  VarsLowSpeed.OutputBuf[ch].InPtr = IOMapLowSpeed.OutBuf[ch].InPtr;
-  IOMapLowSpeed.OutBuf[ch].OutPtr = IOMapLowSpeed.OutBuf[ch].InPtr;
-/*
-  VarsLowSpeed.OutputBuf[ch].OutPtr = 0;
-  for (VarsLowSpeed.OutputBuf[ch].InPtr = 0; VarsLowSpeed.OutputBuf[ch].InPtr < IOMapLowSpeed.OutBuf[ch].InPtr; VarsLowSpeed.OutputBuf[ch].InPtr++)
-  {
-    VarsLowSpeed.OutputBuf[ch].Buf[VarsLowSpeed.OutputBuf[ch].InPtr] = IOMapLowSpeed.OutBuf[ch].Buf[IOMapLowSpeed.OutBuf[ch].OutPtr];
-    IOMapLowSpeed.OutBuf[ch].OutPtr++;
-  }
-*/
+void cLowSpeedFinished(UBYTE ch, UBYTE bDone) {
+    IOMapLowSpeed.Active &= ~(1 << ch);
+    if (bDone) {
+        IOMapLowSpeed.ChannelState[ch] = LOWSPEED_IDLE;
+    }
 }
 
-void cLowSpeedFinished(UBYTE ch, UBYTE bDone)
-{
-  IOMapLowSpeed.State = IOMapLowSpeed.State & ~LOWSPEED_CH_NUMBER[ch];
-  if (bDone)
-    IOMapLowSpeed.ChannelState[ch] = LOWSPEED_IDLE;
-  if (IOMapLowSpeed.State == 0)
-  {
-    dLowSpeedStopTimer();
-    VarsLowSpeed.TimerState = TIMER_STOPPED;
-  }
-}
+SBYTE cLowSpeedFastI2C(UBYTE ch) {
+    SBYTE            failCode;
+    hal_iic_result_t result;
 
+    // 0. check for validity
+    if (ch >= 4) {
+        failCode = LOWSPEED_FAST_ERROR_INVALID_PORT;
+        goto failure;
+    }
+    if (!Hal_IicHost_Present(ch)) {
+        failCode = LOWSPEED_FAST_ERROR_FAULT;
+        goto failure;
+    }
 
-SBYTE      cLowSpeedFastI2C(UBYTE ch)
-{
-  cLowSpeedLoadWriteBuffer(ch);
-  SBYTE result = dLowSpeedFastI2C(ch,
-                                  *(VarsLowSpeed.OutputBuf[ch].Buf),
-                                  VarsLowSpeed.OutputBuf[ch].Buf+1,
-                                  VarsLowSpeed.OutputBuf[ch].InPtr-1,
-                                  &(IOMapLowSpeed.InBuf[ch].BytesToRx),
-                                  VarsLowSpeed.InputBuf[ch].Buf);
-  if (result >= 0)
-  {
-    // finally copy the data from the VarsLowSpeed buffer into the IOMapLowSpeed buffer
-    // and update our channel state and mode
-    cLowSpeedCompleteRead(ch);
-    IOMapLowSpeed.Mode[ch] = LOWSPEED_DATA_RECEIVED;
-//    IOMapLowSpeed.ChannelState[ch] = LOWSPEED_DONE;
+    // 1. load write payload
+    cLowSpeedLoadWriteBuffer(ch);
+
+    // 2. write it
+    result = Hal_IicDev_Start(VarsLowSpeed.Devices[ch],
+                              VarsLowSpeed.OutputBuf[ch].Buf,
+                              VarsLowSpeed.OutputBuf->InPtr);
+    if (result == HAL_IIC_RESULT_ERROR) {
+        failCode = LOWSPEED_FAST_ERROR_FAULT;
+        goto failure;
+    }
+    if (result == HAL_IIC_RESULT_PROCESSING) {
+        failCode = LOWSPEED_FAST_ERROR_BUSY;
+        goto failure;
+    }
+
+    // 3. read back if needed
+    if (IOMapLowSpeed.InBuf[ch].BytesToRx > 0) {
+        do {
+            result = Hal_IicDev_Poll(VarsLowSpeed.Devices[ch],
+                                     VarsLowSpeed.InputBuf[ch].Buf,
+                                     IOMapLowSpeed.InBuf[ch].BytesToRx);
+        } while (result == HAL_IIC_RESULT_PROCESSING);
+        if (result == HAL_IIC_RESULT_ERROR) {
+            failCode = LOWSPEED_FAST_ERROR_FAULT;
+            memset(VarsLowSpeed.InputBuf[ch].Buf, 0x00, SIZE_OF_LSBUF);
+            VarsLowSpeed.InputBuf[ch].OutPtr = IOMapLowSpeed.InBuf[ch].BytesToRx;
+            goto failure;
+        } else {
+            cLowSpeedCompleteRead(ch);
+        }
+    }
+
+    // 4. finalize
     cLowSpeedFinished(ch, TRUE);
-  }
-  else
-  {
-    IOMapLowSpeed.ChannelState[ch] = LOWSPEED_ERROR;
-    IOMapLowSpeed.ErrorType[ch] = (UBYTE)result;
-  }
-  return result;
+    return LOWSPEED_NO_ERROR;
+failure:
+    cLowSpeedFinished(ch, FALSE);
+    return failCode;
 }
 
-void      cLowSpeedCtrl(void)
-{
-  UBYTE Temp;
-  UBYTE ChannelNumber = 0;
+void cLowSpeedCtrl(void) {
+    Hal_IicMgr_Tick();
 
-  if (IOMapLowSpeed.State != 0)
-  {
-    for (ChannelNumber = 0; ChannelNumber < NO_OF_LOWSPEED_COM_CHANNEL; ChannelNumber++)
-    {
-      //Lowspeed com is activated
-	    switch (IOMapLowSpeed.ChannelState[ChannelNumber])
-	    {
-	      case LOWSPEED_IDLE:
-		    {
-		    }
-		    break;
-
-		    case LOWSPEED_INIT:
-		    {
-		      if ((pMapInput->Inputs[ChannelNumber].SensorType == LOWSPEED) || (pMapInput->Inputs[ChannelNumber].SensorType == LOWSPEED_9V))
-          {
-            if (IOMapLowSpeed.Speed & (COM_CHANNEL_ONE_FAST << ChannelNumber))
-            {
-              cLowSpeedFastI2C(ChannelNumber);
-            }
-            else
-            {
-              if (VarsLowSpeed.TimerState == TIMER_STOPPED)
-              {
-                dLowSpeedStartTimer();
-                VarsLowSpeed.TimerState = TIMER_RUNNING;
-              }
-              IOMapLowSpeed.ChannelState[ChannelNumber] = LOWSPEED_LOAD_BUFFER;
-              IOMapLowSpeed.ErrorType[ChannelNumber] = LOWSPEED_NO_ERROR;
-              VarsLowSpeed.ErrorCount[ChannelNumber] = 0;
-              dLowSpeedInitPins(ChannelNumber);
-            }
-          }
-          else
-          {
-            IOMapLowSpeed.ChannelState[ChannelNumber] = LOWSPEED_ERROR;
-            IOMapLowSpeed.ErrorType[ChannelNumber] = LOWSPEED_CH_NOT_READY;
-          }
-		    }
-		    break;
-
-		    case LOWSPEED_LOAD_BUFFER:
-		    {
-		      if ((pMapInput->Inputs[ChannelNumber].SensorType == LOWSPEED) || (pMapInput->Inputs[ChannelNumber].SensorType == LOWSPEED_9V))
-          {
-            cLowSpeedLoadWriteBuffer(ChannelNumber);
-            if (dLowSpeedSendData(ChannelNumber, VarsLowSpeed.OutputBuf[ChannelNumber].Buf, VarsLowSpeed.OutputBuf[ChannelNumber].InPtr))
-            {
-		          if (IOMapLowSpeed.InBuf[ChannelNumber].BytesToRx != 0)
-              {
-                dLowSpeedReceiveData(ChannelNumber, &VarsLowSpeed.InputBuf[ChannelNumber].Buf[0], IOMapLowSpeed.InBuf[ChannelNumber].BytesToRx, IOMapLowSpeed.NoRestartOnRead);
-                VarsLowSpeed.RxTimeCnt[ChannelNumber] = 0;
-              }
-              IOMapLowSpeed.ChannelState[ChannelNumber] = LOWSPEED_COMMUNICATING;
-			        IOMapLowSpeed.Mode[ChannelNumber] = LOWSPEED_TRANSMITTING;
-		        }
-            else
-            {
-              IOMapLowSpeed.ChannelState[ChannelNumber] = LOWSPEED_ERROR;
-              IOMapLowSpeed.ErrorType[ChannelNumber] = LOWSPEED_CH_NOT_READY;
-            }
-          }
-          else
-          {
-            IOMapLowSpeed.ChannelState[ChannelNumber] = LOWSPEED_ERROR;
-            IOMapLowSpeed.ErrorType[ChannelNumber] = LOWSPEED_CH_NOT_READY;
-          }
-	      }
-		    break;
-
-		    case LOWSPEED_COMMUNICATING:
-		    {
-		      if ((pMapInput->Inputs[ChannelNumber].SensorType == LOWSPEED) || (pMapInput->Inputs[ChannelNumber].SensorType == LOWSPEED_9V))
-          {
-            if (IOMapLowSpeed.Mode[ChannelNumber] == LOWSPEED_TRANSMITTING)
-		        {
-		          Temp = dLowSpeedComTxStatus(ChannelNumber);			// Returns 0x00 if not done, 0x01 if success, 0xFF if error
-
-		          if (Temp == LOWSPEED_COMMUNICATION_SUCCESS)
-		          {
-		            if (IOMapLowSpeed.InBuf[ChannelNumber].BytesToRx != 0)
-                {
-                  IOMapLowSpeed.Mode[ChannelNumber] = LOWSPEED_RECEIVING;
-                }
-                else
-                {
-                  IOMapLowSpeed.Mode[ChannelNumber] = LOWSPEED_DATA_RECEIVED;
-                  IOMapLowSpeed.ChannelState[ChannelNumber] = LOWSPEED_DONE;
-                }
-			        }
-			        if (Temp == LOWSPEED_COMMUNICATION_ERROR)
-			        {
-			          //ERROR in Communication, No ACK received from SLAVE, retry send data 3 times!
-		            VarsLowSpeed.ErrorCount[ChannelNumber]++;
-			          if (VarsLowSpeed.ErrorCount[ChannelNumber] > MAX_RETRY_TX_COUNT)
-			          {
-			            IOMapLowSpeed.ChannelState[ChannelNumber] = LOWSPEED_ERROR;
-                  IOMapLowSpeed.ErrorType[ChannelNumber] = LOWSPEED_TX_ERROR;
-			          }
-			          else
-			          {
-			            IOMapLowSpeed.ChannelState[ChannelNumber] = LOWSPEED_LOAD_BUFFER;
-			          }
-		          }
-		        }
-		        if (IOMapLowSpeed.Mode[ChannelNumber] == LOWSPEED_RECEIVING)
-		        {
-		          VarsLowSpeed.RxTimeCnt[ChannelNumber]++;
-		          if (VarsLowSpeed.RxTimeCnt[ChannelNumber] > LOWSPEED_RX_TIMEOUT)
-		          {
-		            IOMapLowSpeed.ChannelState[ChannelNumber] = LOWSPEED_ERROR;
-                IOMapLowSpeed.ErrorType[ChannelNumber] = LOWSPEED_RX_ERROR;
-		          }
-              Temp = dLowSpeedComRxStatus(ChannelNumber);
-              if (Temp == LOWSPEED_COMMUNICATION_SUCCESS)
-              {
-                cLowSpeedCompleteRead(ChannelNumber);
-                IOMapLowSpeed.Mode[ChannelNumber] = LOWSPEED_DATA_RECEIVED;
-                IOMapLowSpeed.ChannelState[ChannelNumber] = LOWSPEED_DONE;
-              }
-              if (Temp == LOWSPEED_COMMUNICATION_ERROR)
-              {
-                //There was and error in receiving data from the device
-                for (VarsLowSpeed.InputBuf[ChannelNumber].OutPtr = 0; VarsLowSpeed.InputBuf[ChannelNumber].OutPtr < IOMapLowSpeed.InBuf[ChannelNumber].BytesToRx; VarsLowSpeed.InputBuf[ChannelNumber].OutPtr++)
-                {
-                  VarsLowSpeed.InputBuf[ChannelNumber].Buf[VarsLowSpeed.InputBuf[ChannelNumber].OutPtr] = 0;
-                }
-                IOMapLowSpeed.ChannelState[ChannelNumber] = LOWSPEED_ERROR;
-                IOMapLowSpeed.ErrorType[ChannelNumber] = LOWSPEED_RX_ERROR;
-              }
-		        }
-	        }
-          else
-          {
-            IOMapLowSpeed.ChannelState[ChannelNumber] = LOWSPEED_ERROR;
-            IOMapLowSpeed.ErrorType[ChannelNumber] = LOWSPEED_CH_NOT_READY;
-          }
-        }
-	      break;
-
-        case LOWSPEED_ERROR:
-        {
-          cLowSpeedFinished(ChannelNumber, FALSE);
-        }
-        break;
-        case LOWSPEED_DONE:
-	      {
-                cLowSpeedFinished(ChannelNumber, TRUE);
-	      }
-	      break;
-	      default:
-	   	    break;
-	    }
+    int port;
+    for (port = 0; port < NO_OF_LOWSPEED_COM_CH; port++) {
+        if (Hal_IicHost_Present(port))
+            Hal_IicDev_Tick(VarsLowSpeed.Devices[port]);
     }
-  }
+
+    if (IOMapLowSpeed.Active == 0)
+        return;
+
+    hal_iic_result_t result;
+
+    for (port = 0; port < NO_OF_LOWSPEED_COM_CHANNEL; port++) {
+
+        switch (IOMapLowSpeed.ChannelState[port]) {
+        case LOWSPEED_IDLE:
+            break;
+
+        case LOWSPEED_INIT:
+            if (!(pMapInput->Inputs[port].SensorType == LOWSPEED) &&
+                !(pMapInput->Inputs[port].SensorType == LOWSPEED_9V)) {
+                IOMapLowSpeed.ChannelState[port] = LOWSPEED_ERROR;
+                IOMapLowSpeed.ErrorType[port]    = LOWSPEED_CH_NOT_READY;
+                break;
+            }
+
+            if (!Hal_IicHost_Present(port)) {
+                IOMapLowSpeed.ChannelState[port] = LOWSPEED_ERROR;
+                IOMapLowSpeed.ErrorType[port]    = LOWSPEED_CH_NOT_READY;
+                break;
+            }
+
+            if (IOMapLowSpeed.FastMask & (1 << port)) {
+                cLowSpeedFastI2C(port);
+            } else {
+                IOMapLowSpeed.ChannelState[port] = LOWSPEED_LOAD_BUFFER;
+                IOMapLowSpeed.ErrorType[port]    = LOWSPEED_NO_ERROR;
+            }
+            break;
+
+        case LOWSPEED_LOAD_BUFFER:
+            if (!(pMapInput->Inputs[port].SensorType == LOWSPEED) &&
+                !(pMapInput->Inputs[port].SensorType == LOWSPEED_9V)) {
+                IOMapLowSpeed.ChannelState[port] = LOWSPEED_ERROR;
+                IOMapLowSpeed.ErrorType[port]    = LOWSPEED_CH_NOT_READY;
+                break;
+            }
+
+            cLowSpeedLoadWriteBuffer(port);
+
+            result = Hal_IicDev_Start(VarsLowSpeed.Devices[port],
+                                      VarsLowSpeed.OutputBuf[port].Buf,
+                                      VarsLowSpeed.OutputBuf->InPtr);
+
+            if (result == HAL_IIC_RESULT_DONE) {
+                VarsLowSpeed.RxTimeCnt[port]     = 0;
+                IOMapLowSpeed.ChannelState[port] = LOWSPEED_COMMUNICATING;
+                IOMapLowSpeed.Mode[port]         = LOWSPEED_TRANSMITTING;
+
+            } else if (result == HAL_IIC_RESULT_PROCESSING) {
+                IOMapLowSpeed.ChannelState[port] = LOWSPEED_ERROR;
+                IOMapLowSpeed.ErrorType[port]    = LOWSPEED_CH_NOT_READY;
+
+            } else if (result == HAL_IIC_RESULT_ERROR) {
+                IOMapLowSpeed.ChannelState[port] = LOWSPEED_ERROR;
+                IOMapLowSpeed.ErrorType[port]    = LOWSPEED_TX_ERROR;
+            }
+            break;
+
+        case LOWSPEED_COMMUNICATING:
+            if (!(pMapInput->Inputs[port].SensorType == LOWSPEED) &&
+                !(pMapInput->Inputs[port].SensorType == LOWSPEED_9V)) {
+                IOMapLowSpeed.ChannelState[port] = LOWSPEED_ERROR;
+                IOMapLowSpeed.ErrorType[port]    = LOWSPEED_CH_NOT_READY;
+                break;
+            }
+
+            if (IOMapLowSpeed.Mode[port] == LOWSPEED_TRANSMITTING) {
+                if (IOMapLowSpeed.InBuf[port].BytesToRx != 0) {
+                    IOMapLowSpeed.Mode[port] = LOWSPEED_RECEIVING;
+                } else {
+                    IOMapLowSpeed.Mode[port]         = LOWSPEED_DATA_RECEIVED;
+                    IOMapLowSpeed.ChannelState[port] = LOWSPEED_DONE;
+                }
+            }
+
+            if (IOMapLowSpeed.Mode[port] == LOWSPEED_RECEIVING) {
+                VarsLowSpeed.RxTimeCnt[port]++;
+                if (VarsLowSpeed.RxTimeCnt[port] > LOWSPEED_RX_TIMEOUT) {
+                    Hal_IicDev_Cancel(VarsLowSpeed.Devices[port]);
+                    IOMapLowSpeed.ChannelState[port] = LOWSPEED_ERROR;
+                    IOMapLowSpeed.ErrorType[port]    = LOWSPEED_RX_ERROR;
+                }
+                result = Hal_IicDev_Poll(VarsLowSpeed.Devices[port],
+                                         VarsLowSpeed.InputBuf[port].Buf,
+                                         IOMapLowSpeed.InBuf[port].BytesToRx);
+
+                if (result == HAL_IIC_RESULT_DONE) {
+                    cLowSpeedCompleteRead(port);
+                    IOMapLowSpeed.Mode[port]         = LOWSPEED_DATA_RECEIVED;
+                    IOMapLowSpeed.ChannelState[port] = LOWSPEED_DONE;
+                }
+                if (result == HAL_IIC_RESULT_ERROR) {
+                    //There was and error in receiving data from the device
+                    memset(VarsLowSpeed.InputBuf[port].Buf, 0x00, SIZE_OF_LSBUF);
+                    VarsLowSpeed.InputBuf[port].OutPtr = IOMapLowSpeed.InBuf[port].BytesToRx;
+                    IOMapLowSpeed.ChannelState[port] = LOWSPEED_ERROR;
+                    IOMapLowSpeed.ErrorType[port]    = LOWSPEED_RX_ERROR;
+                }
+            }
+            break;
+
+        case LOWSPEED_ERROR: {
+            cLowSpeedFinished(port, FALSE);
+        }
+            break;
+        case LOWSPEED_DONE: {
+            cLowSpeedFinished(port, TRUE);
+        }
+            break;
+        default:
+            break;
+        }
+    }
 }
 
-void      cLowSpeedExit(void)
-{
-  dLowSpeedExit();
+void cLowSpeedExit(void) {
+    for (int port = 0; port < NO_OF_LOWSPEED_COM_CH; port++) {
+        if (!VarsLowSpeed.Devices[port])
+            continue;
+
+        if (IOMapLowSpeed.Active & (1 << port)) {
+            Hal_IicDev_Cancel(VarsLowSpeed.Devices[port]);
+            IOMapLowSpeed.Active &= ~(1 << port);
+        }
+        Hal_IicHost_Detach(port);
+    }
+    Hal_IicMgr_RefDel();
+}
+
+bool Hal_IicHost_Attach(hal_iic_dev_t *device, int port) {
+    if (port >= 4 || port < 0)
+        return false;
+    if (VarsLowSpeed.Devices[port])
+        return false;
+
+    if (Hal_IicDev_JustAttached(device, port)) {
+        VarsLowSpeed.Devices[port] = device;
+        return true;
+    }
+    return false;
+}
+
+bool Hal_IicHost_Detach(int port) {
+    if (port >= 4 || port < 0)
+        return false;
+    if (!VarsLowSpeed.Devices[port])
+        return true;
+
+    Hal_IicDev_Cancel(VarsLowSpeed.Devices[port]);
+    Hal_IicDev_JustDetached(VarsLowSpeed.Devices[port]);
+    VarsLowSpeed.Devices[port] = NULL;
+    return true;
+}
+
+bool Hal_IicHost_Present(int port) {
+    if (port >= 4 || port < 0)
+        return false;
+    return VarsLowSpeed.Devices[port] != NULL;
 }

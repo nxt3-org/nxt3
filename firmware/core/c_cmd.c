@@ -2361,7 +2361,7 @@ void cCmdResetDevices(void)
     if (pMapLowSpeed->ChannelState[i] != LOWSPEED_IDLE)
     {
       pMapLowSpeed->ChannelState[i] = LOWSPEED_DONE;
-      pMapLowSpeed->State |= (0x01<<i);
+      pMapLowSpeed->Active |= (0x01 << i);
     }
   }
 
@@ -7867,15 +7867,15 @@ NXT_STATUS cCmdLSWrite(UBYTE Port, UBYTE BufLength, UBYTE *pBuf, UBYTE ResponseL
     pMapLowSpeed->InBuf[Port].BytesToRx = ResponseLength;
 
     *pChState = LOWSPEED_INIT;
-    pMapLowSpeed->State |= (COM_CHANNEL_ONE_ACTIVE << Port);
+    pMapLowSpeed->Active |= (1 << Port);
     if (NoRestartOnRead)
-      pMapLowSpeed->NoRestartOnRead |= (COM_CHANNEL_NO_RESTART_1 << Port);
+      pMapLowSpeed->NoRestartMask |= (1 << Port);
     else
-      pMapLowSpeed->NoRestartOnRead &= ~(COM_CHANNEL_NO_RESTART_1 << Port);
+      pMapLowSpeed->NoRestartMask &= ~(1 << Port);
     if (bFast)
-      pMapLowSpeed->Speed |= (COM_CHANNEL_ONE_FAST << Port);
+      pMapLowSpeed->FastMask |= (1 << Port);
     else
-      pMapLowSpeed->Speed &= ~(COM_CHANNEL_ONE_FAST << Port);
+      pMapLowSpeed->FastMask &= ~(1 << Port);
 
     return (NO_ERR);
   }

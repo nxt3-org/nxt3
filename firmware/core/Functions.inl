@@ -174,7 +174,7 @@ void      cUiWriteLowspeed(UBYTE Port,UBYTE TxBytes,UBYTE *TxBuf,UBYTE RxBytes)
   }
   pMapLowSpeed->InBuf[Port].BytesToRx = RxBytes;
   pMapLowSpeed->ChannelState[Port]    = LOWSPEED_INIT;
-  pMapLowSpeed->State                |= (COM_CHANNEL_ONE_ACTIVE << Port);
+  pMapLowSpeed->Active                |= (1 << Port);
 }
 
 
