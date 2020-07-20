@@ -16,11 +16,11 @@
 #include  "stdconst.h"
 #include  "modules.h"
 #include  "c_input.h"
-#include  "d_input.h"
 #include  "c_cmd.iom.h"
 #include  "c_output.iom.h"
 #include  "c_loader.iom.h"
 #include  <string.h>
+#include  "hal_general.h"
 
 
 #define   INVALID_RELOAD_NORMAL         20
@@ -158,6 +158,14 @@ void      cInputInit(void* pHeader)
   IOMapInput.pFunc = &cInputPinFunc;
   UBYTE   Tmp;
 
+  /* Init ADC host */
+  for (Tmp = 0; Tmp < NO_OF_INPUTS; Tmp++) {
+    VarsInput.Devices[Tmp] = NULL;
+  }
+
+  if (!Hal_AdcMgr_RefAdd())
+    Hal_General_AbnormalExit("Cannot initialize ADC manager");
+
   memset(IOMapInput.Colors, 0, sizeof(IOMapInput.Colors));
   memset(VarsInput.VarsColor, 0, sizeof(VarsInput.VarsColor));
 
@@ -165,6 +173,7 @@ void      cInputInit(void* pHeader)
   for (Tmp = 0; Tmp < NO_OF_INPUTS; Tmp++)
   {
     INPUTSTRUCT * pIn = &(IOMapInput.Inputs[Tmp]);
+    hal_adc_dev_t * dev = VarsInput.Devices[Tmp];
     pIn->SensorType         = NO_SENSOR;
     pIn->SensorMode         = RAWMODE;
     pIn->SensorRaw          = 0;
@@ -176,8 +185,8 @@ void      cInputInit(void* pHeader)
     pIn->CustomActiveStatus = CUSTOMINACTIVE;
     pIn->CustomZeroOffset   = 0;
     pIn->CustomPctFullScale = 0;
-    dInputRead0(Tmp, &(pIn->DigiPinsIn));
-    dInputRead1(Tmp, &(pIn->DigiPinsIn));
+    Hal_AdcDev_LoadPins(dev);
+    Hal_AdcDev_GetDigiIn(dev, DIGI0 | DIGI1, &pIn->DigiPinsIn);
 
     VarsInput.EdgeCnt[Tmp]       = 0;
     VarsInput.InputDebounce[Tmp] = 0;
@@ -189,42 +198,38 @@ void      cInputInit(void* pHeader)
 
   VarsInput.ColorStatus = 0;
   VarsInput.ColorCnt    = 0;
-
-  dInputInit();
 }
 
 void      cInputCtrl(void)
 {
   UBYTE   Tmp;
 
+  Hal_AdcMgr_Tick();
+  for (int port = 0; port < NO_OF_INPUTS; port++) {
+    Hal_AdcDev_Tick(VarsInput.Devices[port]);
+  }
 
   if (VarsInput.ColorStatus)
   {
     switch(VarsInput.ColorCnt)
     {
       case 0:
-      {
         VarsInput.ColorCnt = 1;
-        dInputSetColorClkInput();
-
-      }
-      break;
+        break;
       case 1:
-      {
         VarsInput.ColorCnt = 2;
-      }
-      break;
+        break;
       case 2:
-      {
         VarsInput.ColorCnt = 0;
-        dInputGetAllColors(IOMapInput.Colors, VarsInput.ColorStatus);
-      }
-      break;
+        for (int port = 0; port < NO_OF_INPUTS; port++) {
+          if (VarsInput.ColorStatus & (1 << port)) {
+            Hal_AdcDev_ReadColorAdc4(VarsInput.Devices[port], IOMapInput.Colors->ADRaw);
+          }
+        }
+        break;
       default:
-      {
         VarsInput.ColorCnt = 0;
-      }
-      break;
+        break;
     }
   }
 
@@ -236,7 +241,7 @@ void      cInputCtrl(void)
 
     if (sType != oldType)
     {
-
+      Hal_AdcDev_SetType(VarsInput.Devices[Tmp], sType);
       /* Clear all variables for this sensor */
       VarsInput.EdgeCnt[Tmp]       = 0;
       VarsInput.InputDebounce[Tmp] = 0;
@@ -288,11 +293,13 @@ void      cInputCtrl(void)
       }
       else
       {
-
         /* The invalid bit could have been set by the VM due to Mode change    */
         /* but input module needs to be called once to update the values       */
         pIn->InvalidData &= ~INVALID_DATA;
       }
+
+      if (!Hal_AdcDev_IsValid(VarsInput.Devices[Tmp]))
+          pIn->InvalidData |= INVALID_DATA;
     }
 
     if (!(INVALID_DATA & (pIn->InvalidData)))
@@ -307,6 +314,7 @@ void      cInputCalcSensorValues(UBYTE No)
 {
   INPUTSTRUCT * pIn = &(IOMapInput.Inputs[No]);
   UBYTE sType = pIn->SensorType;
+  hal_adc_dev_t *dev = VarsInput.Devices[No];
 
   switch(sType)
   {
@@ -325,11 +333,11 @@ void      cInputCalcSensorValues(UBYTE No)
       if (sType == CUSTOM) {
         /* Setup and read digital IO */
         cInputSetupCustomSensor(No);
-        dInputRead0(No, &(pIn->DigiPinsIn));
-        dInputRead1(No, &(pIn->DigiPinsIn));
+        Hal_AdcDev_LoadPins(dev);
+        Hal_AdcDev_GetDigiIn(dev, DIGI0 | DIGI1, &pIn->DigiPinsIn);
       }
 
-      dInputGetRawAd(&InputVal, No);
+      InputVal = Hal_AdcDev_ReadAdc(dev);
       pIn->ADRaw = InputVal;
 
       if (sType == REFLECTION)
@@ -376,12 +384,8 @@ void      cInputCalcSensorValues(UBYTE No)
     case LOWSPEED:
     case LOWSPEED_9V:
     case HIGHSPEED:
-    {
-      UWORD InputVal;
-      dInputGetRawAd(&InputVal, No);
-      pIn->ADRaw = InputVal;
-    }
-    break;
+      pIn->ADRaw = Hal_AdcDev_ReadAdc(dev);
+      break;
 
     /* Four cases intended */
     case COLORRED:
@@ -397,7 +401,7 @@ void      cInputCalcSensorValues(UBYTE No)
         case SENSOROFF:
         {
           /* Check if sensor has been attached */
-          if (dInputCheckColorStatus(No))
+          if (Hal_AdcDev_IsColorPresent(dev))
           {
 
             /* Sensor has been attached now get cal data */
@@ -421,14 +425,15 @@ void      cInputCalcSensorValues(UBYTE No)
           {
 
             /* Use clock to detect errors */
-            dInputSetDirInDigi0(No);
+            Hal_AdcDev_SetDigiDir(dev, DIGI0, DIR_IN);
+            Hal_AdcDev_StorePins(dev);
             (pC->CalibrationState) = 0;
           }
         }
         break;
         default:
         {
-          if (dInputGetColor(No, &(pIn->ADRaw)))
+          if (Hal_AdcDev_ReadColorAdc1(dev, &pIn->ADRaw))
           {
             InputVal = pIn->ADRaw;
             cInputCalcFullScale(&InputVal, COLORSENSORBGMIN, COLORSENSORBGPCTDYN, FALSE);
@@ -460,7 +465,7 @@ void      cInputCalcSensorValues(UBYTE No)
         case SENSOROFF:
         {
           /* Check if sensor has been attached */
-          if (dInputCheckColorStatus(No))
+          if (Hal_AdcDev_IsColorPresent(dev))
           {
 
             /* Sensor has been attached now get cal data */
@@ -504,7 +509,7 @@ void      cInputCalcSensorValues(UBYTE No)
             UBYTE ColorCount;
 
             /* Check if sensor is deteched */
-            if (dInputCheckColorStatus(No))
+            if (Hal_AdcDev_IsColorPresent(dev))
             {
 
               /* Calibrate the raw ad values returns the SensorRaw */
@@ -1012,59 +1017,56 @@ void      cInputCalcFullScale(UWORD *pRawVal, UWORD ZeroPointOffset, UBYTE PctFu
 
 void      cInputSetupType(UBYTE Port, UBYTE newType, UBYTE OldType)
 {
-
+  hal_adc_dev_t *dev = VarsInput.Devices[Port];
   switch(newType)
   {
     case NO_SENSOR:
     case SWITCH:
     case TEMPERATURE:
     {
-      dInputSetInactive(Port);
-      dInputSetDirInDigi0(Port);
-      dInputSetDirInDigi1(Port);
+      Hal_AdcDev_SetPower(dev, POWER_AUX_OFF);
+      Hal_AdcDev_SetDigiDir(dev, DIGI0 | DIGI1, DIR_IN);
     }
     break;
 
     case REFLECTION:
     case ANGLE:
     {
-      dInputSetActive(Port);
-      dInputClearDigi0(Port);
-      dInputClearDigi1(Port);
+      Hal_AdcDev_SetPower(dev, POWER_AUX_RCX);
+      Hal_AdcDev_SetDigiOut(dev, DIGI0 | DIGI1, PIN_LOW);
     }
     break;
 
     case LIGHT_ACTIVE:
     {
-      dInputSetInactive(Port);
-      dInputSetDigi0(Port);
-      dInputClearDigi1(Port);
+      Hal_AdcDev_SetPower(dev, POWER_AUX_OFF);
+      Hal_AdcDev_SetDigiOut(dev, DIGI0, PIN_HIGH);
+      Hal_AdcDev_SetDigiOut(dev, DIGI1, PIN_LOW);
     }
     break;
 
     case LIGHT_INACTIVE:
     {
-      dInputSetInactive(Port);
-      dInputClearDigi0(Port);
-      dInputClearDigi1(Port);
+      Hal_AdcDev_SetPower(dev, POWER_AUX_OFF);
+      Hal_AdcDev_SetDigiOut(dev, DIGI1, PIN_LOW);
     }
     break;
 
     case SOUND_DB:
     {
       VarsInput.InvalidTimer[Port] = INVALID_RELOAD_SOUND;
-      dInputSetInactive(Port);
-      dInputSetDigi0(Port);
-      dInputClearDigi1(Port);
+      Hal_AdcDev_SetPower(dev, POWER_AUX_OFF);
+      Hal_AdcDev_SetDigiOut(dev, DIGI0, PIN_HIGH);
+      Hal_AdcDev_SetDigiOut(dev, DIGI1, PIN_LOW);
     }
     break;
 
     case SOUND_DBA:
     {
       VarsInput.InvalidTimer[Port] = INVALID_RELOAD_SOUND;
-      dInputSetInactive(Port);
-      dInputClearDigi0(Port);
-      dInputSetDigi1(Port);
+      Hal_AdcDev_SetPower(dev, POWER_AUX_OFF);
+      Hal_AdcDev_SetDigiOut(dev, DIGI0, PIN_LOW);
+      Hal_AdcDev_SetDigiOut(dev, DIGI1, PIN_HIGH);
     }
     break;
 
@@ -1076,25 +1078,22 @@ void      cInputSetupType(UBYTE Port, UBYTE newType, UBYTE OldType)
 
     case LOWSPEED:
     {
-      dInputSetInactive(Port);
-      dInputSetDigi0(Port);
-      dInputSetDigi1(Port);
+      Hal_AdcDev_SetPower(dev, POWER_AUX_OFF);
+      Hal_AdcDev_SetDigiOut(dev, DIGI0 | DIGI1, PIN_HIGH);
     }
     break;
 
     case LOWSPEED_9V:
     {
-      dInputSet9v(Port);
-      dInputSetDigi0(Port);
-      dInputSetDigi1(Port);
+      Hal_AdcDev_SetPower(dev, POWER_AUX_9V);
+      Hal_AdcDev_SetDigiOut(dev, DIGI0 | DIGI1, PIN_HIGH);
     }
     break;
 
     case HIGHSPEED:
     {
-      dInputSetInactive(Port);
-      dInputSetDirInDigi0(Port);
-      dInputSetDirInDigi1(Port);
+      Hal_AdcDev_SetPower(dev, POWER_AUX_9V);
+      Hal_AdcDev_SetDigiDir(dev, DIGI0 | DIGI1, DIR_IN);
     }
     break;
 
@@ -1105,9 +1104,9 @@ void      cInputSetupType(UBYTE Port, UBYTE newType, UBYTE OldType)
     case COLORNONE:
     {
       VarsInput.InvalidTimer[Port] = INVALID_RELOAD_COLOR;
-      dInputSetInactive(Port);
-      dInputSetDigi0(Port);
-      dInputSetDirInDigi1(Port);
+      Hal_AdcDev_SetPower(dev, POWER_AUX_OFF);
+      Hal_AdcDev_SetDigiOut(dev, DIGI0, PIN_LOW);
+      Hal_AdcDev_SetDigiDir(dev, DIGI1, DIR_IN);
       IOMapInput.Colors[Port].CalibrationState = SENSORCAL;
       VarsInput.VarsColor[Port].ColorInitState = 0;
 
@@ -1120,204 +1119,41 @@ void      cInputSetupType(UBYTE Port, UBYTE newType, UBYTE OldType)
     }
     break;
   }
+  Hal_AdcDev_StorePins(dev);
 }
 
 void      cInputSetupCustomSensor(UBYTE Port)
 {
-  if ((IOMapInput.Inputs[Port].DigiPinsDir) & 0x01)
-  {
-    if ((IOMapInput.Inputs[Port].DigiPinsOut) & 0x01)
-    {
-      dInputSetDigi0(Port);
-    }
-    else
-    {
-      dInputClearDigi0(Port);
-    }
-  }
-  else
-  {
-    dInputSetDirInDigi0(Port);
-  }
-  if ((IOMapInput.Inputs[Port].DigiPinsDir) & 0x02)
-  {
-    if ((IOMapInput.Inputs[Port].DigiPinsOut) & 0x02)
-    {
-      dInputSetDigi1(Port);
-    }
-    else
-    {
-      dInputClearDigi1(Port);
-    }
-  }
-  else
-  {
-    dInputSetDirInDigi1(Port);
-  }
+  hal_adc_dev_t *dev = VarsInput.Devices[Port];
+
+  Hal_AdcDev_SetDigiOut(dev, IOMapInput.Inputs[Port].DigiPinsOut, PIN_HIGH);
+  Hal_AdcDev_SetDigiOut(dev, ~IOMapInput.Inputs[Port].DigiPinsOut, PIN_LOW);
+  Hal_AdcDev_SetDigiDir(dev, ~IOMapInput.Inputs[Port].DigiPinsDir, DIR_IN);
 
   if (CUSTOMACTIVE == (IOMapInput.Inputs[Port].CustomActiveStatus))
   {
-    dInputSetActive(Port);
+    Hal_AdcDev_SetPower(dev, POWER_AUX_RCX);
   }
   else
   {
     if (CUSTOM9V == (IOMapInput.Inputs[Port].CustomActiveStatus))
     {
-      dInputSet9v(Port);
+      Hal_AdcDev_SetPower(dev, POWER_AUX_9V);
     }
     else
     {
-      dInputSetInactive(Port);
+      Hal_AdcDev_SetPower(dev, POWER_AUX_OFF);
     }
   }
 }
 
 
-UBYTE      cInputInitColorSensor(UBYTE Port, UBYTE *pInitStatus)
-{
-
-  *pInitStatus = FALSE;
-  switch(VarsInput.VarsColor[Port].ColorInitState)
-  {
-    case 0:
-    {
-      dInputSetDigi0(Port);
-      dInputSetDigi1(Port);
-      VarsInput.VarsColor[Port].ColorInitState++;
-    }
-    break;
-    case 1:
-    {
-      dInputClearDigi0(Port);
-      VarsInput.VarsColor[Port].ColorInitState++;
-    }
-    break;
-
-    case 2:
-    {
-      dInputSetDigi0(Port);
-      VarsInput.VarsColor[Port].ColorInitState++;
-    }
-    break;
-    case 3:
-    {
-
-      dInputClearDigi0(Port);
-
-      /* Clear clock for 100mS - use pit timer*/
-      dInputClearColor100msTimer(Port);
-      VarsInput.VarsColor[Port].ColorInitState++;
-    }
-    break;
-    case 4:
-    {
-
-      /* Wait 100mS            */
-      if (dInputChkColor100msTimer(Port))
-      {
-        VarsInput.VarsColor[Port].ColorInitState += 1;
-      }
-    }
-    break;
-    case 5:
-    {
-      UBYTE TmpType;
-
-      if (COLOREXIT == IOMapInput.Inputs[Port].SensorType)
-      {
-        TmpType = COLORNONE;
-      }
-      else
-      {
-        TmpType = IOMapInput.Inputs[Port].SensorType;
-      }
-      dInputColorTx(Port, TmpType);
-
-      /* Be ready to receive data from sensor */
-      dInputSetDirInDigi1(Port);
-      VarsInput.VarsColor[Port].ReadCnt = 0;
-      VarsInput.VarsColor[Port].ColorInitState++;
-    }
-    break;
-    case 6:
-    {
-      UBYTE Data;
-      UBYTE DataCnt;
-      UBYTE *pData;
-
-      DataCnt = (VarsInput.VarsColor[Port].ReadCnt);
-      pData   = (UBYTE*)(IOMapInput.Colors[Port].Calibration);
-
-      /* Read first byte of cal data */
-      dInputReadCal(Port, &Data);
-
-      pData[DataCnt] = Data;
-
-      /* If all bytes has been read - then continue to next step */
-      if (++(VarsInput.VarsColor[Port].ReadCnt) >= ((sizeof(IOMapInput.Colors[Port].Calibration) + sizeof(IOMapInput.Colors[Port].CalLimits))))
-      {
-        VarsInput.VarsColor[Port].ColorInitState++;
-      }
-    }
-    break;
-    case 7:
-    {
-
-      /* Check CRC then continue or restart if false */
-      UWORD Crc, CrcCheck;
-      UBYTE Cnt;
-      UBYTE Data;
-      UBYTE *pData;
-
-      dInputReadCal(Port, &Data);
-      Crc  = (UWORD)(Data) << 8;
-      dInputReadCal(Port, &Data);
-      Crc += (UWORD)Data;
-      CrcCheck = 0x5AA5;
-      pData = (UBYTE*)(IOMapInput.Colors[Port].Calibration);
-      for (Cnt = 0; Cnt < (sizeof(IOMapInput.Colors[Port].Calibration) + sizeof(IOMapInput.Colors[Port].CalLimits)); Cnt++)
-      {
-        UWORD i,j;
-        UBYTE c;
-        c = pData[Cnt];
-        for(i = 0; i != 8; c >>= 1, i++)
-        {
-          j = (c^CrcCheck) & 1;
-          CrcCheck >>= 1;
-
-          if(j)
-          {
-            CrcCheck ^= 0xA001;
-          }
-        }
-
-      }
-      if ((CrcCheck != Crc))
-      {
-
-        /* incorrect!!! try again */
-        VarsInput.VarsColor[Port].ColorInitState = 0;
-        VarsInput.InvalidTimer[Port] = INVALID_RELOAD_COLOR;
-      }
-      else
-      {
-
-        /* Correct crc sum -> calculate the calibration values then exit */
-        VarsInput.VarsColor[Port].ColorInitState = 0;
-
-        /* Sensor is almost ready - needs a little time to make first measurements */
-        VarsInput.InvalidTimer[Port] = 10;
-        *pInitStatus = TRUE;
-      }
-    }
-    break;
-    default:
-    {
-      VarsInput.VarsColor[Port].ColorInitState = 0;
-    }
-    break;
+UBYTE      cInputInitColorSensor(UBYTE Port, UBYTE *pInitStatus) {
+  *pInitStatus = Hal_AdcDev_ReadColorCalib(VarsInput.Devices[Port], &IOMapInput.Colors->ColorCal);
+  if (*pInitStatus) {
+    VarsInput.InvalidTimer[Port] = 10;
   }
-  return(dInputCheckColorStatus(Port));
+  return Hal_AdcDev_IsColorPresent(VarsInput.Devices[Port]);
 }
 
 
@@ -1325,13 +1161,13 @@ void      cInputCalibrateColor(COLORSTRUCT *pC, UWORD *pNewVals)
 {
   UBYTE CalRange;
 
-  if ((pC->ADRaw[BLANK]) < pC->CalLimits[1])
+  if ((pC->ADRaw[BLANK]) < pC->ColorCal.CalLimits[1])
   {
     CalRange = 2;
   }
   else
   {
-    if ((pC->ADRaw[BLANK]) < pC->CalLimits[0])
+    if ((pC->ADRaw[BLANK]) < pC->ColorCal.CalLimits[0])
     {
       CalRange = 1;
     }
@@ -1344,89 +1180,98 @@ void      cInputCalibrateColor(COLORSTRUCT *pC, UWORD *pNewVals)
   pNewVals[RED] = 0;
   if ((pC->ADRaw[RED]) > (pC->ADRaw[BLANK]))
   {
-    pNewVals[RED] = (UWORD)(((ULONG)((pC->ADRaw[RED]) - (pC->ADRaw[BLANK])) * (pC->Calibration[CalRange][RED])) >> 16);
+    pNewVals[RED] = (UWORD)(((ULONG)((pC->ADRaw[RED]) - (pC->ADRaw[BLANK])) * (pC->ColorCal.Calibration[CalRange][RED])) >> 16);
   }
 
   pNewVals[GREEN] = 0;
   if ((pC->ADRaw[GREEN]) > (pC->ADRaw[BLANK]))
   {
-     pNewVals[GREEN] = (UWORD)(((ULONG)((pC->ADRaw[GREEN]) - (pC->ADRaw[BLANK])) * (pC->Calibration[CalRange][GREEN])) >> 16);
+     pNewVals[GREEN] = (UWORD)(((ULONG)((pC->ADRaw[GREEN]) - (pC->ADRaw[BLANK])) * (pC->ColorCal.Calibration[CalRange][GREEN])) >> 16);
   }
 
   pNewVals[BLUE] = 0;
   if ((pC->ADRaw[BLUE]) > (pC->ADRaw[BLANK]))
   {
-    pNewVals[BLUE] = (UWORD)(((ULONG)((pC->ADRaw[BLUE]) -(pC->ADRaw[BLANK])) * (pC->Calibration[CalRange][BLUE])) >> 16);
+    pNewVals[BLUE] = (UWORD)(((ULONG)((pC->ADRaw[BLUE]) -(pC->ADRaw[BLANK])) * (pC->ColorCal.Calibration[CalRange][BLUE])) >> 16);
   }
 
   pNewVals[BLANK] = (pC->ADRaw[BLANK]);
   cInputCalcFullScale(&(pNewVals[BLANK]), COLORSENSORBGMIN, COLORSENSORBGPCTDYN, FALSE);
-  (pNewVals[BLANK]) = (UWORD)(((ULONG)(pNewVals[BLANK]) * (pC->Calibration[CalRange][BLANK])) >> 16);
+  (pNewVals[BLANK]) = (UWORD)(((ULONG)(pNewVals[BLANK]) * (pC->ColorCal.Calibration[CalRange][BLANK])) >> 16);
 }
 
 
 void      cInputExit(void)
 {
-  dInputExit();
+  for (int port = 0; port < NO_OF_INPUTS; port++) {
+    Hal_AdcHost_Detach(port);
+  }
+  Hal_AdcMgr_RefDel();
 }
 
 UBYTE cInputPinFunc(UBYTE Cmd, UBYTE Port, UBYTE Pin, UBYTE *pData)
 {
   UBYTE ReturnState = NO_ERR;
+  if (Port >= NO_OF_INPUTS)
+    return (UBYTE)ERR_INVALID_PORT;
   if (IOMapInput.Inputs[Port].SensorType != CUSTOM)
     return (UBYTE)ERR_INVALID_PORT;
 
-  UBYTE WaitUSEC = (Cmd&0xFC)>>2;
-  UBYTE Dir = (Pin&0xFC)>>2;
+  hal_adc_dev_t *dev = VarsInput.Devices[Port];
+
+  //UBYTE WaitUSEC = (Cmd&0xFC)>>2;
+  bool Dir = ((Pin&0xFC)>>2) != 0;
   Pin &= 0x03;
 
   switch(Cmd&0x03)
   {
     case PINDIR:
-    {
-      if (Pin & DIGI0)
-      {
-        if (Dir)
-          dInputSetDirInDigi0(Port);
-        else
-          dInputSetDirOutDigi0(Port);
-      }
-      if (Pin & DIGI1)
-      {
-        if (Dir)
-          dInputSetDirInDigi1(Port);
-        else
-          dInputSetDirOutDigi1(Port);
-      }
-    }
-    break;
+      Hal_AdcDev_SetDigiDir(dev, Pin, Dir);
+      Hal_AdcDev_StorePins(dev);
+      break;
     case SETPIN:
-    {
-      if (Pin & DIGI0)
-        dInputSetDigi0(Port);
-      if (Pin & DIGI1)
-        dInputSetDigi1(Port);
-    }
-    break;
+      Hal_AdcDev_SetDigiOut(dev, Pin, true);
+      Hal_AdcDev_StorePins(dev);
+      break;
     case CLEARPIN:
-    {
-      if (Pin & DIGI0)
-        dInputClearDigi0(Port);
-      if (Pin & DIGI1)
-        dInputClearDigi1(Port);
-    }
-    break;
+      Hal_AdcDev_SetDigiOut(dev, Pin, false);
+      Hal_AdcDev_StorePins(dev);
+      break;
     case READPIN:
-    {
-      if (Pin & DIGI0)
-        dInputRead0(Port, pData);
-      if (Pin & DIGI1)
-        dInputRead1(Port, pData);
-    }
-    break;
+      Hal_AdcDev_LoadPins(dev);
+      Hal_AdcDev_GetDigiIn(dev, Pin, pData);
+      break;
   }
-  if (WaitUSEC)
-    dInputWaitUS(WaitUSEC);
 
   return (ReturnState);
+}
+
+bool Hal_AdcHost_Attach(hal_adc_dev_t *device, int port) {
+    if (port >= 4 || port < 0)
+        return false;
+    if (VarsInput.Devices[port])
+        return false;
+
+    if (Hal_AdcDev_JustAttached(device, port)) {
+        VarsInput.Devices[port] = device;
+        return true;
+    }
+    return false;
+}
+
+bool Hal_AdcHost_Detach(int port) {
+    if (port >= 4 || port < 0)
+        return false;
+    if (!VarsInput.Devices[port])
+        return true;
+
+    Hal_AdcDev_JustDetached(VarsInput.Devices[port]);
+    VarsInput.Devices[port] = NULL;
+    return true;
+}
+
+bool Hal_AdcHost_Present(int port) {
+    if (port >= 4 || port < 0)
+        return false;
+    return VarsInput.Devices[port] != NULL;
 }

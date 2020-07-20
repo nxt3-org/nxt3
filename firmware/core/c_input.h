@@ -20,6 +20,7 @@ extern    const HEADER cInput;
 #endif
 
 #include  "c_input.iom.h"
+#include "hal_adc.h"
 
 #define   ACTUAL_AD_RES                 1023L
 #define   SENSOR_RESOLUTION             1023L
@@ -48,6 +49,7 @@ typedef   struct
 
 typedef   struct
 {
+  hal_adc_dev_t *Devices[NO_OF_INPUTS];
   UWORD     InvalidTimer  [NO_OF_INPUTS];
   UBYTE     InputDebounce [NO_OF_INPUTS];
   UBYTE     EdgeCnt       [NO_OF_INPUTS];
