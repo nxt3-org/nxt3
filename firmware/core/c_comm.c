@@ -22,10 +22,11 @@
 #include  "c_display.iom.h"
 #include  "c_comm.h"
 #include  "d_usb.h"
-#include  "d_hispeed.h"
+#include  "hal_rs485.h"
 #include  "d_bt.h"
 #include  <string.h>
 #include  <ctype.h>
+#include <hal_general.h>
 
 enum
 {
@@ -171,7 +172,9 @@ void      cCommInit(void* pHeader)
   dBtInitReceive(VarsComm.BtModuleInBuf.Buf, (UBYTE)CMD_MODE, FALSE);
   dBtStartADConverter();
 
-  dHiSpeedInit();
+  if (!Hal_Rs485_RefAdd())
+      Hal_General_AbnormalExit("Cannot initialize RS485 link");
+  Hal_Rs485_EnablePins();
   VarsComm.HsState    = 0;
 
   IOMapComm.UsbPollBuf.InPtr  = 0;
@@ -258,9 +261,9 @@ void      cCommCtrl(void)
       {
         // 0 == NORMAL mode (aka RS232 mode)
         // 1 == RS485 mode
-        dHiSpeedSetupUart(IOMapComm.HsSpeed,
-                          IOMapComm.HsMode & HS_MODE_MASK,
-                          IOMapComm.HsMode & HS_UART_MASK ? 0 : 1);
+        Hal_Rs485_Setup(IOMapComm.HsSpeed,
+                        IOMapComm.HsMode & HS_MODE_MASK,
+                        IOMapComm.HsMode & HS_UART_MASK);
         IOMapComm.HsState = HS_INIT_RECEIVER;
         IOMapComm.HsFlags |= HS_UPDATE;
       }
@@ -268,7 +271,7 @@ void      cCommCtrl(void)
 
       case HS_INIT_RECEIVER:
       {
-        dHiSpeedInitReceive(VarsComm.HsModuleInBuf.Buf);
+        Hal_Rs485_EnableRx();
         VarsComm.HsState = 0x01;
         IOMapComm.HsState = HS_DEFAULT;
       }
@@ -284,7 +287,7 @@ void      cCommCtrl(void)
       case HS_DISABLE:
       {
         VarsComm.HsState = 0x00;
-        dHiSpeedExit();
+        Hal_Rs485_Disable();
         IOMapComm.HsState = HS_DEFAULT;
       }
       break;
@@ -292,7 +295,7 @@ void      cCommCtrl(void)
       case HS_ENABLE:
       {
         if (VarsComm.HsState == 0)
-          dHiSpeedInit();
+            Hal_Rs485_EnablePins();
         IOMapComm.HsState = HS_DEFAULT;
       }
       break;
@@ -302,8 +305,8 @@ void      cCommCtrl(void)
   // update the HsState if there are bytes remaining to be sent
   if (IOMapComm.HsState >= HS_BYTES_REMAINING)
   {
-    UWORD bts = 0;
-    dHiSpeedBytesToSend(&bts);
+    uint32_t bts = 0;
+    Hal_Rs485_TxStatus(&bts);
     if (bts == 0)
     {
       IOMapComm.HsState = HS_DEFAULT;
@@ -372,7 +375,8 @@ void      cCommCtrl(void)
 void      cCommExit(void)
 {
   dUsbExit();
-  dHiSpeedExit();
+  Hal_Rs485_Disable();
+  Hal_Rs485_RefDel();
   dBtExit();
 }
 
@@ -1520,17 +1524,18 @@ void cCommSendHiSpeedData(void)
   VarsComm.HsModuleOutBuf.OutPtr = 0;
   memcpy(VarsComm.HsModuleOutBuf.Buf, IOMapComm.HsOutBuf.Buf, IOMapComm.HsOutBuf.InPtr);
   VarsComm.HsModuleOutBuf.InPtr = IOMapComm.HsOutBuf.InPtr;
-  dHiSpeedSendData(VarsComm.HsModuleOutBuf.Buf, VarsComm.HsModuleOutBuf.InPtr);
+  uint32_t bytes = VarsComm.HsModuleOutBuf.InPtr;
+  Hal_Rs485_Transmit(VarsComm.HsModuleOutBuf.Buf, &bytes);
 //  IOMapComm.HsOutBuf.OutPtr = IOMapComm.HsOutBuf.InPtr;
 }
 
 void cCommReceivedHiSpeedData(void)
 {
-  UWORD NumberOfBytes;
   UWORD Tmp;
   UBYTE Address;
 
-  dHiSpeedReceivedData(&NumberOfBytes);
+  uint32_t NumberOfBytes = sizeof(VarsComm.HsModuleInBuf.Buf);
+  Hal_Rs485_Receive(VarsComm.HsModuleInBuf.Buf, &NumberOfBytes);
 
   if (NumberOfBytes != 0)
   {
