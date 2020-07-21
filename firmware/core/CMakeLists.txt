@@ -19,7 +19,6 @@ add_executable(nxt3.elf
     ${CMAKE_CURRENT_SOURCE_DIR}/c_sound_adpcm.c
     ${CMAKE_CURRENT_SOURCE_DIR}/c_ui.c
     ${CMAKE_CURRENT_SOURCE_DIR}/d_bt.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/d_usb.c
     ${CMAKE_CURRENT_SOURCE_DIR}/m_sched.c
         )
 

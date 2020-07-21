@@ -21,7 +21,7 @@
 #include  "c_cmd.iom.h"
 #include  "c_display.iom.h"
 #include  "c_comm.h"
-#include  "d_usb.h"
+#include  "hal_usb.h"
 #include  "hal_rs485.h"
 #include  "d_bt.h"
 #include  <string.h>
@@ -141,7 +141,8 @@ void      cCommInit(void* pHeader)
 
   CLEARExtMode;
 
-  dUsbInit();
+  if (!Hal_Usb_RefAdd())
+      Hal_General_AbnormalExit("Cannot initialize USB support");
   dBtInit();
 
   SETBtStateIdle;
@@ -208,7 +209,7 @@ void      cCommCtrl(void)
 
       /* there is an BT fatal error - set default bt adr and name*/
       strcpy((char*)IOMapComm.BrickData.Name, (char*)UI_NAME_DEFAULT);
-      dUsbStoreBtAddress((UBYTE*)DEFAULTBTADR);
+      Hal_Usb_StoreBtAddress((const uint8_t*) DEFAULTBTADR);
       pMapUi->Flags |= UI_REDRAW_STATUS;
       dBtSetBcResetPinLow();
       VarsComm.BtAdrStatus = BTADRERROR;
@@ -327,18 +328,18 @@ void      cCommCtrl(void)
 
   if (0 != IOMapComm.UsbOutBuf.OutPtr)
   {
-    dUsbWrite((const UBYTE *)IOMapComm.UsbOutBuf.Buf, (ULONG)IOMapComm.UsbOutBuf.OutPtr);
+    Hal_Usb_TxFrame(IOMapComm.UsbOutBuf.Buf, IOMapComm.UsbOutBuf.OutPtr);
     IOMapComm.UsbOutBuf.OutPtr = 0;
   }
 
   Length = 0;
 
-  if (TRUE == dUsbCheckConnection())
+  if (TRUE == Hal_Usb_IsPresent())
   {
     pMapUi->UsbState = 1;
-    if (TRUE == dUsbIsConfigured())
+    if (TRUE == Hal_Usb_IsReady())
     {
-      Length = dUsbRead(IOMapComm.UsbInBuf.Buf, sizeof(IOMapComm.UsbInBuf.Buf));
+      Length = Hal_Usb_RxFrame(IOMapComm.UsbInBuf.Buf, sizeof(IOMapComm.UsbInBuf.Buf));
       IOMapComm.UsbState = TRUE;
       pMapUi->UsbState = 2;
     }
@@ -346,17 +347,18 @@ void      cCommCtrl(void)
   else
   {
     pMapUi->UsbState = 0;
-    dUsbResetConfig();
+    Hal_Usb_ResetState();
     if (TRUE == IOMapComm.UsbState)
     {
       IOMapComm.UsbState = FALSE;
-      Status =  dUsbGetFirstHandle();
+      uint32_t pos = 0;
+      Status =  Hal_Usb_GetNextHandle(&pos);
       while(0 == LOADER_ERR(Status))
       {
         IOMapComm.UsbInBuf.Buf[0] = LOADER_HANDLE(Status);
         pMapLoader->pFunc(CLOSE, &(IOMapComm.UsbInBuf.Buf[0]), &(IOMapComm.UsbInBuf.Buf[2]), &Length);
-        dUsbRemoveHandle(IOMapComm.UsbInBuf.Buf[0]);
-        Status = dUsbGetNextHandle();
+        Hal_Usb_RemoveHandle(IOMapComm.UsbInBuf.Buf[0]);
+        Status = Hal_Usb_GetNextHandle(&pos);
       }
     }
   }
@@ -366,7 +368,7 @@ void      cCommCtrl(void)
     cCommInterprete(IOMapComm.UsbInBuf.Buf, IOMapComm.UsbOutBuf.Buf, (UBYTE*)&Length, USB_CMD_READY, (UWORD)Length);
     if (Length)
     {
-      dUsbWrite((const UBYTE *)IOMapComm.UsbOutBuf.Buf, Length);
+      Hal_Usb_TxFrame(IOMapComm.UsbOutBuf.Buf, Length);
     }
   }
   dBtStartADConverter();
@@ -374,7 +376,7 @@ void      cCommCtrl(void)
 
 void      cCommExit(void)
 {
-  dUsbExit();
+  Hal_Usb_RefDel();
   Hal_Rs485_Disable();
   Hal_Rs485_RefDel();
   dBtExit();
@@ -563,7 +565,7 @@ UWORD     cCommInterpreteCmd(UBYTE Cmd, UBYTE *pInBuf, UBYTE *pOutBuf, UBYTE *pL
       *pLength = 2;
       if ((SUCCESS == LOADER_ERR(Status)) && (CmdBit & USB_CMD_READY))
       {
-        dUsbInsertHandle(LOADER_HANDLE(Status));
+        Hal_Usb_AddHandle(LOADER_HANDLE(Status));
       }
     }
     break;
@@ -647,7 +649,7 @@ UWORD     cCommInterpreteCmd(UBYTE Cmd, UBYTE *pInBuf, UBYTE *pOutBuf, UBYTE *pL
       *pLength = 2;
       if ((SUCCESS == LOADER_ERR(Status)) && (CmdBit & USB_CMD_READY))
       {
-        dUsbInsertHandle(LOADER_HANDLE(Status));
+        Hal_Usb_AddHandle(LOADER_HANDLE(Status));
       }
     }
     break;
@@ -664,7 +666,7 @@ UWORD     cCommInterpreteCmd(UBYTE Cmd, UBYTE *pInBuf, UBYTE *pOutBuf, UBYTE *pL
       *pLength = 6;
       if ((SUCCESS == LOADER_ERR(Status)) && (CmdBit & USB_CMD_READY))
       {
-        dUsbInsertHandle(LOADER_HANDLE(Status));
+        Hal_Usb_AddHandle(LOADER_HANDLE(Status));
       }
     }
     break;
@@ -672,7 +674,7 @@ UWORD     cCommInterpreteCmd(UBYTE Cmd, UBYTE *pInBuf, UBYTE *pOutBuf, UBYTE *pL
     {
       if (CmdBit & USB_CMD_READY)
       {
-        dUsbRemoveHandle(pInBuf[1]);
+        Hal_Usb_RemoveHandle(pInBuf[1]);
       }
       Status = pMapLoader->pFunc(CLOSE, &(pInBuf[1]), NULL, &FileLength);
       pOutBuf[0] = LOADER_ERR_BYTE(Status);
@@ -700,7 +702,7 @@ UWORD     cCommInterpreteCmd(UBYTE Cmd, UBYTE *pInBuf, UBYTE *pOutBuf, UBYTE *pL
       *pLength = 6;
       if ((SUCCESS == LOADER_ERR(Status)) && (CmdBit & USB_CMD_READY))
       {
-        dUsbInsertHandle(LOADER_HANDLE(Status));
+        Hal_Usb_AddHandle(LOADER_HANDLE(Status));
       }
     }
     break;
@@ -811,7 +813,7 @@ UWORD     cCommInterpreteCmd(UBYTE Cmd, UBYTE *pInBuf, UBYTE *pOutBuf, UBYTE *pL
         pOutBuf[25] = (UBYTE)(FileLength >> 24);
         if (CmdBit & USB_CMD_READY)
         {
-          dUsbInsertHandle(pOutBuf[1]);
+          Hal_Usb_AddHandle(pOutBuf[1]);
         }
       }
       else
@@ -873,7 +875,7 @@ UWORD     cCommInterpreteCmd(UBYTE Cmd, UBYTE *pInBuf, UBYTE *pOutBuf, UBYTE *pL
       *pLength = 2;
       if ((SUCCESS == LOADER_ERR(Status)) && (CmdBit & USB_CMD_READY))
       {
-        dUsbInsertHandle(LOADER_HANDLE(Status));
+        Hal_Usb_AddHandle(LOADER_HANDLE(Status));
       }
     }
     break;
@@ -1666,7 +1668,7 @@ void      cCommUpdateBt(void)
           if (MSG_GET_LOCAL_ADDR_RESULT == IOMapComm.BtInBuf.Buf[BT_CMD_BYTE])
           {
             cCommCopyBdaddr((IOMapComm.BrickData.BdAddr), &(IOMapComm.BtInBuf.Buf[BT_CMD_BYTE + 1]));
-            dUsbStoreBtAddress( &(IOMapComm.BtInBuf.Buf[BT_CMD_BYTE + 1]));
+            Hal_Usb_StoreBtAddress( &(IOMapComm.BtInBuf.Buf[BT_CMD_BYTE + 1]));
             dBtSendBtCmd((UBYTE)MSG_GET_FRIENDLY_NAME, 0, 0, NULL, NULL, NULL, NULL);
             VarsComm.BtAdrStatus = INITIALIZED;
             (VarsComm.UpdateState)++;
