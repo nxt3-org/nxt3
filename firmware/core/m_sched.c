@@ -33,6 +33,7 @@
 #include  "c_cmd.iom.h"
 #include  "c_ioctrl.h"
 #include  "c_ui.h"
+#include  "c_pnp.h"
 
 
 static    const HEADER*  pModuleHeaders[] =
@@ -48,6 +49,7 @@ static    const HEADER*  pModuleHeaders[] =
   &cIOCtrl,
   &cCmd,
   &cUi,
+  &cPnp,
   0
 };
 
