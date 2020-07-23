@@ -163,9 +163,6 @@ void      cInputInit(void* pHeader)
     VarsInput.Devices[Tmp] = NULL;
   }
 
-  if (!Hal_AdcMgr_RefAdd())
-    Hal_General_AbnormalExit("Cannot initialize ADC manager");
-
   memset(IOMapInput.Colors, 0, sizeof(IOMapInput.Colors));
   memset(VarsInput.VarsColor, 0, sizeof(VarsInput.VarsColor));
 
@@ -203,11 +200,6 @@ void      cInputInit(void* pHeader)
 void      cInputCtrl(void)
 {
   UBYTE   Tmp;
-
-  Hal_AdcMgr_Tick();
-  for (int port = 0; port < NO_OF_INPUTS; port++) {
-    Hal_AdcDev_Tick(VarsInput.Devices[port]);
-  }
 
   if (VarsInput.ColorStatus)
   {
@@ -1206,7 +1198,6 @@ void      cInputExit(void)
   for (int port = 0; port < NO_OF_INPUTS; port++) {
     Hal_AdcHost_Detach(port);
   }
-  Hal_AdcMgr_RefDel();
 }
 
 UBYTE cInputPinFunc(UBYTE Cmd, UBYTE Port, UBYTE Pin, UBYTE *pData)
@@ -1252,7 +1243,7 @@ bool Hal_AdcHost_Attach(hal_adc_dev_t *device, int port) {
     if (VarsInput.Devices[port])
         return false;
 
-    if (Hal_AdcDev_JustAttached(device, port)) {
+    if (Hal_AdcDev_JustAttached(device)) {
         VarsInput.Devices[port] = device;
         return true;
     }

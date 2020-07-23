@@ -84,7 +84,7 @@ typedef struct
   SBYTE MotorMaxAcceleration;                 // For absolute regulation, maximum motor acceleration
   UBYTE RunStateAtLimit;                      // what run state to switch to when tacho limit is reached
   UBYTE RampDownToLimit;
-  UBYTE Spare2;
+  UBYTE LastTachoValid;
   UBYTE Spare3;
   SLONG LastTacho;
 }MOTORDATA;
@@ -153,6 +153,8 @@ void      dOutputInit(void)
     pMD->MotorOverloaded = 0;
     pMD->RunStateAtLimit = MOTOR_RUN_STATE_IDLE;
     pMD->RampDownToLimit = 0;
+    pMD->LastTacho = 0;
+    pMD->LastTachoValid = false;
     Hal_Motor_SetStopMode(Temp, STOP_MODE_COAST);
     Hal_Motor_PushPwm(Temp, 0);
   }
@@ -169,14 +171,24 @@ void dOutputCtrl(void)
   UBYTE MotorNr;
   SLONG NewTachoCount[3];
 
-  Hal_Motor_Tick();
-
   for (MotorNr = 0; MotorNr < 3; MotorNr++)
   {
+    MOTORDATA * pMD = &(MotorData[MotorNr]);
+
     int32_t newTacho = 0;
-    Hal_Motor_GetTacho(MotorNr, &newTacho);
-    NewTachoCount[MotorNr] = newTacho - MotorData[MotorNr].LastTacho;
-    MotorData[MotorNr].LastTacho = newTacho;
+    if (Hal_Motor_GetTacho(MotorNr, &newTacho)) {
+        if (pMD->LastTachoValid) {
+            NewTachoCount[MotorNr] = newTacho - pMD->LastTacho;
+        } else {
+            NewTachoCount[MotorNr] = 0;
+            pMD->LastTachoValid = true;
+        }
+        MotorData[MotorNr].LastTacho = newTacho;
+    } else {
+        NewTachoCount[MotorNr] = 0;
+        MotorData[MotorNr].LastTacho = 0;
+        pMD->LastTachoValid = false;
+    }
   }
 
   for (MotorNr = 0; MotorNr < 3; MotorNr++)
