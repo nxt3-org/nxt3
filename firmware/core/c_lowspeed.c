@@ -46,8 +46,6 @@ void cLowSpeedInit(void *pHeader) {
     IOMapLowSpeed.NoRestartMask = 0x00;
     IOMapLowSpeed.FastMask      = 0x00;
     IOMapLowSpeed.pFunc         = &cLowSpeedFastI2C;
-    if (!Hal_IicMgr_RefAdd())
-        Hal_General_AbnormalExit("Cannot initialize I2C port manager");
 }
 
 void cLowSpeedLoadWriteBuffer(UBYTE ch) {
@@ -144,8 +142,6 @@ failure:
 }
 
 void cLowSpeedCtrl(void) {
-    Hal_IicMgr_Tick();
-
     int port;
     for (port = 0; port < NO_OF_LOWSPEED_COM_CH; port++) {
         if (Hal_IicHost_Present(port))
@@ -282,7 +278,6 @@ void cLowSpeedExit(void) {
         }
         Hal_IicHost_Detach(port);
     }
-    Hal_IicMgr_RefDel();
 }
 
 bool Hal_IicHost_Attach(hal_iic_dev_t *device, int port) {
@@ -291,7 +286,7 @@ bool Hal_IicHost_Attach(hal_iic_dev_t *device, int port) {
     if (VarsLowSpeed.Devices[port])
         return false;
 
-    if (Hal_IicDev_JustAttached(device, port)) {
+    if (Hal_IicDev_JustAttached(device)) {
         VarsLowSpeed.Devices[port] = device;
         return true;
     }
