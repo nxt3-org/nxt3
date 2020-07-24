@@ -106,7 +106,7 @@ SBYTE cLowSpeedFastI2C(UBYTE ch) {
     // 2. write it
     result = Hal_IicDev_Start(VarsLowSpeed.Devices[ch],
                               VarsLowSpeed.OutputBuf[ch].Buf,
-                              VarsLowSpeed.OutputBuf->InPtr);
+                              VarsLowSpeed.OutputBuf[ch].InPtr);
     if (result == HAL_IIC_RESULT_ERROR) {
         failCode = LOWSPEED_FAST_ERROR_FAULT;
         goto failure;
@@ -193,7 +193,7 @@ void cLowSpeedCtrl(void) {
 
             result = Hal_IicDev_Start(VarsLowSpeed.Devices[port],
                                       VarsLowSpeed.OutputBuf[port].Buf,
-                                      VarsLowSpeed.OutputBuf->InPtr);
+                                      VarsLowSpeed.OutputBuf[port].InPtr);
 
             if (result == HAL_IIC_RESULT_DONE) {
                 VarsLowSpeed.RxTimeCnt[port]     = 0;
