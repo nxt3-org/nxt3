@@ -1831,6 +1831,8 @@ void      cUiCtrl(void)
         }
       }
     }
+  } else {
+      VarsUi.LowBattHasOccured = false;
   }
 
   // Check for incomming BT connection requests
