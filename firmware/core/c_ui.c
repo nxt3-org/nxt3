@@ -1828,6 +1828,10 @@ void      cUiCtrl(void)
           IOMapUi.Flags                     |= UI_REDRAW_STATUS;
           IOMapUi.Flags                     |= UI_BUSY;
           IOMapUi.State                      = LOW_BATTERY;
+          pMapSound->Freq                    = 800;
+          pMapSound->Duration                = 500;
+          pMapSound->Mode                    = SOUND_TONE;
+          pMapSound->Flags                  |= SOUND_UPDATE;
         }
       }
     }
