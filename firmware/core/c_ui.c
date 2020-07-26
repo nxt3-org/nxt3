@@ -18,6 +18,7 @@
 
 #include <hal_battery.h>
 #include <hal_general.h>
+#include <hal_led.h>
 #include  "stdio.h"
 #include  "string.h"
 #include  "ctype.h"
@@ -822,9 +823,15 @@ void      cUiUpdateStatus(void)
       else
         VarsUi.BatteryToggle = 0;
 
+      Hal_Led_SetMode(BRICK_LED_ON_GREEN);
     } else {
       VarsUi.LowBatt = 1;
       VarsUi.BatteryToggle = !VarsUi.BatteryToggle;
+      if (!crit) {
+        Hal_Led_SetMode(BRICK_LED_ON_ORANGE);
+      } else {
+        Hal_Led_SetMode(BRICK_LED_ON_RED);
+      }
     }
 
     // Ensure frequently status updates
