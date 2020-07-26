@@ -18,15 +18,3 @@ enum
   NOS_OF_AVR_BTNS     = 4,
   NOS_OF_AVR_INPUTS   = 4
 };
-
-typedef   struct {
-  UWORD   Battery;
-} IOFROMAVR;
-
-extern    IOFROMAVR IoFromAvr;
-
-#ifdef INCLUDE_OS
-
-IOFROMAVR InFromAvr;
-
-#endif

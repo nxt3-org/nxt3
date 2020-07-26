@@ -53,8 +53,6 @@ static    const HEADER*  pModuleHeaders[] =
   0
 };
 
-IOFROMAVR IoFromAvr;
-
 void      mSchedInit(void)
 {
   UWORD   Tmp;

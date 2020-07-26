@@ -16,6 +16,8 @@
 // Platform        C
 //
 
+#include <hal_battery.h>
+#include <hal_general.h>
 #include  "stdio.h"
 #include  "string.h"
 #include  "ctype.h"
@@ -300,22 +302,6 @@ const     UBYTE TXT_FILETYPE[FILETYPES] =
 #define   POWER_OFF_TIME_DEFAULT  3
 
 const     UBYTE PowerOffTimeSteps[POWER_OFF_TIME_STEPS] = { 0,2,5,10,30,60 }; // [min]
-
-// ****** BATTERY DEFINITIONS ************************************************
-
-#define   BATTERYLIMITS           4   // [Cnt]
-#define   BATTERYLIMITHYST        100 // [mV]
-#define   RECHARGEABLELIMITHYST   50  // [mV]
-
-const     UWORD BatteryLimits[BATTERYLIMITS] =
-{
-  6100,6500,7000,7500 // [mV]
-};
-
-const     UWORD RechargeableLimits[BATTERYLIMITS] =
-{
-  7100,7200,7300,7500 // [mV]
-};
 
 //******* UI MENU FILE HANDLER *************************************************************************
 
@@ -806,70 +792,36 @@ void      cUiUpdateStatus(void)
       VarsUi.Running = 0;
     }
 
-    // Get battery voltage limits
-    if ((IoFromAvr.Battery & 0x8000))
-    {
-      IOMapUi.Rechargeable = 1;
-      pTmp = (UWORD*)RechargeableLimits;
-      Hyst = RECHARGEABLELIMITHYST;
-    }
-    else
-    {
-      IOMapUi.Rechargeable = 0;
-      pTmp = (UWORD*)BatteryLimits;
-      Hyst = BATTERYLIMITHYST;
-    }
+    bool akku = false;
+    bool warn = false;
+    bool crit = false;
+    float voltage = 0.0f;
+    float pct = 0.0f;
+    Hal_Battery_Tick();
+    Hal_Battery_IsRechargeable(&akku);
+    Hal_Battery_CheckBatteryWarning(&warn, &crit);
+    Hal_Battery_GetVoltage(&voltage);
+    Hal_Battery_GetPercentRemaining(&pct);
 
-    // Calculate battery voltage
-    Tmp = IoFromAvr.Battery & 0x03FF;
-    Tmp = (UWORD)((float)Tmp * BATTERY_COUNT_TO_MV);
+    IOMapUi.Rechargeable = akku ? 1 : 0;
+    IOMapUi.BatteryVoltage = (UWORD)(voltage * 1000.0f);
+    IOMapUi.BatteryState = (UBYTE)(pct * 3.0f / 100.0f) + 1;
+    if (IOMapUi.BatteryState > 4)
+        IOMapUi.BatteryState = 4;
+    if (pct == 0.0f)
+        IOMapUi.BatteryState = 0;
 
-    IOMapUi.BatteryVoltage = Tmp;
-
-    // Find new battery state
-    Pointer = 0;
-    while ((Tmp > pTmp[Pointer]) && (Pointer < BATTERYLIMITS))
-    {
-      Pointer++;
-    }
-
-    // Change battery state
-    if (Pointer != IOMapUi.BatteryState)
-    {
-      if (Pointer > IOMapUi.BatteryState)
-      {
-        if (Tmp > (pTmp[IOMapUi.BatteryState] + Hyst))
-        {
-          IOMapUi.BatteryState   = Pointer;
-        }
-      }
-      else
-      {
-        IOMapUi.BatteryState   = Pointer;
-      }
-    }
+    if (crit)
+        IOMapUi.ForceOff  = TRUE;
 
     // Control toggle and bitmap
-    if (IOMapUi.BatteryState)
-    {
+    if (!warn) {
       VarsUi.BatteryToggle = 0;
       VarsUi.LowBatt = 0;
-    }
-    else
-    {
-      if (VarsUi.LowBatt < 255)
-      {
-        VarsUi.LowBatt++;
-      }
 
-      if (VarsUi.BatteryToggle)
-      {
-        VarsUi.BatteryToggle = 0;
-      }
-      else
-      {
-        VarsUi.BatteryToggle = 1;
-      }
+    } else {
+      VarsUi.LowBatt = 1;
+      VarsUi.BatteryToggle = !VarsUi.BatteryToggle;
     }
 
     // Ensure frequently status updates
@@ -886,8 +838,11 @@ void      cUiUpdateStatus(void)
       // Status line update nessesary
       if (IOMapUi.BatteryState < Status.ItemsX)
       {
+        bool batteryPack = false;
+        Hal_Battery_IsRechargeable(&batteryPack);
+
         // Update battery status icons
-        if (IoFromAvr.Battery & 0x8000)
+        if (batteryPack)
         {
           VarsUi.NewStatusIcons[STATUSICON_BATTERY] = STATUS_NO_RECHARGEABLE_0 + IOMapUi.BatteryState + VarsUi.BatteryToggle;
         }
@@ -1204,6 +1159,8 @@ void      cUiInit(void* pHeader)
   IOMapUi.BluetoothState    = BT_STATE_OFF;
   IOMapUi.UsbState          = 0;
   IOMapUi.State             = INIT_DISPLAY;
+  if (!Hal_Battery_RefAdd())
+      Hal_General_AbnormalExit("Cannot initialize battery monitoring");
 }
 
 
@@ -1851,7 +1808,7 @@ void      cUiCtrl(void)
   }
 
   // Check for low battery voltage
-  if (VarsUi.LowBatt >= LOW_BATT_THRESHOLD)
+  if (VarsUi.LowBatt)
   {
     if (!VarsUi.LowBattHasOccured)
     {
@@ -1944,6 +1901,7 @@ void      cUiCtrl(void)
 
 void      cUiExit(void)
 {
+  Hal_Battery_RefDel();
   VarsUi.Initialized        = FALSE;
   IOMapUi.State             = INIT_DISPLAY;
 }
