@@ -805,7 +805,7 @@ void      cUiUpdateStatus(void)
 
     IOMapUi.Rechargeable = akku ? 1 : 0;
     IOMapUi.BatteryVoltage = (UWORD)(voltage * 1000.0f);
-    IOMapUi.BatteryState = (UBYTE)(pct * 3.0f / 100.0f) + 1;
+    IOMapUi.BatteryState = (UBYTE)(pct * 4.0f / 100.0f);
     if (IOMapUi.BatteryState > 4)
         IOMapUi.BatteryState = 4;
     if (pct == 0.0f)
@@ -816,8 +816,11 @@ void      cUiUpdateStatus(void)
 
     // Control toggle and bitmap
     if (!warn) {
-      VarsUi.BatteryToggle = 0;
       VarsUi.LowBatt = 0;
+      if (IOMapUi.BatteryState == 0)
+        VarsUi.BatteryToggle = 1;
+      else
+        VarsUi.BatteryToggle = 0;
 
     } else {
       VarsUi.LowBatt = 1;
