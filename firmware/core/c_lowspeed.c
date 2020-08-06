@@ -19,6 +19,7 @@
 #include  "c_lowspeed.h"
 #include <string.h>
 #include <hal_general.h>
+#include <hal_pnp_defs.h>
 
 static IOMAPLOWSPEED IOMapLowSpeed;
 static VARSLOWSPEED  VarsLowSpeed;
@@ -95,7 +96,7 @@ SBYTE cLowSpeedFastI2C(UBYTE ch) {
         failCode = LOWSPEED_FAST_ERROR_INVALID_PORT;
         goto failure;
     }
-    if (!Hal_IicHost_Present(ch)) {
+    if (!VarsLowSpeed.Devices[ch]) {
         failCode = LOWSPEED_FAST_ERROR_FAULT;
         goto failure;
     }
@@ -143,10 +144,6 @@ failure:
 
 void cLowSpeedCtrl(void) {
     int port;
-    for (port = 0; port < NO_OF_LOWSPEED_COM_CH; port++) {
-        if (Hal_IicHost_Present(port))
-            Hal_IicDev_Tick(VarsLowSpeed.Devices[port]);
-    }
 
     if (IOMapLowSpeed.Active == 0)
         return;
@@ -167,7 +164,7 @@ void cLowSpeedCtrl(void) {
                 break;
             }
 
-            if (!Hal_IicHost_Present(port)) {
+            if (!VarsLowSpeed.Devices[port]) {
                 IOMapLowSpeed.ChannelState[port] = LOWSPEED_ERROR;
                 IOMapLowSpeed.ErrorType[port]    = LOWSPEED_CH_NOT_READY;
                 break;
@@ -286,11 +283,8 @@ bool Hal_IicHost_Attach(hal_iic_dev_t *device, int port) {
     if (VarsLowSpeed.Devices[port])
         return false;
 
-    if (Hal_IicDev_JustAttached(device)) {
-        VarsLowSpeed.Devices[port] = device;
-        return true;
-    }
-    return false;
+    VarsLowSpeed.Devices[port] = device;
+    return true;
 }
 
 bool Hal_IicHost_Detach(int port) {
@@ -300,13 +294,6 @@ bool Hal_IicHost_Detach(int port) {
         return true;
 
     Hal_IicDev_Cancel(VarsLowSpeed.Devices[port]);
-    Hal_IicDev_JustDetached(VarsLowSpeed.Devices[port]);
     VarsLowSpeed.Devices[port] = NULL;
     return true;
-}
-
-bool Hal_IicHost_Present(int port) {
-    if (port >= 4 || port < 0)
-        return false;
-    return VarsLowSpeed.Devices[port] != NULL;
 }

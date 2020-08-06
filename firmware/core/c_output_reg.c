@@ -87,6 +87,8 @@ typedef struct
   UBYTE LastTachoValid;
   UBYTE Spare3;
   SLONG LastTacho;
+  hal_motor_dev_t *Device;
+  motor_stop_t StopMode;
 }MOTORDATA;
 
 typedef struct
@@ -125,9 +127,6 @@ void      dOutputInit(void)
 {
   UBYTE Temp;
 
-  if (!Hal_Motor_RefAdd())
-      Hal_General_AbnormalExit("Cannot initialize motor output");
-
   RegulationTime = REGULATION_TIME;
 
   for (Temp = 0; Temp < 3; Temp++)
@@ -155,8 +154,8 @@ void      dOutputInit(void)
     pMD->RampDownToLimit = 0;
     pMD->LastTacho = 0;
     pMD->LastTachoValid = false;
-    Hal_Motor_SetStopMode(Temp, STOP_MODE_COAST);
-    Hal_Motor_PushPwm(Temp, 0);
+    pMD->Device = NULL;
+    pMD->StopMode = STOP_MODE_COAST;
   }
 }
 
@@ -176,7 +175,7 @@ void dOutputCtrl(void)
     MOTORDATA * pMD = &(MotorData[MotorNr]);
 
     int32_t newTacho = 0;
-    if (Hal_Motor_GetTacho(MotorNr, &newTacho)) {
+    if (Hal_MotorDev_GetTacho(pMD->Device, &newTacho)) {
         if (pMD->LastTachoValid) {
             NewTachoCount[MotorNr] = newTacho - pMD->LastTacho;
         } else {
@@ -234,15 +233,17 @@ void dOutputCtrl(void)
     }
   }
 
-  Hal_Motor_PushPwm(MOTOR_PORT_A, MotorData[MOTOR_A].MotorActualSpeed);
-  Hal_Motor_PushPwm(MOTOR_PORT_B, MotorData[MOTOR_B].MotorActualSpeed);
-  Hal_Motor_PushPwm(MOTOR_PORT_C, MotorData[MOTOR_C].MotorActualSpeed);
-  //Hal_Motor_PushPwm(MOTOR_PORT_D, MotorData[MOTOR_D].MotorActualSpeed);
+  for (MotorNr = 0; MotorNr < 3; MotorNr++) {
+    MOTORDATA *pMD = &MotorData[MotorNr];
+    Hal_MotorDev_SetPwm(pMD->Device, pMD->MotorActualSpeed, pMD->StopMode);
+  }
 }
 
 void      dOutputExit(void)
 {
-  Hal_Motor_RefDel();
+  for (int port = 0; port < 3; port++) {
+    Hal_MotorHost_Detach(port);
+  }
 }
 
 /* Called eveyr 1 mS */
@@ -265,11 +266,13 @@ void dOutputGetMotorParameters(UBYTE *CurrentMotorSpeed, SLONG *TachoCount, SLON
 
 void dOutputSetMode(UBYTE Motor, UBYTE Mode)     //Set motor mode (break, Float)
 {
+  MOTORDATA *pMD = &MotorData[Motor];
   if (Mode & 0x02) {
-    Hal_Motor_SetStopMode(Motor, STOP_MODE_BRAKE);
+    pMD->StopMode = STOP_MODE_BRAKE;
   } else {
-    Hal_Motor_SetStopMode(Motor, STOP_MODE_COAST);
+    pMD->StopMode = STOP_MODE_COAST;
   }
+  Hal_MotorDev_SetPwm(pMD->Device, pMD->MotorActualSpeed, pMD->StopMode);
 }
 
 /* Update the regulation state for the motor */
@@ -431,7 +434,7 @@ void dOutputSetSpeed (UBYTE MotorNr, UBYTE NewMotorRunState, SBYTE Speed, SBYTE 
       pMD->PositionFracError = 0;
       pMD->RegulationTimeCount = 0;
       pMD->DeltaCaptureCount = 0;
-      Hal_Motor_ResetTacho(MotorNr);
+      Hal_MotorDev_ResetTacho(pMD->Device);
     }
     switch (NewMotorRunState)
     {
@@ -1508,5 +1511,29 @@ void dOutputRampDownSynch(UBYTE MotorNr)
       }
     }
   }
+}
+
+bool Hal_MotorHost_Attach(hal_motor_dev_t *device, motor_port_t port) {
+    if (port >= 3 || port < 0)
+        return false;
+    if (MotorData[port].Device)
+        return false;
+
+    MotorData[port].LastTacho = 0;
+    MotorData[port].LastTachoValid = false;
+    MotorData[port].Device = device;
+    Hal_MotorDev_SetPwm(device, MotorData[port].MotorActualSpeed, MotorData[port].StopMode);
+    return true;
+}
+
+bool Hal_MotorHost_Detach(motor_port_t port) {
+    if (port >= 3 || port < 0)
+        return false;
+    MotorData[port].Device = NULL;
+    return true;
+}
+
+bool Hal_MotorHost_Present(motor_port_t port) {
+    return MotorData[port].Device != NULL;
 }
 

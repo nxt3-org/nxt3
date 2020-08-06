@@ -21,6 +21,7 @@ extern    const HEADER cInput;
 
 #include  "c_input.iom.h"
 #include "hal_adc.h"
+#include "hal_pnp.h"
 
 #define   ACTUAL_AD_RES                 1023L
 #define   SENSOR_RESOLUTION             1023L

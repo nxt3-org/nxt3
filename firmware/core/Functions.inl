@@ -18,7 +18,9 @@
 
 //******* cUiBtTest **********************************************************
 
-const     UBYTE NONVOLATILE_NAME[]      = UI_NONVOLATILE;     // Non volatile filename without extention
+#include <hal_pnp_defs.h>
+
+const     UBYTE NONVOLATILE_NAME[] = UI_NONVOLATILE;     // Non volatile filename without extention
 #ifndef STRIPPED
 const     UBYTE DEFAULT_PROGRAM_NAME[]  = UI_PROGRAM_DEFAULT; // On brick programming filename without extention
 const     UBYTE TEMP_PROGRAM_FILENAME[] = UI_PROGRAM_TEMP;    // On brick programming tmp filename without extention

@@ -158,6 +158,9 @@ void      cInputInit(void* pHeader)
   IOMapInput.pFunc = &cInputPinFunc;
   UBYTE   Tmp;
 
+  if (!Hal_Pnp_RefAdd())
+      Hal_General_AbnormalExit("Cannot initialize PNP manager");
+
   /* Init ADC host */
   for (Tmp = 0; Tmp < NO_OF_INPUTS; Tmp++) {
     VarsInput.Devices[Tmp] = NULL;
@@ -182,8 +185,16 @@ void      cInputInit(void* pHeader)
     pIn->CustomActiveStatus = CUSTOMINACTIVE;
     pIn->CustomZeroOffset   = 0;
     pIn->CustomPctFullScale = 0;
-    Hal_AdcDev_LoadPins(dev);
-    Hal_AdcDev_GetDigiIn(dev, DIGI0 | DIGI1, &pIn->DigiPinsIn);
+    struct hal_pins pins = {
+        .d0_dir = DIR_IN,
+        .d0_in  = PIN_LOW,
+        .d0_out = PIN_LOW,
+        .d1_dir = DIR_IN,
+        .d1_in  = PIN_LOW,
+        .d1_out = PIN_LOW,
+        .pwr_mode = POWER_AUX_OFF
+    };
+    Hal_Pnp_SetPins(Tmp, pins);
 
     VarsInput.EdgeCnt[Tmp]       = 0;
     VarsInput.InputDebounce[Tmp] = 0;
@@ -233,7 +244,7 @@ void      cInputCtrl(void)
 
     if (sType != oldType)
     {
-      Hal_AdcDev_SetType(VarsInput.Devices[Tmp], sType);
+      Hal_Pnp_SetType(Tmp, sType, false);
       /* Clear all variables for this sensor */
       VarsInput.EdgeCnt[Tmp]       = 0;
       VarsInput.InputDebounce[Tmp] = 0;
@@ -290,7 +301,7 @@ void      cInputCtrl(void)
         pIn->InvalidData &= ~INVALID_DATA;
       }
 
-      if (!Hal_AdcDev_IsValid(VarsInput.Devices[Tmp]))
+      if (!Hal_Pnp_IsReady(Tmp))
           pIn->InvalidData |= INVALID_DATA;
     }
 
@@ -325,8 +336,9 @@ void      cInputCalcSensorValues(UBYTE No)
       if (sType == CUSTOM) {
         /* Setup and read digital IO */
         cInputSetupCustomSensor(No);
-        Hal_AdcDev_LoadPins(dev);
-        Hal_AdcDev_GetDigiIn(dev, DIGI0 | DIGI1, &pIn->DigiPinsIn);
+        struct hal_pins pins;
+        Hal_Pnp_GetPins(No, &pins);
+        Hal_Pnp_GetDigiIn(&pins, DIGI0 | DIGI1, &pIn->DigiPinsIn);
       }
 
       InputVal = Hal_AdcDev_ReadAdc(dev);
@@ -417,8 +429,10 @@ void      cInputCalcSensorValues(UBYTE No)
           {
 
             /* Use clock to detect errors */
-            Hal_AdcDev_SetDigiDir(dev, DIGI0, DIR_IN);
-            Hal_AdcDev_StorePins(dev);
+            struct hal_pins pins;
+            Hal_Pnp_GetPins(No, &pins);
+            Hal_Pnp_SetDigiDir(&pins, DIGI0, DIR_IN);
+            Hal_Pnp_SetPins(No, pins);
             (pC->CalibrationState) = 0;
           }
         }
@@ -1009,56 +1023,58 @@ void      cInputCalcFullScale(UWORD *pRawVal, UWORD ZeroPointOffset, UBYTE PctFu
 
 void      cInputSetupType(UBYTE Port, UBYTE newType, UBYTE OldType)
 {
-  hal_adc_dev_t *dev = VarsInput.Devices[Port];
+  struct hal_pins pins;
+  Hal_Pnp_GetPins(Port, &pins);
   switch(newType)
   {
     case NO_SENSOR:
     case SWITCH:
     case TEMPERATURE:
     {
-      Hal_AdcDev_SetPower(dev, POWER_AUX_OFF);
-      Hal_AdcDev_SetDigiDir(dev, DIGI0 | DIGI1, DIR_IN);
+      Hal_Pnp_SetPower(&pins, POWER_AUX_OFF);
+      Hal_Pnp_SetDigiDir(&pins, DIGI0 | DIGI1, DIR_IN);
     }
     break;
 
     case REFLECTION:
     case ANGLE:
     {
-      Hal_AdcDev_SetPower(dev, POWER_AUX_RCX);
-      Hal_AdcDev_SetDigiOut(dev, DIGI0 | DIGI1, PIN_LOW);
+      Hal_Pnp_SetPower(&pins, POWER_AUX_RCX);
+      Hal_Pnp_SetDigiOut(&pins, DIGI0 | DIGI1, PIN_LOW);
     }
     break;
 
     case LIGHT_ACTIVE:
     {
-      Hal_AdcDev_SetPower(dev, POWER_AUX_OFF);
-      Hal_AdcDev_SetDigiOut(dev, DIGI0, PIN_HIGH);
-      Hal_AdcDev_SetDigiOut(dev, DIGI1, PIN_LOW);
+      Hal_Pnp_SetPower(&pins, POWER_AUX_OFF);
+      Hal_Pnp_SetDigiOut(&pins, DIGI0, PIN_HIGH);
+      Hal_Pnp_SetDigiOut(&pins, DIGI1, PIN_LOW);
     }
     break;
 
     case LIGHT_INACTIVE:
     {
-      Hal_AdcDev_SetPower(dev, POWER_AUX_OFF);
-      Hal_AdcDev_SetDigiOut(dev, DIGI1, PIN_LOW);
+      Hal_Pnp_SetPower(&pins, POWER_AUX_OFF);
+      Hal_Pnp_SetDigiOut(&pins, DIGI0, PIN_LOW);
+      Hal_Pnp_SetDigiOut(&pins, DIGI1, PIN_LOW);
     }
     break;
 
     case SOUND_DB:
     {
       VarsInput.InvalidTimer[Port] = INVALID_RELOAD_SOUND;
-      Hal_AdcDev_SetPower(dev, POWER_AUX_OFF);
-      Hal_AdcDev_SetDigiOut(dev, DIGI0, PIN_HIGH);
-      Hal_AdcDev_SetDigiOut(dev, DIGI1, PIN_LOW);
+      Hal_Pnp_SetPower(&pins, POWER_AUX_OFF);
+      Hal_Pnp_SetDigiOut(&pins, DIGI0, PIN_HIGH);
+      Hal_Pnp_SetDigiOut(&pins, DIGI1, PIN_LOW);
     }
     break;
 
     case SOUND_DBA:
     {
       VarsInput.InvalidTimer[Port] = INVALID_RELOAD_SOUND;
-      Hal_AdcDev_SetPower(dev, POWER_AUX_OFF);
-      Hal_AdcDev_SetDigiOut(dev, DIGI0, PIN_LOW);
-      Hal_AdcDev_SetDigiOut(dev, DIGI1, PIN_HIGH);
+      Hal_Pnp_SetPower(&pins, POWER_AUX_OFF);
+      Hal_Pnp_SetDigiOut(&pins, DIGI0, PIN_LOW);
+      Hal_Pnp_SetDigiOut(&pins, DIGI1, PIN_HIGH);
     }
     break;
 
@@ -1070,22 +1086,22 @@ void      cInputSetupType(UBYTE Port, UBYTE newType, UBYTE OldType)
 
     case LOWSPEED:
     {
-      Hal_AdcDev_SetPower(dev, POWER_AUX_OFF);
-      Hal_AdcDev_SetDigiOut(dev, DIGI0 | DIGI1, PIN_HIGH);
+      Hal_Pnp_SetPower(&pins, POWER_AUX_OFF);
+      Hal_Pnp_SetDigiOut(&pins, DIGI0 | DIGI1, PIN_HIGH);
     }
     break;
 
     case LOWSPEED_9V:
     {
-      Hal_AdcDev_SetPower(dev, POWER_AUX_9V);
-      Hal_AdcDev_SetDigiOut(dev, DIGI0 | DIGI1, PIN_HIGH);
+      Hal_Pnp_SetPower(&pins, POWER_AUX_9V);
+      Hal_Pnp_SetDigiOut(&pins, DIGI0 | DIGI1, PIN_HIGH);
     }
     break;
 
     case HIGHSPEED:
     {
-      Hal_AdcDev_SetPower(dev, POWER_AUX_9V);
-      Hal_AdcDev_SetDigiDir(dev, DIGI0 | DIGI1, DIR_IN);
+      Hal_Pnp_SetPower(&pins, POWER_AUX_9V);
+      Hal_Pnp_SetDigiDir(&pins, DIGI0 | DIGI1, DIR_IN);
     }
     break;
 
@@ -1096,9 +1112,9 @@ void      cInputSetupType(UBYTE Port, UBYTE newType, UBYTE OldType)
     case COLORNONE:
     {
       VarsInput.InvalidTimer[Port] = INVALID_RELOAD_COLOR;
-      Hal_AdcDev_SetPower(dev, POWER_AUX_OFF);
-      Hal_AdcDev_SetDigiOut(dev, DIGI0, PIN_LOW);
-      Hal_AdcDev_SetDigiDir(dev, DIGI1, DIR_IN);
+      Hal_Pnp_SetPower(&pins, POWER_AUX_OFF);
+      Hal_Pnp_SetDigiOut(&pins, DIGI0, PIN_LOW);
+      Hal_Pnp_SetDigiDir(&pins, DIGI1, DIR_IN);
       IOMapInput.Colors[Port].CalibrationState = SENSORCAL;
       VarsInput.VarsColor[Port].ColorInitState = 0;
 
@@ -1111,32 +1127,32 @@ void      cInputSetupType(UBYTE Port, UBYTE newType, UBYTE OldType)
     }
     break;
   }
-  Hal_AdcDev_StorePins(dev);
+  Hal_Pnp_SetPins(Port, pins);
 }
 
 void      cInputSetupCustomSensor(UBYTE Port)
 {
-  hal_adc_dev_t *dev = VarsInput.Devices[Port];
-
-  Hal_AdcDev_SetDigiOut(dev, IOMapInput.Inputs[Port].DigiPinsOut, PIN_HIGH);
-  Hal_AdcDev_SetDigiOut(dev, ~IOMapInput.Inputs[Port].DigiPinsOut, PIN_LOW);
-  Hal_AdcDev_SetDigiDir(dev, ~IOMapInput.Inputs[Port].DigiPinsDir, DIR_IN);
-
+  struct hal_pins pins;
+  Hal_Pnp_GetPins(Port, &pins);
+  Hal_Pnp_SetDigiOut(&pins, IOMapInput.Inputs[Port].DigiPinsOut, PIN_HIGH);
+  Hal_Pnp_SetDigiOut(&pins, ~IOMapInput.Inputs[Port].DigiPinsOut, PIN_LOW);
+  Hal_Pnp_SetDigiDir(&pins, ~IOMapInput.Inputs[Port].DigiPinsDir, DIR_IN);
   if (CUSTOMACTIVE == (IOMapInput.Inputs[Port].CustomActiveStatus))
   {
-    Hal_AdcDev_SetPower(dev, POWER_AUX_RCX);
+    Hal_Pnp_SetPower(&pins, POWER_AUX_RCX);
   }
   else
   {
     if (CUSTOM9V == (IOMapInput.Inputs[Port].CustomActiveStatus))
     {
-      Hal_AdcDev_SetPower(dev, POWER_AUX_9V);
+      Hal_Pnp_SetPower(&pins, POWER_AUX_9V);
     }
     else
     {
-      Hal_AdcDev_SetPower(dev, POWER_AUX_OFF);
+      Hal_Pnp_SetPower(&pins, POWER_AUX_OFF);
     }
   }
+  Hal_Pnp_SetPins(Port, pins);
 }
 
 
@@ -1198,6 +1214,8 @@ void      cInputExit(void)
   for (int port = 0; port < NO_OF_INPUTS; port++) {
     Hal_AdcHost_Detach(port);
   }
+  if (!Hal_Pnp_RefDel())
+      Hal_General_AbnormalExit("Cannot deinitialize PNP manager");
 }
 
 UBYTE cInputPinFunc(UBYTE Cmd, UBYTE Port, UBYTE Pin, UBYTE *pData)
@@ -1214,26 +1232,26 @@ UBYTE cInputPinFunc(UBYTE Cmd, UBYTE Port, UBYTE Pin, UBYTE *pData)
   bool Dir = ((Pin&0xFC)>>2) != 0;
   Pin &= 0x03;
 
+  struct hal_pins pins;
+  Hal_Pnp_GetPins(Port, &pins);
+
   switch(Cmd&0x03)
   {
     case PINDIR:
-      Hal_AdcDev_SetDigiDir(dev, Pin, Dir);
-      Hal_AdcDev_StorePins(dev);
+      Hal_Pnp_SetDigiDir(&pins, Pin, Dir);
       break;
     case SETPIN:
-      Hal_AdcDev_SetDigiOut(dev, Pin, true);
-      Hal_AdcDev_StorePins(dev);
+      Hal_Pnp_SetDigiOut(&pins, Pin, true);
       break;
     case CLEARPIN:
-      Hal_AdcDev_SetDigiOut(dev, Pin, false);
-      Hal_AdcDev_StorePins(dev);
+      Hal_Pnp_SetDigiOut(&pins, Pin, false);
       break;
     case READPIN:
-      Hal_AdcDev_LoadPins(dev);
-      Hal_AdcDev_GetDigiIn(dev, Pin, pData);
+      Hal_Pnp_GetDigiIn(&pins, Pin, pData);
       break;
   }
 
+  Hal_Pnp_SetPins(Port, pins);
   return (ReturnState);
 }
 
@@ -1243,11 +1261,8 @@ bool Hal_AdcHost_Attach(hal_adc_dev_t *device, int port) {
     if (VarsInput.Devices[port])
         return false;
 
-    if (Hal_AdcDev_JustAttached(device)) {
-        VarsInput.Devices[port] = device;
-        return true;
-    }
-    return false;
+    VarsInput.Devices[port] = device;
+    return true;
 }
 
 bool Hal_AdcHost_Detach(int port) {
@@ -1256,13 +1271,6 @@ bool Hal_AdcHost_Detach(int port) {
     if (!VarsInput.Devices[port])
         return true;
 
-    Hal_AdcDev_JustDetached(VarsInput.Devices[port]);
     VarsInput.Devices[port] = NULL;
     return true;
-}
-
-bool Hal_AdcHost_Present(int port) {
-    if (port >= 4 || port < 0)
-        return false;
-    return VarsInput.Devices[port] != NULL;
 }

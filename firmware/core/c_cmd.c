@@ -45,6 +45,7 @@
 #include <math.h> // for sqrt, abs, and trig stuff
 #include <limits.h>
 #include <float.h>
+#include <hal_pnp_defs.h>
 
 #define VMProfilingCode 0
 
