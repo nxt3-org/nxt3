@@ -46,6 +46,7 @@ void      cLoaderGetModuleName(UBYTE *pDst, UBYTE *pModule);
 UWORD     cLoaderCreateFile(UBYTE *pFileName, ULONG *pLength);
 UWORD     cLoaderRenameFile(UBYTE *pFileName, UBYTE *pBuffer, ULONG *pLength);
 UWORD     cLoaderOpenRead(UBYTE *pFileName, UBYTE *pBuffer, ULONG *pLength, UBYTE bLinear);
+UWORD     cLoaderOpenAppend(UBYTE *pFileName, ULONG *pLength);
 UWORD     cLoaderDeleteFile(UBYTE *pFileName);
 UWORD     cLoaderResizeFile(UBYTE *pFileName, ULONG pLength);
 
@@ -97,7 +98,16 @@ UWORD cLoaderRenameFile(UBYTE *pFileName, UBYTE *pBuffer, ULONG *pLength)
     return hnd;
   }
 
-  error_t err = Hal_Fs_CheckHandleIsExclusive(hnd, true);
+  file_meta_t meta;
+  error_t err = Hal_Fs_GetMeta(hnd, &meta);
+  if (FS_ISERR(err)) {
+    Hal_Fs_Close(hnd);
+    return hnd | err;
+  }
+
+  *pLength = meta.allocated;
+
+  err = Hal_Fs_CheckHandleIsExclusive(hnd, true);
   if (FS_ISERR(err)) {
     Hal_Fs_Close(hnd);
     return hnd | err;
@@ -110,22 +120,54 @@ UWORD cLoaderRenameFile(UBYTE *pFileName, UBYTE *pBuffer, ULONG *pLength)
 
 UWORD cLoaderOpenRead(UBYTE *pFileName, UBYTE *pBuffer, ULONG *pLength, UBYTE bLinear)
 {
+  file_meta_t meta;
   error_t err;
   errhnd_t hnd = Hal_Fs_Locate((char*) pFileName, NULL, NULL);
   if (FS_ISERR(hnd))
       return hnd;
 
   if (!bLinear)
-    err = Hal_Fs_OpenRead(hnd);
+      err = Hal_Fs_OpenRead(hnd);
   else
-    err = Hal_Fs_MapFile(hnd, (const uint8_t**) pBuffer, (uint32_t*) pLength);
+      err = Hal_Fs_MapFile(hnd, (const uint8_t **) pBuffer, NULL);
 
   if (FS_ISERR(err)) {
     Hal_Fs_Close(hnd);
     return err;
-  } else {
-    return hnd;
   }
+
+  err = Hal_Fs_GetMeta(hnd, &meta);
+  if (FS_ISERR(err)) {
+    Hal_Fs_Close(hnd);
+    return err;
+  }
+  *pLength = meta.allocated;
+  return hnd;
+}
+
+UWORD cLoaderOpenAppend(UBYTE *pFileName, ULONG *pLength)
+{
+    file_meta_t meta;
+    error_t err;
+    errhnd_t hnd = Hal_Fs_Locate((const char*) pFileName, NULL, (uint32_t*) pLength);
+    if (FS_ISERR(hnd)) {
+        return hnd;
+    }
+
+    err = Hal_Fs_OpenAppend(hnd);
+    if (FS_ISERR(err)) {
+        Hal_Fs_Close(hnd);
+        return err;
+    }
+
+    err = Hal_Fs_GetMeta(hnd, &meta);
+    if (FS_ISERR(err)) {
+        Hal_Fs_Close(hnd);
+        return err;
+    }
+
+    *pLength = meta.allocated;
+    return hnd;
 }
 
 UWORD cLoaderDeleteFile(UBYTE *pFileName)
@@ -174,15 +216,7 @@ UWORD     cLoaderFileRq(UBYTE Cmd, UBYTE *pFileName, UBYTE *pBuffer, ULONG *pLen
     break;
     case OPENAPPENDDATA:
     {
-      errhnd_t hnd = Hal_Fs_Locate((const char*) pFileName, NULL, (uint32_t*) pLength);
-      if (!FS_ISERR(hnd)) {
-          error_t err = Hal_Fs_OpenAppend(hnd);
-          if (FS_ISERR(err))
-              Hal_Fs_Close(hnd);
-          ReturnState = hnd | err;
-      } else {
-          ReturnState = hnd;
-      }
+      ReturnState = cLoaderOpenAppend(pFileName, pLength);
     }
     break;
     case CLOSE:
