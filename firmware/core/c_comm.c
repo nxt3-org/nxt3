@@ -323,6 +323,7 @@ void      cCommCtrl(void)
   }
 
   /* Here comes the the USB implementation */
+  Hal_Usb_Tick();
   ULONG   Length;
   UWORD   Status;
 
