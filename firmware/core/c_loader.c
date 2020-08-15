@@ -99,7 +99,7 @@ UWORD cLoaderRenameFile(UBYTE *pFileName, UBYTE *pBuffer, ULONG *pLength)
   }
 
   file_meta_t meta;
-  error_t err = Hal_Fs_GetMeta(hnd, &meta);
+  fserr_t     err = Hal_Fs_GetMeta(hnd, &meta);
   if (FS_ISERR(err)) {
     Hal_Fs_Close(hnd);
     return hnd | err;
@@ -121,8 +121,8 @@ UWORD cLoaderRenameFile(UBYTE *pFileName, UBYTE *pBuffer, ULONG *pLength)
 UWORD cLoaderOpenRead(UBYTE *pFileName, UBYTE *pBuffer, ULONG *pLength, UBYTE bLinear)
 {
   file_meta_t meta;
-  error_t err;
-  errhnd_t hnd = Hal_Fs_Locate((char*) pFileName, NULL, NULL);
+  fserr_t     err;
+  errhnd_t    hnd = Hal_Fs_Locate((char*) pFileName, NULL, NULL);
   if (FS_ISERR(hnd))
       return hnd;
 
@@ -148,8 +148,8 @@ UWORD cLoaderOpenRead(UBYTE *pFileName, UBYTE *pBuffer, ULONG *pLength, UBYTE bL
 UWORD cLoaderOpenAppend(UBYTE *pFileName, ULONG *pLength)
 {
     file_meta_t meta;
-    error_t err;
-    errhnd_t hnd = Hal_Fs_Locate((const char*) pFileName, NULL, (uint32_t*) pLength);
+    fserr_t     err;
+    errhnd_t    hnd = Hal_Fs_Locate((const char*) pFileName, NULL, (uint32_t*) pLength);
     if (FS_ISERR(hnd)) {
         return hnd;
     }
@@ -227,7 +227,7 @@ UWORD     cLoaderFileRq(UBYTE Cmd, UBYTE *pFileName, UBYTE *pBuffer, ULONG *pLen
     case CROPDATAFILE:
     {
       handle_t hnd = *pFileName;
-      error_t err;
+      fserr_t  err;
       err = Hal_Fs_Truncate(hnd);
       ReturnState = hnd | err;
       Hal_Fs_GetFreeStorage(&IOMapLoader.FreeUserFlash);
@@ -244,7 +244,7 @@ UWORD     cLoaderFileRq(UBYTE Cmd, UBYTE *pFileName, UBYTE *pBuffer, ULONG *pLen
     case SEEKFROMEND:
     {
       handle_t hnd = *pFileName;
-      error_t err;
+      fserr_t  err;
       err = Hal_Fs_Seek(hnd, *(int32_t*)pLength, Cmd-SEEKFROMSTART);
       ReturnState = hnd | err;
     }
@@ -252,7 +252,7 @@ UWORD     cLoaderFileRq(UBYTE Cmd, UBYTE *pFileName, UBYTE *pBuffer, ULONG *pLen
     case FILEPOSITION:
     {
         handle_t hnd = *pFileName;
-        error_t err;
+        fserr_t  err;
         err = Hal_Fs_Tell(hnd, (uint32_t*)pLength);
         ReturnState = hnd | err;
     }
@@ -260,7 +260,7 @@ UWORD     cLoaderFileRq(UBYTE Cmd, UBYTE *pFileName, UBYTE *pBuffer, ULONG *pLen
     case READ:
     {
       handle_t hnd = *pFileName;
-      error_t err;
+      fserr_t  err;
       err = Hal_Fs_Read(hnd, pBuffer, (uint32_t*)pLength);
       ReturnState = hnd | err;
     }
@@ -268,7 +268,7 @@ UWORD     cLoaderFileRq(UBYTE Cmd, UBYTE *pFileName, UBYTE *pBuffer, ULONG *pLen
     case WRITE:
     {
       handle_t hnd = *pFileName;
-      error_t err;
+      fserr_t  err;
       err = Hal_Fs_Write(hnd, pBuffer, (uint32_t*)pLength);
       ReturnState = hnd | err;
     }
