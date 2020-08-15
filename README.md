@@ -3,6 +3,23 @@ NXT3
 
 This program intends to create a port of the NBC/NXC Enhanced Firmware to the EV3 programmable brick.
 
+Status
+------
+
+This project is **pre-alpha**, do expect bugs and crashes to occur.
+
+| Component  | Status                    | Comment |
+| ---------- | ------------------------- | ------- |
+| NXT VM     | PARTIAL                   | carried over from NXT, some previously hidden bugs now cause segfaults |
+| Buttons    | mostly DONE               | button press OK; TODO for LED control (needs new bytecode or IOMap) |
+| Motors     | partial DONE, not tested  | reused NXT PID controller, PID coefficients need some tuning |
+| Display    | mostly DONE               | needs configurable scaling + some sort of "damage" tracking to optimize flushes |
+| Sound      | mostly DONE               | sounds (PCM+ADPCM) tested, tones tested, melodies untested; only 8000 kHz sample rate is supported |
+| Sensors    | PARTIAL                   | EV3 sensors emulate NXT ones; needs pure EV3 layer + IIC support + emulation of more sensors |
+| Bluetooth  | not started               | RFCOMM connections + HCI |
+| USB        | PARTIAL                   | EV3 system commands work (ev3duder), NXT protocol tunnel mostly works |
+| NXT driver | not started               | emulate NXT as a USB device via USB/IP or other similar mechanism |
+
 Why?
 ----
 
@@ -21,26 +38,15 @@ It intends to complement other programming solutions available for EV3:
  * [Pybricks](https://pybricks.com/), a MicroPython-based programming environment for EV3, NXT (preview) and other platforms,
  * and also the aforementioned [NXC4EV3](https://gitlab.com/nxc4ev3), a (somewhat unfinished) NXC-to-C4EV3 transpiler.
 
-Status
-------
-
-| Component  | Status                    | Comment |
-| ---------- | ------------------------- | ------- |
-| NXT VM     | N/A, not tested           | carried over from NXT, some previously hidden bugs now cause segfaults |
-| Buttons    | mostly DONE               | button press OK; TODO for LED control (needs new bytecode or IOMap) |
-| Motors     | partial DONE, not tested  | only proof-of-concept; PID controller is in userspace, the resulting PWM duty cycle is sent to the kernel driver |
-| Display    | mostly DONE, but slow     | framebuffer format conversion is somewhat slow + drawing is slow too |
-| Sound      | mostly DONE               | startup sound works, click works, playback works, tones seem to work; ADPCM untested |
-| Sensors    | not started               | will require an autonomous layer as the NXT API does not provide enough information for sensor configuration |
-| Bluetooth  | not started               | RFCOMM connections + HCI |
-| USB        | not started               | NXT protocol tunneling over extended EV3 USB protocol |
-| USB driver | not started               | emulate NXT as a USB device via USB/IP or other similar mechanism |
-
 License
 -------
 
-Since the majority of the code comes straight from NXT, it falls under the LOSLA (LEGO® OPEN SOURCE LICENSE AGREEMENT 1.0 LEGO® MINDSTORMS® NXT FIRMWARE).
+Since the core code comes straight from the NXT codebase, it falls under the LOSLA (LEGO® OPEN SOURCE LICENSE AGREEMENT 1.0 LEGO® MINDSTORMS® NXT FIRMWARE).
 See [LICENSE.pdf](LICENSE.pdf) for details. This also [precludes](https://fedoraproject.org/wiki/Licensing/LOSLA) using GPL'd components, so all code for interfacing
 with the EV3 kernel has to be written from scratch (C4EV3 is GPLv2.0, lms2012 is GPLv2.0).
 
 The original code for this port comes from the Mindboards SVN repository: https://sourceforge.net/p/mindboards/code/HEAD/tree/lms_nbcnxc/branches/version_132/
+
+The HAL base and implementation layers are licensed under the MIT License.
+
+The battd daemon in lms2012 HAL is licensed under GNU GPLv2.0 because it includes battery temperature estimation code from the stock firmware.
