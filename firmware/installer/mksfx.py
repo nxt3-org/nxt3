@@ -42,10 +42,9 @@ def write_sfx(nxt3, battd, include_data, sfx, output):
         archive.add(name=battd, arcname="NXT3/battd.elf", filter=make_file(True))
         archive.addfile(make_rbf("NXT3/Run NXT3.rbf", rbf_contents), rbf)
         rbf.close()
-        archive.addfile(make_directory("NXT3/data"))
         for path in include_data:
             archive.add(name=path,
-                        arcname=f"NXT3/data/{os.path.basename(path)}",
+                        arcname=f"NXT3/{os.path.basename(path)}",
                         filter=make_file(False))
     tar_gz.seek(0)
     with open(output, 'wb') as output:
@@ -79,19 +78,6 @@ def make_file(executable: bool):
         return info
 
     return file_filter
-
-
-def make_directory(path):
-    info = tarfile.TarInfo(path)
-    info.name = path
-    info.size = 0
-    info.mtime = 0
-    info.mode = 0o00777
-    info.type = tarfile.DIRTYPE
-    info.uid = info.gid = 0
-    info.uname = info.gname = "root"
-    info.pax_headers = {}
-    return info
 
 
 def make_rbf(path, buffer):
