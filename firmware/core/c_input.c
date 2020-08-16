@@ -244,7 +244,7 @@ void      cInputCtrl(void)
 
     if (sType != oldType)
     {
-      Hal_Pnp_SetType(Tmp, sType, false);
+      Hal_Pnp_SetType(Tmp, false, sType);
       /* Clear all variables for this sensor */
       VarsInput.EdgeCnt[Tmp]       = 0;
       VarsInput.InputDebounce[Tmp] = 0;
