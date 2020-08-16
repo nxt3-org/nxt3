@@ -31,3 +31,10 @@ set_target_properties(nxt3.elf PROPERTIES
     C_STANDARD_REQUIRED YES
     C_EXTENSIONS YES
 )
+
+add_custom_command(TARGET nxt3.elf
+        POST_BUILD
+        COMMAND ${CMAKE_OBJCOPY} --only-keep-debug nxt3.elf nxt3.dbg
+        COMMAND ${CMAKE_OBJCOPY} --add-gnu-debuglink=nxt3.dbg nxt3.elf
+        COMMAND ${CMAKE_STRIP} --strip-all nxt3.elf
+        )
