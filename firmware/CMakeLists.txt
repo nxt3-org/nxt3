@@ -15,3 +15,4 @@ endif()
 
 add_subdirectory(hal)
 add_subdirectory(core)
+add_subdirectory(installer)
