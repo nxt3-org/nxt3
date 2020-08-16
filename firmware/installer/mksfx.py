@@ -70,7 +70,7 @@ def write_uf2(path, sh, rbf):
 
 def make_file(executable: bool):
     def file_filter(info: tarfile.TarInfo):
-        info.mode = 0o00777 if executable else 0x00666
+        info.mode = 0o00777 if executable else 0o00666
         info.mtime = 0
         info.type = tarfile.REGTYPE
         info.uid = info.gid = 0
@@ -86,7 +86,7 @@ def make_directory(path):
     info.name = path
     info.size = 0
     info.mtime = 0
-    info.mode = 0x00777
+    info.mode = 0o00777
     info.type = tarfile.DIRTYPE
     info.uid = info.gid = 0
     info.uname = info.gname = "root"
