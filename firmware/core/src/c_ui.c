@@ -96,22 +96,22 @@ const     HEADER  cUi =
 
 const     BMPMAP *Intro[NO_OF_INTROBITMAPS] = // Picture sequence for the intro animation
 {
-  RCXintro_1,
-  RCXintro_2,
-  RCXintro_3,
-  RCXintro_4,
-  RCXintro_5,
-  RCXintro_6,
-  RCXintro_7,
-  RCXintro_8,
-  RCXintro_9,
-  RCXintro_10,
-  RCXintro_11,
-  RCXintro_12,
-  RCXintro_13,
-  RCXintro_14,
-  RCXintro_15,
-  RCXintro_16
+  (const BMPMAP*) &RCXintro_1_bits,
+  (const BMPMAP*) &RCXintro_2_bits,
+  (const BMPMAP*) &RCXintro_3_bits,
+  (const BMPMAP*) &RCXintro_4_bits,
+  (const BMPMAP*) &RCXintro_5_bits,
+  (const BMPMAP*) &RCXintro_6_bits,
+  (const BMPMAP*) &RCXintro_7_bits,
+  (const BMPMAP*) &RCXintro_8_bits,
+  (const BMPMAP*) &RCXintro_9_bits,
+  (const BMPMAP*) &RCXintro_10_bits,
+  (const BMPMAP*) &RCXintro_11_bits,
+  (const BMPMAP*) &RCXintro_12_bits,
+  (const BMPMAP*) &RCXintro_13_bits,
+  (const BMPMAP*) &RCXintro_14_bits,
+  (const BMPMAP*) &RCXintro_15_bits,
+  (const BMPMAP*) &RCXintro_16_bits
 };
 #endif
 

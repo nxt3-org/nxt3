@@ -65,8 +65,8 @@ def convert_bitmap_c(bmp_file: str, c_file: str, start_x: int, start_y: int):
         for start in range(0, row_bytes * columns, columns):
             write_c_bytes(out, raw_bytes, start + 8, columns)
         out.write("};\n")
-        out.write(f"#define {name} ((const BMPMAP*) &{name}_bits)\n")
-        out.write(f"#define {name}_size (sizeof({name}_bits))\n")
+        out.write(f"const BMPMAP *{name} = (const BMPMAP*) &{name}_bits;\n")
+        out.write(f"const uint16_t {name}_size = sizeof({name}_bits);\n")
 
 
 def convert_bitmap_binary(src: Image.Image, start_x: int, start_y: int):
