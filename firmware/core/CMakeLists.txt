@@ -14,7 +14,7 @@ add_executable(nxt3.elf
         ${CMAKE_CURRENT_SOURCE_DIR}/generated/Submenu05.rms
         ${CMAKE_CURRENT_SOURCE_DIR}/generated/Submenu06.rms
         ${CMAKE_CURRENT_SOURCE_DIR}/generated/Submenu07.rms
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/Font.txt
+        ${CMAKE_CURRENT_BINARY_DIR}/generated/Font.h
         ${CMAKE_CURRENT_BINARY_DIR}/generated/Port.h
         ${CMAKE_CURRENT_BINARY_DIR}/generated/Running.h
         ${CMAKE_CURRENT_BINARY_DIR}/generated/Devices.h
@@ -124,6 +124,7 @@ add_custom_command(TARGET nxt3.elf
 add_custom_command(
         COMMENT "Generating resources"
         OUTPUT
+        generated/Font.h
         generated/Port.h
         generated/Running.h
         generated/Devices.h
@@ -160,6 +161,7 @@ add_custom_command(
         DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/generate_resources.py
         ${CMAKE_SOURCE_DIR}/resources/FONT/Port.bmp
+        ${CMAKE_SOURCE_DIR}/resources/FONT/Font.bmp
         ${CMAKE_SOURCE_DIR}/resources/STATUS/Status.bmp
         ${CMAKE_SOURCE_DIR}/resources/MENUES/Icons.bmp
         ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Running.bmp
@@ -227,5 +229,6 @@ add_custom_command(
         icons  ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Devices.bmp     generated/Devices.h      24 24
         icons  ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Step.bmp        generated/Step.h         11 16
         icons  ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Connections.bmp generated/Connections.h  24 24
+        font   ${CMAKE_SOURCE_DIR}/resources/FONT/Font.bmp           generated/Font.h          6  8
         texts  ${CMAKE_SOURCE_DIR}/resources/TEXT/strings.json       generated/Ui.h
 )

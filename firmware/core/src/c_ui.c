@@ -61,7 +61,7 @@ const     HEADER  cUi =
 
 #include  "Display.h"       // Bitmap for frame used in view and datalog
 #include  "LowBattery.h"      // Bitmap showed when low battery occures
-#include  "Font.txt"          // Font used for all text
+#include  "Font.h"            // Font used for all text
 #ifndef STRIPPED
 #include  "Step.h"            // Bitmap used in On Brick Programming
 #endif
@@ -1169,7 +1169,7 @@ void      cUiCtrl(void)
       VarsUi.LowBatt                                  =  0;
       VarsUi.LowBattHasOccured                        =  0;
 
-      pMapDisplay->pFont                              =  &Font;
+      pMapDisplay->pFont                              =  Font;
       pMapDisplay->pStatusIcons                       =  Status;
       pMapDisplay->pStatusText                        =  (UBYTE*)VarsUi.StatusText;
 #ifndef STRIPPED

@@ -8,6 +8,7 @@ from PIL import Image
 import struct
 
 FILEFORMAT_BITMAP = 0x0200
+FILEFORMAT_FONT   = 0x0300
 FILEFORMAT_ICON   = 0x0400
 
 
@@ -34,7 +35,13 @@ def main():
             extras = 2
             icon_w = int(sys.argv[base + 3])
             icon_h = int(sys.argv[base + 4])
-            convert_icon_c(src, dst, icon_w, icon_h)
+            convert_icon_c(src, dst, icon_w, icon_h, False)
+
+        elif op == 'font':
+            extras = 2
+            char_w = int(sys.argv[base + 3])
+            char_h = int(sys.argv[base + 4])
+            convert_icon_c(src, dst, char_w, char_h, True)
 
         base += 3 + extras
 
@@ -71,15 +78,18 @@ def convert_bitmap_binary(src: Image.Image, start_x: int, start_y: int):
     return common_image_pipe(src, FILEFORMAT_BITMAP, start_x, start_y, src.width, src.height)
 
 
-def convert_icon_c(bmp_file: str, c_file: str, icon_w: int, icon_h: int):
+def convert_icon_c(bmp_file: str, c_file: str, icon_w: int, icon_h: int, is_font: bool = False):
     name_ext = os.path.basename(c_file)
     name, _ = os.path.splitext(name_ext)
 
-    print(Fore.LIGHTBLUE_EX + f"Compiling icon atlas {name_ext}" + Style.RESET_ALL)
+    if is_font:
+        print(Fore.LIGHTBLUE_EX + f"Compiling font {name_ext}" + Style.RESET_ALL)
+    else:
+        print(Fore.LIGHTBLUE_EX + f"Compiling icon atlas {name_ext}" + Style.RESET_ALL)
 
     with open(bmp_file, "rb") as fp:
         with Image.open(fp) as image:
-            raw_bytes = convert_icon_binary(image, icon_w, icon_h)
+            raw_bytes = convert_icon_binary(image, icon_w, icon_h, is_font)
             columns = image.width
             row_bytes = (image.height + 7) // 8
 
@@ -90,10 +100,13 @@ def convert_icon_c(bmp_file: str, c_file: str, icon_w: int, icon_h: int):
         for start in range(0, row_bytes * columns, columns):
             write_c_bytes(out, raw_bytes, start + 8, columns)
         out.write("};\n")
-        out.write(f"const ICON *{name} = (const ICON*) &{name}_bits;\n")
+        if is_font:
+            out.write(f"const FONT *{name} = (const FONT*) &{name}_bits;\n")
+        else:
+            out.write(f"const ICON *{name} = (const ICON*) &{name}_bits;\n")
 
 
-def convert_icon_binary(src: Image.Image, icon_w: int, icon_h: int):
+def convert_icon_binary(src: Image.Image, icon_w: int, icon_h: int, is_font: bool):
     icons_x = src.width // icon_w
     icons_y = src.height // icon_h
     if src.width % icon_w != 0:
@@ -104,10 +117,14 @@ def convert_icon_binary(src: Image.Image, icon_w: int, icon_h: int):
         raise ValueError(f"Atlas too short in X direction")
     if icons_y <= 0:
         raise ValueError(f"Atlas too short in Y direction")
-    return common_image_pipe(src, FILEFORMAT_ICON, icons_x, icons_y, icon_w, icon_h)
+    if is_font:
+        fmt = FILEFORMAT_FONT
+    else:
+        fmt = FILEFORMAT_ICON
+    return common_image_pipe(src, fmt, icons_x, icons_y, icon_w, icon_h)
 
 
-def common_image_pipe(src: Image.Image, format: int, aux1: int, aux2: int, aux3: int, aux4: int):
+def common_image_pipe(src: Image.Image, fmt: int, aux1: int, aux2: int, aux3: int, aux4: int):
     px = src.load()
 
     header_bytes = 8
@@ -116,7 +133,7 @@ def common_image_pipe(src: Image.Image, format: int, aux1: int, aux2: int, aux3:
     buffer = bytearray(header_bytes + width_bytes * height_bytes)
     struct.pack_into(
         ">HHBBBB", buffer, 0,
-        format,
+        fmt,
         width_bytes * height_bytes,
         aux1,
         aux2,
