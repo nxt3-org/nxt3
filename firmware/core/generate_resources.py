@@ -8,6 +8,7 @@ from PIL import Image
 import struct
 
 FILEFORMAT_BITMAP = 0x0200
+FILEFORMAT_ICON   = 0x0400
 
 
 def main():
@@ -24,9 +25,16 @@ def main():
             start_x = int(sys.argv[base + 3])
             start_y = int(sys.argv[base + 4])
             convert_bitmap_c(src, dst, start_x, start_y)
+
         elif op == 'texts':
             extras = 0
             convert_texts(src, dst)
+
+        elif op == 'icons':
+            extras = 2
+            icon_w = int(sys.argv[base + 3])
+            icon_h = int(sys.argv[base + 4])
+            convert_icon_c(src, dst, icon_w, icon_h)
 
         base += 3 + extras
 
@@ -35,7 +43,7 @@ def convert_bitmap_c(bmp_file: str, c_file: str, start_x: int, start_y: int):
     name_ext = os.path.basename(c_file)
     name, _ = os.path.splitext(name_ext)
 
-    print(Fore.LIGHTBLUE_EX + f"Compiling resource {name_ext}" + Style.RESET_ALL)
+    print(Fore.LIGHTBLUE_EX + f"Compiling bitmap {name_ext}" + Style.RESET_ALL)
 
     with open(bmp_file, "rb") as fp:
         with Image.open(fp) as image:
@@ -54,19 +62,52 @@ def convert_bitmap_c(bmp_file: str, c_file: str, start_x: int, start_y: int):
         out.write(f"#define {name}_size (sizeof({name}_bits))\n")
 
 
-def write_c_bytes(out: typing.IO, array: bytearray, start: int, count: int):
-    for byte in array[start:start + count]:
-        out.write(str(byte))
-        out.write(",")
-    out.write("\n")
-
-
 def convert_bitmap_binary(src: Image.Image, start_x: int, start_y: int):
     if start_x < 0 or start_x >= 256:
         raise ValueError(f"Start X coordinate is invalid: {start_x}")
     if start_y < 0 or start_y >= 256:
         raise ValueError(f"Start Y coordinate is invalid: {start_x}")
 
+    return common_image_pipe(src, FILEFORMAT_BITMAP, start_x, start_y, src.width, src.height)
+
+
+def convert_icon_c(bmp_file: str, c_file: str, icon_w: int, icon_h: int):
+    name_ext = os.path.basename(c_file)
+    name, _ = os.path.splitext(name_ext)
+
+    print(Fore.LIGHTBLUE_EX + f"Compiling icon atlas {name_ext}" + Style.RESET_ALL)
+
+    with open(bmp_file, "rb") as fp:
+        with Image.open(fp) as image:
+            raw_bytes = convert_icon_binary(image, icon_w, icon_h)
+            columns = image.width
+            row_bytes = (image.height + 7) // 8
+
+    os.makedirs(os.path.dirname(c_file), exist_ok=True)
+    with open(c_file, "w") as out:
+        out.write(f"const unsigned char {name}_bits[] = {{")
+        write_c_bytes(out, raw_bytes, 0, 8)
+        for start in range(0, row_bytes * columns, columns):
+            write_c_bytes(out, raw_bytes, start + 8, columns)
+        out.write("};\n")
+        out.write(f"const ICON *{name} = (const ICON*) &{name}_bits;\n")
+
+
+def convert_icon_binary(src: Image.Image, icon_w: int, icon_h: int):
+    icons_x = src.width // icon_w
+    icons_y = src.height // icon_h
+    if src.width % icon_w != 0:
+        raise ValueError(f"Trailing icon space: atlas width {src.width}, icon width {icon_w}")
+    if src.height % icon_h != 0:
+        raise ValueError(f"Trailing icon space: atlas height {src.width}, icon height {icon_w}")
+    if icons_x <= 0:
+        raise ValueError(f"Atlas too short in X direction")
+    if icons_y <= 0:
+        raise ValueError(f"Atlas too short in Y direction")
+    return common_image_pipe(src, FILEFORMAT_ICON, icons_x, icons_y, icon_w, icon_h)
+
+
+def common_image_pipe(src: Image.Image, format: int, aux1: int, aux2: int, aux3: int, aux4: int):
     px = src.load()
 
     header_bytes = 8
@@ -75,12 +116,12 @@ def convert_bitmap_binary(src: Image.Image, start_x: int, start_y: int):
     buffer = bytearray(header_bytes + width_bytes * height_bytes)
     struct.pack_into(
         ">HHBBBB", buffer, 0,
-        FILEFORMAT_BITMAP,
+        format,
         width_bytes * height_bytes,
-        start_x,
-        start_y,
-        src.width,
-        src.height
+        aux1,
+        aux2,
+        aux3,
+        aux4
     )
     index = header_bytes
 
@@ -115,6 +156,13 @@ def convert_texts(src: str, dst: str):
         for item in strings:
             fp.write(f"    [{item['name']}] = \"{item['value']}\",\n")
         fp.write("};\n")
+
+
+def write_c_bytes(out: typing.IO, array: bytearray, start: int, count: int):
+    for byte in array[start:start + count]:
+        out.write(str(byte))
+        out.write(",")
+    out.write("\n")
 
 
 if __name__ == '__main__':

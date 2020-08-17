@@ -63,16 +63,16 @@ const     HEADER  cUi =
 #include  "LowBattery.h"      // Bitmap showed when low battery occures
 #include  "Font.txt"          // Font used for all text
 #ifndef STRIPPED
-#include  "Step.txt"          // Bitmap used in On Brick Programming
+#include  "Step.h"            // Bitmap used in On Brick Programming
 #endif
 #include  "Cursor.h"          // Bitmap for cursor
-#include  "Running.txt"       // Icon collection used for "running" symbol
-#include  "Port.txt"          // Font used for naming sensor ports in datalog/bluetooth
+#include  "Running.h"         // Icon collection used for "running" symbol
+#include  "Port.h"            // Font used for naming sensor ports in datalog/bluetooth
 #include  "Ok.h"              // Bitmap for OK buttom in get user string
 #include  "Wait.h"            // Bitmap for feedback
 #include  "Fail.h"            // Bitmap for feedback
 #include  "Info.h"            // Bitmap for feedback
-#include  "Icons.txt"         // Icon collection used for menues
+#include  "Icons.h"           // Icon collection used for menues
 
 #ifndef STRIPPED
 // ****** INTRO ANIMATION RESOURCES ******************************************
@@ -117,7 +117,7 @@ const     BMPMAP *Intro[NO_OF_INTROBITMAPS] = // Picture sequence for the intro 
 
 // ****** STATUS LINE GRAPHIC RESOURCES **************************************
 
-#include  "Status.txt"                  // Status icon collection file
+#include  "Status.h"                    // Status icon collection file
 
 enum STATUS_NO                          // Index in status icon collection file
 {
@@ -162,15 +162,15 @@ enum STATUS_NO                          // Index in status icon collection file
 
 // ****** BT DEVICE GRAPHIC RESOURCES ****************************************
 
-#include  "Devices.txt"       // Icon collection used for Blue tooth devices
+#include  "Devices.h"         // Icon collection used for Blue tooth devices
 
 // ****** BT CONNECTIONS GRAPHIC RESOURCES ***********************************
 
-#include  "Connections.txt"   // Icon collection used for Blue tooth connections
+#include  "Connections.h"     // Icon collection used for Blue tooth connections
 
 // ****** FREE TEXT GRAPHIC RESOURCES ****************************************
 
-#include  "Ui.h"              // Text strings that is'nt defined in menu files
+#include  "Ui.h"              // Text strings that aren't defined in menu files
 
 // ****** FILE TYPE GRAPHIC RESOURCES ****************************************
 
@@ -474,9 +474,9 @@ UBYTE*    cUiMenuGetIconImage(UBYTE No)
   UBYTE   *Image;
 
   Image = NULL;
-  if (No < (Icons.ItemsX * Icons.ItemsY))
+  if (No < (Icons->ItemsX * Icons->ItemsY))
   {
-    Image = (UBYTE*)&Icons.Data[No * Icons.ItemPixelsX * (Icons.ItemPixelsY / 8)];
+    Image = (UBYTE*)&Icons->Data[No * Icons->ItemPixelsX * (Icons->ItemPixelsY / 8)];
   }
 
   return (Image);
@@ -746,7 +746,7 @@ void      cUiUpdateStatus(void)
       pMapDisplay->pStatusText   =  (UBYTE*)VarsUi.StatusText;
 
       // Status line update nessesary
-      if (IOMapUi.BatteryState < Status.ItemsX)
+      if (IOMapUi.BatteryState < Status->ItemsX)
       {
         bool batteryPack = false;
         Hal_Battery_IsRechargeable(&batteryPack);
@@ -763,7 +763,7 @@ void      cUiUpdateStatus(void)
       }
 
       // Update bluetooth status icons
-      if ((IOMapUi.BluetoothState & (BT_STATE_VISIBLE | BT_STATE_CONNECTED | BT_STATE_OFF)) < Status.ItemsX)
+      if ((IOMapUi.BluetoothState & (BT_STATE_VISIBLE | BT_STATE_CONNECTED | BT_STATE_OFF)) < Status->ItemsX)
       {
         VarsUi.NewStatusIcons[STATUSICON_BLUETOOTH] = STATUS_NO_BLUETOOTH_0 + (IOMapUi.BluetoothState & (BT_STATE_VISIBLE | BT_STATE_CONNECTED | BT_STATE_OFF));
       }
@@ -1170,10 +1170,10 @@ void      cUiCtrl(void)
       VarsUi.LowBattHasOccured                        =  0;
 
       pMapDisplay->pFont                              =  &Font;
-      pMapDisplay->pStatusIcons                       =  &Status;
+      pMapDisplay->pStatusIcons                       =  Status;
       pMapDisplay->pStatusText                        =  (UBYTE*)VarsUi.StatusText;
 #ifndef STRIPPED
-      pMapDisplay->pStepIcons                         =  &Step;
+      pMapDisplay->pStepIcons                         =  Step;
 #endif
 
       VarsUi.State                                    =  0;

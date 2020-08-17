@@ -5,23 +5,23 @@ project(NXTcore VERSION 1.32.1
         LANGUAGES C)
 
 add_executable(nxt3.elf
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/Running.txt
         ${CMAKE_CURRENT_SOURCE_DIR}/generated/cCmdWriteIOMapOffsetsFile.txt
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/Devices.txt
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/Font.txt
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/Status.txt
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/Submenu04.rms
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/Submenu05.rms
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/Submenu07.rms
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/Icons.txt
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/Step.txt
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/Submenu02.rms
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/Port.txt
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/Submenu06.rms
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/Submenu03.rms
         ${CMAKE_CURRENT_SOURCE_DIR}/generated/Mainmenu.rms
         ${CMAKE_CURRENT_SOURCE_DIR}/generated/Submenu01.rms
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/Connections.txt
+        ${CMAKE_CURRENT_SOURCE_DIR}/generated/Submenu02.rms
+        ${CMAKE_CURRENT_SOURCE_DIR}/generated/Submenu03.rms
+        ${CMAKE_CURRENT_SOURCE_DIR}/generated/Submenu04.rms
+        ${CMAKE_CURRENT_SOURCE_DIR}/generated/Submenu05.rms
+        ${CMAKE_CURRENT_SOURCE_DIR}/generated/Submenu06.rms
+        ${CMAKE_CURRENT_SOURCE_DIR}/generated/Submenu07.rms
+        ${CMAKE_CURRENT_SOURCE_DIR}/generated/Font.txt
+        ${CMAKE_CURRENT_BINARY_DIR}/generated/Port.h
+        ${CMAKE_CURRENT_BINARY_DIR}/generated/Running.h
+        ${CMAKE_CURRENT_BINARY_DIR}/generated/Devices.h
+        ${CMAKE_CURRENT_BINARY_DIR}/generated/Status.h
+        ${CMAKE_CURRENT_BINARY_DIR}/generated/Icons.h
+        ${CMAKE_CURRENT_BINARY_DIR}/generated/Step.h
+        ${CMAKE_CURRENT_BINARY_DIR}/generated/Connections.h
         ${CMAKE_CURRENT_BINARY_DIR}/generated/Ui.h
         ${CMAKE_CURRENT_BINARY_DIR}/generated/Test1.h
         ${CMAKE_CURRENT_BINARY_DIR}/generated/Test2.h
@@ -124,6 +124,13 @@ add_custom_command(TARGET nxt3.elf
 add_custom_command(
         COMMENT "Generating resources"
         OUTPUT
+        generated/Port.h
+        generated/Running.h
+        generated/Devices.h
+        generated/Status.h
+        generated/Icons.h
+        generated/Step.h
+        generated/Connections.h
         generated/Test1.h
         generated/Test2.h
         generated/LowBattery.h
@@ -152,6 +159,13 @@ add_custom_command(
         generated/Ui.h
         DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/generate_resources.py
+        ${CMAKE_SOURCE_DIR}/resources/FONT/Port.bmp
+        ${CMAKE_SOURCE_DIR}/resources/STATUS/Status.bmp
+        ${CMAKE_SOURCE_DIR}/resources/MENUES/Icons.bmp
+        ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Running.bmp
+        ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Devices.bmp
+        ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Step.bmp
+        ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Connections.bmp
         ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Test1.bmp
         ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Test2.bmp
         ${CMAKE_SOURCE_DIR}/resources/BITMAPS/LowBattery.bmp
@@ -180,31 +194,38 @@ add_custom_command(
         ${CMAKE_SOURCE_DIR}/resources/TEXT/strings.json
         COMMAND
         /usr/bin/env python3 "${CMAKE_CURRENT_SOURCE_DIR}/generate_resources.py"
-        bitmap ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Test1.bmp      generated/Test1.h         0  0
-        bitmap ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Test2.bmp      generated/Test2.h         0  0
-        bitmap ${CMAKE_SOURCE_DIR}/resources/BITMAPS/LowBattery.bmp generated/LowBattery.h    2  8
-        bitmap ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Cursor.bmp     generated/Cursor.h        0  0
-        bitmap ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Wait.bmp       generated/Wait.h          0  8
-        bitmap ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Fail.bmp       generated/Fail.h          0  8
-        bitmap ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Info.bmp       generated/Info.h          0  8
-        bitmap ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Ok.bmp         generated/Ok.h           42 48
-        bitmap ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Display.bmp    generated/Display.h      14 16
-        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_1.bmp   generated/RCXintro_1.h   16  0
-        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_2.bmp   generated/RCXintro_2.h   16  0
-        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_3.bmp   generated/RCXintro_3.h   16  0
-        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_4.bmp   generated/RCXintro_4.h   16  0
-        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_5.bmp   generated/RCXintro_5.h   23  0
-        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_6.bmp   generated/RCXintro_6.h   28  0
-        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_7.bmp   generated/RCXintro_7.h   35 16
-        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_8.bmp   generated/RCXintro_8.h   44 24
-        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_9.bmp   generated/RCXintro_9.h   52 24
-        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_10.bmp  generated/RCXintro_10.h  56 32
-        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_11.bmp  generated/RCXintro_11.h  58 32
-        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_12.bmp  generated/RCXintro_12.h   3 32
-        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_13.bmp  generated/RCXintro_13.h   3 32
-        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_14.bmp  generated/RCXintro_14.h   3 32
-        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_15.bmp  generated/RCXintro_15.h   3 32
-        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_16.bmp  generated/RCXintro_16.h   3 32
-        bitmap ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Test1.bmp      generated/Test1.h         0  0
-        texts  ${CMAKE_SOURCE_DIR}/resources/TEXT/strings.json      generated/Ui.h
+        bitmap ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Test1.bmp       generated/Test1.h         0  0
+        bitmap ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Test2.bmp       generated/Test2.h         0  0
+        bitmap ${CMAKE_SOURCE_DIR}/resources/BITMAPS/LowBattery.bmp  generated/LowBattery.h    2  8
+        bitmap ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Cursor.bmp      generated/Cursor.h        0  0
+        bitmap ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Wait.bmp        generated/Wait.h          0  8
+        bitmap ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Fail.bmp        generated/Fail.h          0  8
+        bitmap ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Info.bmp        generated/Info.h          0  8
+        bitmap ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Ok.bmp          generated/Ok.h           42 48
+        bitmap ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Display.bmp     generated/Display.h      14 16
+        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_1.bmp    generated/RCXintro_1.h   16  0
+        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_2.bmp    generated/RCXintro_2.h   16  0
+        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_3.bmp    generated/RCXintro_3.h   16  0
+        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_4.bmp    generated/RCXintro_4.h   16  0
+        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_5.bmp    generated/RCXintro_5.h   23  0
+        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_6.bmp    generated/RCXintro_6.h   28  0
+        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_7.bmp    generated/RCXintro_7.h   35 16
+        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_8.bmp    generated/RCXintro_8.h   44 24
+        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_9.bmp    generated/RCXintro_9.h   52 24
+        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_10.bmp   generated/RCXintro_10.h  56 32
+        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_11.bmp   generated/RCXintro_11.h  58 32
+        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_12.bmp   generated/RCXintro_12.h   3 32
+        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_13.bmp   generated/RCXintro_13.h   3 32
+        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_14.bmp   generated/RCXintro_14.h   3 32
+        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_15.bmp   generated/RCXintro_15.h   3 32
+        bitmap ${CMAKE_SOURCE_DIR}/resources/INTRO/RCXintro_16.bmp   generated/RCXintro_16.h   3 32
+        bitmap ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Test1.bmp       generated/Test1.h         0  0
+        icons  ${CMAKE_SOURCE_DIR}/resources/FONT/Port.bmp           generated/Port.h          3  8
+        icons  ${CMAKE_SOURCE_DIR}/resources/STATUS/Status.bmp       generated/Status.h       12  8
+        icons  ${CMAKE_SOURCE_DIR}/resources/MENUES/Icons.bmp        generated/Icons.h        24 24
+        icons  ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Running.bmp     generated/Running.h      24 24
+        icons  ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Devices.bmp     generated/Devices.h      24 24
+        icons  ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Step.bmp        generated/Step.h         11 16
+        icons  ${CMAKE_SOURCE_DIR}/resources/BITMAPS/Connections.bmp generated/Connections.h  24 24
+        texts  ${CMAKE_SOURCE_DIR}/resources/TEXT/strings.json       generated/Ui.h
 )

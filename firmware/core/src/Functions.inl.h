@@ -1068,17 +1068,17 @@ UBYTE     cUiFileList(UBYTE Action)       // Show files and select
 
         if (VarsUi.FileLeft)
         {
-          pMapDisplay->pMenuIcons[MENUICON_LEFT]    = (UBYTE*)&Icons.Data[(VarsUi.FileType + ALLFILES) * Icons.ItemPixelsX * (Icons.ItemPixelsY / 8)];
+          pMapDisplay->pMenuIcons[MENUICON_LEFT]    = (UBYTE*)&Icons->Data[(VarsUi.FileType + ALLFILES) * Icons->ItemPixelsX * (Icons->ItemPixelsY / 8)];
           pMapDisplay->UpdateMask                  |= MENUICON_BIT(MENUICON_LEFT);
         }
         if (VarsUi.FileCenter)
         {
-          pMapDisplay->pMenuIcons[MENUICON_CENTER]  = (UBYTE*)&Icons.Data[(VarsUi.FileType + ALLFILES) * Icons.ItemPixelsX * (Icons.ItemPixelsY / 8)];
+          pMapDisplay->pMenuIcons[MENUICON_CENTER]  = (UBYTE*)&Icons->Data[(VarsUi.FileType + ALLFILES) * Icons->ItemPixelsX * (Icons->ItemPixelsY / 8)];
           pMapDisplay->UpdateMask                  |= MENUICON_BIT(MENUICON_CENTER);
         }
         if (VarsUi.FileRight)
         {
-          pMapDisplay->pMenuIcons[MENUICON_RIGHT]   = (UBYTE*)&Icons.Data[(VarsUi.FileType + ALLFILES) * Icons.ItemPixelsX * (Icons.ItemPixelsY / 8)];
+          pMapDisplay->pMenuIcons[MENUICON_RIGHT]   = (UBYTE*)&Icons->Data[(VarsUi.FileType + ALLFILES) * Icons->ItemPixelsX * (Icons->ItemPixelsY / 8)];
           pMapDisplay->UpdateMask                  |= MENUICON_BIT(MENUICON_RIGHT);
         }
 
@@ -1476,13 +1476,13 @@ void      cUiDrawPortNo(UBYTE *Bitmap,UBYTE MenuIconNo,UBYTE PortNo)
   Bitmap[3] = (UBYTE)(SIZE_OF_PORTBITMAP);
   Bitmap[4] = DISPLAY_MENUICONS_X_OFFS + DISPLAY_MENUICONS_X_DIFF * MenuIconNo + 2;
   Bitmap[5] = DISPLAY_MENUICONS_Y;
-  Bitmap[6] = Port.ItemPixelsX;
-  Bitmap[7] = Port.ItemPixelsY;
+  Bitmap[6] = Port->ItemPixelsX;
+  Bitmap[7] = Port->ItemPixelsY;
 
   Tmp = 0;
   while (Tmp < Bitmap[6])
   {
-    Bitmap[Tmp + FILEHEADER_LENGTH] = Port.Data[Tmp + PortNo * Bitmap[6]];
+    Bitmap[Tmp + FILEHEADER_LENGTH] = Port->Data[Tmp + PortNo * Bitmap[6]];
     Tmp++;
   }
 
@@ -2050,11 +2050,11 @@ void      cUiRunning(UBYTE Action)
         if (++VarsUi.RunTimer >= RUN_BITMAP_CHANGE_TIME)
         {
           VarsUi.RunTimer    = 0;
-          if (++VarsUi.RunBitmapPointer >= Running.ItemsY )
+          if (++VarsUi.RunBitmapPointer >= Running->ItemsY )
           {
             VarsUi.RunBitmapPointer      = 0;
           }
-          pMapDisplay->pMenuIcons[MENUICON_CENTER]  = &Running.Data[VarsUi.RunBitmapPointer * Running.ItemPixelsX * (Running.ItemPixelsY / 8)];
+          pMapDisplay->pMenuIcons[MENUICON_CENTER]  = &Running->Data[VarsUi.RunBitmapPointer * Running->ItemPixelsX * (Running->ItemPixelsY / 8)];
           pMapDisplay->EraseMask                   |= MENUICON_BIT(MENUICON_CENTER);
           pMapDisplay->UpdateMask                  |= MENUICON_BIT(MENUICON_CENTER);
         }
@@ -2064,7 +2064,7 @@ void      cUiRunning(UBYTE Action)
 
     case MENU_UPDATE :
     {
-      pMapDisplay->pMenuIcons[MENUICON_CENTER]  = &Running.Data[VarsUi.RunBitmapPointer * Running.ItemPixelsX * (Running.ItemPixelsY / 8)];
+      pMapDisplay->pMenuIcons[MENUICON_CENTER]  = &Running->Data[VarsUi.RunBitmapPointer * Running->ItemPixelsX * (Running->ItemPixelsY / 8)];
       pMapDisplay->UpdateMask                  |= MENUICON_BIT(MENUICON_CENTER);
     }
     break;
@@ -2891,7 +2891,7 @@ UBYTE     cUiView(UBYTE Action) // MENU_INIT
             pMapDisplay->pBitmaps[BITMAP_1]     = Display;
             pMapDisplay->UpdateMask             = BITMAP_BIT(BITMAP_1);
             IOMapUi.Flags                      |=  UI_REDRAW_STATUS;
-            VarsUi.ReadoutTimer                 = 0;;
+            VarsUi.ReadoutTimer                 = 0;
             VarsUi.State++;
 
             VarsUi.SensorReset = TRUE;
@@ -3467,21 +3467,21 @@ UBYTE     cUiBtDeviceList(UBYTE Action) // Show devices
     {
       VarsUi.Tmp = VarsUi.DeviceLeft - 1;
       cUiBTCommand(UI_BT_GET_DEVICE_TYPE,VarsUi.DevicesKnown,&VarsUi.Tmp,&VarsUi.DeviceType);
-      pMapDisplay->pMenuIcons[MENUICON_LEFT]    = (UBYTE*)&Devices.Data[VarsUi.DeviceType * Devices.ItemPixelsX * (Devices.ItemPixelsY / 8)];
+      pMapDisplay->pMenuIcons[MENUICON_LEFT]    = (UBYTE*)&Devices->Data[VarsUi.DeviceType * Devices->ItemPixelsX * (Devices->ItemPixelsY / 8)];
       pMapDisplay->UpdateMask                  |= MENUICON_BIT(MENUICON_LEFT);
     }
     if (VarsUi.DeviceCenter)
     {
       VarsUi.Tmp = VarsUi.DeviceCenter - 1;
       cUiBTCommand(UI_BT_GET_DEVICE_TYPE,VarsUi.DevicesKnown,&VarsUi.Tmp,&VarsUi.DeviceType);
-      pMapDisplay->pMenuIcons[MENUICON_CENTER]  = (UBYTE*)&Devices.Data[VarsUi.DeviceType * Devices.ItemPixelsX * (Devices.ItemPixelsY / 8)];
+      pMapDisplay->pMenuIcons[MENUICON_CENTER]  = (UBYTE*)&Devices->Data[VarsUi.DeviceType * Devices->ItemPixelsX * (Devices->ItemPixelsY / 8)];
       pMapDisplay->UpdateMask                  |= MENUICON_BIT(MENUICON_CENTER);
     }
     if (VarsUi.DeviceRight)
     {
       VarsUi.Tmp = VarsUi.DeviceRight - 1;
       cUiBTCommand(UI_BT_GET_DEVICE_TYPE,VarsUi.DevicesKnown,&VarsUi.Tmp,&VarsUi.DeviceType);
-      pMapDisplay->pMenuIcons[MENUICON_RIGHT]   = (UBYTE*)&Devices.Data[VarsUi.DeviceType * Devices.ItemPixelsX * (Devices.ItemPixelsY / 8)];
+      pMapDisplay->pMenuIcons[MENUICON_RIGHT]   = (UBYTE*)&Devices->Data[VarsUi.DeviceType * Devices->ItemPixelsX * (Devices->ItemPixelsY / 8)];
       pMapDisplay->UpdateMask                  |= MENUICON_BIT(MENUICON_RIGHT);
     }
 
@@ -3608,13 +3608,13 @@ UBYTE     cUiBtConnectList(UBYTE Action) // Show connections and maybe disconnec
     if (cUiBTCommand(UI_BT_GET_CONNECTION_VALID,0,&VarsUi.Tmp,NULL) == UI_BT_SUCCES)
     {
       cUiBTCommand(UI_BT_GET_CONNECTION_TYPE,0,&VarsUi.Tmp,&VarsUi.DeviceType);
-      pMapDisplay->pMenuIcons[MENUICON_LEFT]    = (UBYTE*)&Devices.Data[VarsUi.DeviceType * Devices.ItemPixelsX * (Devices.ItemPixelsY / 8)];
+      pMapDisplay->pMenuIcons[MENUICON_LEFT]    = (UBYTE*)&Devices->Data[VarsUi.DeviceType * Devices->ItemPixelsX * (Devices->ItemPixelsY / 8)];
       cUiDrawPortNo(VarsUi.PortBitmapLeft,MENUICON_LEFT,VarsUi.Tmp);
       pMapDisplay->UpdateMask                  |= BITMAP_BIT(BITMAP_2);
     }
     else
     {
-      pMapDisplay->pMenuIcons[MENUICON_LEFT]    = (UBYTE*)&Connections.Data[VarsUi.Tmp * Connections.ItemPixelsX * (Connections.ItemPixelsY / 8)];
+      pMapDisplay->pMenuIcons[MENUICON_LEFT]    = (UBYTE*)&Connections->Data[VarsUi.Tmp * Connections->ItemPixelsX * (Connections->ItemPixelsY / 8)];
     }
 
     VarsUi.Tmp = VarsUi.SlotCenter - 1;
@@ -3625,25 +3625,25 @@ UBYTE     cUiBtConnectList(UBYTE Action) // Show connections and maybe disconnec
     if (cUiBTCommand(UI_BT_GET_CONNECTION_VALID,0,&VarsUi.Tmp,NULL) == UI_BT_SUCCES)
     {
       cUiBTCommand(UI_BT_GET_CONNECTION_TYPE,0,&VarsUi.Tmp,&VarsUi.DeviceType);
-      pMapDisplay->pMenuIcons[MENUICON_CENTER]  = (UBYTE*)&Devices.Data[VarsUi.DeviceType * Devices.ItemPixelsX * (Devices.ItemPixelsY / 8)];
+      pMapDisplay->pMenuIcons[MENUICON_CENTER]  = (UBYTE*)&Devices->Data[VarsUi.DeviceType * Devices->ItemPixelsX * (Devices->ItemPixelsY / 8)];
       cUiDrawPortNo(VarsUi.PortBitmapCenter,MENUICON_CENTER,VarsUi.Tmp);
       pMapDisplay->UpdateMask                  |= BITMAP_BIT(BITMAP_3);
     }
     else
     {
-      pMapDisplay->pMenuIcons[MENUICON_CENTER]  = (UBYTE*)&Connections.Data[VarsUi.Tmp * Connections.ItemPixelsX * (Connections.ItemPixelsY / 8)];
+      pMapDisplay->pMenuIcons[MENUICON_CENTER]  = (UBYTE*)&Connections->Data[VarsUi.Tmp * Connections->ItemPixelsX * (Connections->ItemPixelsY / 8)];
     }
     VarsUi.Tmp = VarsUi.SlotRight - 1;
     if (cUiBTCommand(UI_BT_GET_CONNECTION_VALID,0,&VarsUi.Tmp,NULL) == UI_BT_SUCCES)
     {
       cUiBTCommand(UI_BT_GET_CONNECTION_TYPE,0,&VarsUi.Tmp,&VarsUi.DeviceType);
-      pMapDisplay->pMenuIcons[MENUICON_RIGHT]   = (UBYTE*)&Devices.Data[VarsUi.DeviceType * Devices.ItemPixelsX * (Devices.ItemPixelsY / 8)];
+      pMapDisplay->pMenuIcons[MENUICON_RIGHT]   = (UBYTE*)&Devices->Data[VarsUi.DeviceType * Devices->ItemPixelsX * (Devices->ItemPixelsY / 8)];
       cUiDrawPortNo(VarsUi.PortBitmapRight,MENUICON_RIGHT,VarsUi.Tmp);
       pMapDisplay->UpdateMask                  |= BITMAP_BIT(BITMAP_4);
     }
     else
     {
-      pMapDisplay->pMenuIcons[MENUICON_RIGHT]   = (UBYTE*)&Connections.Data[VarsUi.Tmp * Connections.ItemPixelsX * (Connections.ItemPixelsY / 8)];
+      pMapDisplay->pMenuIcons[MENUICON_RIGHT]   = (UBYTE*)&Connections->Data[VarsUi.Tmp * Connections->ItemPixelsX * (Connections->ItemPixelsY / 8)];
     }
     pMapDisplay->EraseMask                     &= ~SCREEN_BIT(SCREEN_LARGE);
     pMapDisplay->EraseMask                     |= MENUICON_BITS;
@@ -3925,13 +3925,13 @@ UBYTE     cUiBtConnect(UBYTE Action) // Select connection no and insert device
     if (cUiBTCommand(UI_BT_GET_CONNECTION_VALID,0,&VarsUi.Tmp,NULL) == UI_BT_SUCCES)
     {
       cUiBTCommand(UI_BT_GET_CONNECTION_TYPE,0,&VarsUi.Tmp,&VarsUi.DeviceType);
-      pMapDisplay->pMenuIcons[MENUICON_LEFT]    = (UBYTE*)&Devices.Data[VarsUi.DeviceType * Devices.ItemPixelsX * (Devices.ItemPixelsY / 8)];
+      pMapDisplay->pMenuIcons[MENUICON_LEFT]    = (UBYTE*)&Devices->Data[VarsUi.DeviceType * Devices->ItemPixelsX * (Devices->ItemPixelsY / 8)];
       cUiDrawPortNo(VarsUi.PortBitmapLeft,MENUICON_LEFT,VarsUi.Tmp);
       pMapDisplay->UpdateMask                  |= BITMAP_BIT(BITMAP_2);
     }
     else
     {
-      pMapDisplay->pMenuIcons[MENUICON_LEFT]    = (UBYTE*)&Connections.Data[VarsUi.Tmp * Connections.ItemPixelsX * (Connections.ItemPixelsY / 8)];
+      pMapDisplay->pMenuIcons[MENUICON_LEFT]    = (UBYTE*)&Connections->Data[VarsUi.Tmp * Connections->ItemPixelsX * (Connections->ItemPixelsY / 8)];
     }
 
     VarsUi.Tmp = VarsUi.SlotCenter;
@@ -3942,25 +3942,25 @@ UBYTE     cUiBtConnect(UBYTE Action) // Select connection no and insert device
     if (cUiBTCommand(UI_BT_GET_CONNECTION_VALID,0,&VarsUi.Tmp,NULL) == UI_BT_SUCCES)
     {
       cUiBTCommand(UI_BT_GET_CONNECTION_TYPE,0,&VarsUi.Tmp,&VarsUi.DeviceType);
-      pMapDisplay->pMenuIcons[MENUICON_CENTER]  = (UBYTE*)&Devices.Data[VarsUi.DeviceType * Devices.ItemPixelsX * (Devices.ItemPixelsY / 8)];
+      pMapDisplay->pMenuIcons[MENUICON_CENTER]  = (UBYTE*)&Devices->Data[VarsUi.DeviceType * Devices->ItemPixelsX * (Devices->ItemPixelsY / 8)];
       cUiDrawPortNo(VarsUi.PortBitmapCenter,MENUICON_CENTER,VarsUi.Tmp);
       pMapDisplay->UpdateMask                  |= BITMAP_BIT(BITMAP_3);
     }
     else
     {
-      pMapDisplay->pMenuIcons[MENUICON_CENTER]  = (UBYTE*)&Connections.Data[VarsUi.Tmp * Connections.ItemPixelsX * (Connections.ItemPixelsY / 8)];
+      pMapDisplay->pMenuIcons[MENUICON_CENTER]  = (UBYTE*)&Connections->Data[VarsUi.Tmp * Connections->ItemPixelsX * (Connections->ItemPixelsY / 8)];
     }
     VarsUi.Tmp = VarsUi.SlotRight;
     if (cUiBTCommand(UI_BT_GET_CONNECTION_VALID,0,&VarsUi.Tmp,NULL) == UI_BT_SUCCES)
     {
       cUiBTCommand(UI_BT_GET_CONNECTION_TYPE,0,&VarsUi.Tmp,&VarsUi.DeviceType);
-      pMapDisplay->pMenuIcons[MENUICON_RIGHT]   = (UBYTE*)&Devices.Data[VarsUi.DeviceType * Devices.ItemPixelsX * (Devices.ItemPixelsY / 8)];
+      pMapDisplay->pMenuIcons[MENUICON_RIGHT]   = (UBYTE*)&Devices->Data[VarsUi.DeviceType * Devices->ItemPixelsX * (Devices->ItemPixelsY / 8)];
       cUiDrawPortNo(VarsUi.PortBitmapRight,MENUICON_RIGHT,VarsUi.Tmp);
       pMapDisplay->UpdateMask                  |= BITMAP_BIT(BITMAP_4);
     }
     else
     {
-      pMapDisplay->pMenuIcons[MENUICON_RIGHT]   = (UBYTE*)&Connections.Data[VarsUi.Tmp * Connections.ItemPixelsX * (Connections.ItemPixelsY / 8)];
+      pMapDisplay->pMenuIcons[MENUICON_RIGHT]   = (UBYTE*)&Connections->Data[VarsUi.Tmp * Connections->ItemPixelsX * (Connections->ItemPixelsY / 8)];
     }
     pMapDisplay->EraseMask                     &= ~SCREEN_BIT(SCREEN_LARGE);
     pMapDisplay->EraseMask                     |= MENUICON_BITS;
