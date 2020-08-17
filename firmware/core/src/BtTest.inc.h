@@ -1,7 +1,7 @@
 //******* TestPrg ************************************************************
 
-#include  "Test1.txt"
-#include  "Test2.txt"
+#include  "Test1.h"
+#include  "Test2.h"
 #include  <stdlib.h>
 //#define TESTPRG                     // If defined the test program will be included
 
@@ -1235,12 +1235,12 @@ UBYTE     TestPrg(UBYTE Dummy)
     {
       if ((Count & 0x7FF) == 0x000)
       {
-        pMapDisplay->pScreens[SCREEN_BACKGROUND]       =  &Test1;
+        pMapDisplay->pScreens[SCREEN_BACKGROUND]       =  Test1;
         pMapDisplay->UpdateMask                       |=  SCREEN_BIT(SCREEN_BACKGROUND);
       }
       if ((Count & 0x7FF) == 0x3FF)
       {
-        pMapDisplay->pScreens[SCREEN_BACKGROUND]       =  &Test2;
+        pMapDisplay->pScreens[SCREEN_BACKGROUND]       =  Test2;
         pMapDisplay->UpdateMask                       |=  SCREEN_BIT(SCREEN_BACKGROUND);
       }
       Count++;
