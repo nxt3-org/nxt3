@@ -13,6 +13,8 @@ add_custom_command(
         OUTPUT installer.sh installer.rbf installer.uf2
         COMMENT "Generating NXT3 SFX installer"
         DEPENDS nxt3.elf battd.elf
+        ${CMAKE_CURRENT_SOURCE_DIR}/mksfx.py
+        ${CMAKE_CURRENT_SOURCE_DIR}/sfx.sh
         COMMAND /usr/bin/env python3 "${CMAKE_CURRENT_SOURCE_DIR}/mksfx.py"
         --output-sh "${CMAKE_CURRENT_BINARY_DIR}/NXT3_Installer.elf"
         --output-rbf "${CMAKE_CURRENT_BINARY_DIR}/NXT3_Installer.rbf"
