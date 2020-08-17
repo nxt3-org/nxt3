@@ -1385,6 +1385,10 @@ void      cCmdInit(void* pHeader)
 
   pHeaders        = pHeader;
 
+#if WRITE_IOMAP_OFFSETS
+  cCmdWriteIOMapOffsetsFile(pHeaders);
+#endif
+
   IOMapCmd.pRCHandler = &cCmdHandleRemoteCommands;
 
 #if defined(ARM_DEBUG)

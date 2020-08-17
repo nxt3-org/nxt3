@@ -55,7 +55,7 @@ void      cCmdExit(void);
 #define WRITE_IOMAP_OFFSETS 0
 
 #if WRITE_IOMAP_OFFSETS
-void cCmdWriteIOMapOffsetsFile();
+void cCmdWriteIOMapOffsetsFile(HEADER **pHeaders);
 #endif
 
 //

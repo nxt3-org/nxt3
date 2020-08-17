@@ -1,5 +1,13 @@
+#include <stdconst.h>
+#include <string.h>
+#include <stdio.h>
+#include "modules.h"
+#include "c_cmd.h"
+#include "c_comm.iom.h"
+#include "c_loader.iom.h"
+
 #if WRITE_IOMAP_OFFSETS
-void cCmdWriteIOMapOffsetsFile()
+void cCmdWriteIOMapOffsetsFile(HEADER **pHeaders)
 {
   LOADER_STATUS LStatus;
   UBYTE Handle;
@@ -23,87 +31,87 @@ void cCmdWriteIOMapOffsetsFile()
     Length = strlen((char *)Buffer);
     LStatus = pMapLoader->pFunc(WRITE, &Handle, Buffer, &Length);
 
-    sprintf((char *)Buffer, "pFunc: %d\r\n", (ULONG)pMapComm->pFunc - (ULONG)pMapComm);
+    sprintf((char *)Buffer, "pFunc: %ld\r\n", (ULONG)pMapComm->pFunc - (ULONG)pMapComm);
     Length = strlen((char *)Buffer);
     LStatus = pMapLoader->pFunc(WRITE, &Handle, Buffer, &Length);
 
-    sprintf((char *)Buffer, "pFunc2: %d\r\n", (ULONG)pMapComm->pFunc2 - (ULONG)pMapComm);
+    sprintf((char *)Buffer, "pFunc2: %ld\r\n", (ULONG)pMapComm->pFunc2 - (ULONG)pMapComm);
     Length = strlen((char *)Buffer);
     LStatus = pMapLoader->pFunc(WRITE, &Handle, Buffer, &Length);
 
-    sprintf((char *)Buffer, "BtDeviceTable: %d\r\n", (ULONG)pMapComm->BtDeviceTable - (ULONG)pMapComm);
+    sprintf((char *)Buffer, "BtDeviceTable: %ld\r\n", (ULONG)pMapComm->BtDeviceTable - (ULONG)pMapComm);
     Length = strlen((char *)Buffer);
     LStatus = pMapLoader->pFunc(WRITE, &Handle, Buffer, &Length);
 
-    sprintf((char *)Buffer, "BtConnectTable: %d\r\n", (ULONG)pMapComm->BtConnectTable - (ULONG)pMapComm);
+    sprintf((char *)Buffer, "BtConnectTable: %ld\r\n", (ULONG)pMapComm->BtConnectTable - (ULONG)pMapComm);
     Length = strlen((char *)Buffer);
     LStatus = pMapLoader->pFunc(WRITE, &Handle, Buffer, &Length);
 
-    sprintf((char *)Buffer, "BrickData: %d\r\n", (ULONG)pMapComm->BrickData.Name - (ULONG)pMapComm);
+    sprintf((char *)Buffer, "BrickData: %ld\r\n", (ULONG)pMapComm->BrickData.Name - (ULONG)pMapComm);
     Length = strlen((char *)Buffer);
     LStatus = pMapLoader->pFunc(WRITE, &Handle, Buffer, &Length);
 
-    sprintf((char *)Buffer, "BtInBuf: %d\r\n", (ULONG)pMapComm->BtInBuf.Buf - (ULONG)pMapComm);
+    sprintf((char *)Buffer, "BtInBuf: %ld\r\n", (ULONG)pMapComm->BtInBuf.Buf - (ULONG)pMapComm);
     Length = strlen((char *)Buffer);
     LStatus = pMapLoader->pFunc(WRITE, &Handle, Buffer, &Length);
 
-    sprintf((char *)Buffer, "BtOutBuf: %d\r\n", (ULONG)pMapComm->BtOutBuf.Buf - (ULONG)pMapComm);
+    sprintf((char *)Buffer, "BtOutBuf: %ld\r\n", (ULONG)pMapComm->BtOutBuf.Buf - (ULONG)pMapComm);
     Length = strlen((char *)Buffer);
     LStatus = pMapLoader->pFunc(WRITE, &Handle, Buffer, &Length);
 
-    sprintf((char *)Buffer, "HsInBuf: %d\r\n", (ULONG)pMapComm->HsInBuf.Buf - (ULONG)pMapComm);
+    sprintf((char *)Buffer, "HsInBuf: %ld\r\n", (ULONG)pMapComm->HsInBuf.Buf - (ULONG)pMapComm);
     Length = strlen((char *)Buffer);
     LStatus = pMapLoader->pFunc(WRITE, &Handle, Buffer, &Length);
 
-    sprintf((char *)Buffer, "HsOutBuf: %d\r\n", (ULONG)pMapComm->HsOutBuf.Buf - (ULONG)pMapComm);
+    sprintf((char *)Buffer, "HsOutBuf: %ld\r\n", (ULONG)pMapComm->HsOutBuf.Buf - (ULONG)pMapComm);
     Length = strlen((char *)Buffer);
     LStatus = pMapLoader->pFunc(WRITE, &Handle, Buffer, &Length);
 
-    sprintf((char *)Buffer, "UsbInBuf: %d\r\n", (ULONG)pMapComm->UsbInBuf.Buf - (ULONG)pMapComm);
+    sprintf((char *)Buffer, "UsbInBuf: %ld\r\n", (ULONG)pMapComm->UsbInBuf.Buf - (ULONG)pMapComm);
     Length = strlen((char *)Buffer);
     LStatus = pMapLoader->pFunc(WRITE, &Handle, Buffer, &Length);
 
-    sprintf((char *)Buffer, "UsbOutBuf: %d\r\n", (ULONG)pMapComm->UsbOutBuf.Buf - (ULONG)pMapComm);
+    sprintf((char *)Buffer, "UsbOutBuf: %ld\r\n", (ULONG)pMapComm->UsbOutBuf.Buf - (ULONG)pMapComm);
     Length = strlen((char *)Buffer);
     LStatus = pMapLoader->pFunc(WRITE, &Handle, Buffer, &Length);
 
-    sprintf((char *)Buffer, "UsbPollBuf: %d\r\n", (ULONG)pMapComm->UsbPollBuf.Buf - (ULONG)pMapComm);
+    sprintf((char *)Buffer, "UsbPollBuf: %ld\r\n", (ULONG)pMapComm->UsbPollBuf.Buf - (ULONG)pMapComm);
     Length = strlen((char *)Buffer);
     LStatus = pMapLoader->pFunc(WRITE, &Handle, Buffer, &Length);
 
-    sprintf((char *)Buffer, "BtDeviceCnt: %d\r\n", (ULONG)&(pMapComm->BtDeviceCnt) - (ULONG)pMapComm);
+    sprintf((char *)Buffer, "BtDeviceCnt: %ld\r\n", (ULONG)&(pMapComm->BtDeviceCnt) - (ULONG)pMapComm);
     Length = strlen((char *)Buffer);
     LStatus = pMapLoader->pFunc(WRITE, &Handle, Buffer, &Length);
 
-    sprintf((char *)Buffer, "BtDeviceNameCnt: %d\r\n", (ULONG)&(pMapComm->BtDeviceNameCnt) - (ULONG)pMapComm);
+    sprintf((char *)Buffer, "BtDeviceNameCnt: %ld\r\n", (ULONG)&(pMapComm->BtDeviceNameCnt) - (ULONG)pMapComm);
     Length = strlen((char *)Buffer);
     LStatus = pMapLoader->pFunc(WRITE, &Handle, Buffer, &Length);
 
-    sprintf((char *)Buffer, "HsFlags: %d\r\n", (ULONG)&(pMapComm->HsFlags) - (ULONG)pMapComm);
+    sprintf((char *)Buffer, "HsFlags: %ld\r\n", (ULONG)&(pMapComm->HsFlags) - (ULONG)pMapComm);
     Length = strlen((char *)Buffer);
     LStatus = pMapLoader->pFunc(WRITE, &Handle, Buffer, &Length);
 
-    sprintf((char *)Buffer, "HsSpeed: %d\r\n", (ULONG)&(pMapComm->HsSpeed) - (ULONG)pMapComm);
+    sprintf((char *)Buffer, "HsSpeed: %ld\r\n", (ULONG)&(pMapComm->HsSpeed) - (ULONG)pMapComm);
     Length = strlen((char *)Buffer);
     LStatus = pMapLoader->pFunc(WRITE, &Handle, Buffer, &Length);
 
-    sprintf((char *)Buffer, "HsState: %d\r\n", (ULONG)&(pMapComm->HsState) - (ULONG)pMapComm);
+    sprintf((char *)Buffer, "HsState: %ld\r\n", (ULONG)&(pMapComm->HsState) - (ULONG)pMapComm);
     Length = strlen((char *)Buffer);
     LStatus = pMapLoader->pFunc(WRITE, &Handle, Buffer, &Length);
 
-    sprintf((char *)Buffer, "UsbState: %d\r\n", (ULONG)&(pMapComm->UsbState) - (ULONG)pMapComm);
+    sprintf((char *)Buffer, "UsbState: %ld\r\n", (ULONG)&(pMapComm->UsbState) - (ULONG)pMapComm);
     Length = strlen((char *)Buffer);
     LStatus = pMapLoader->pFunc(WRITE, &Handle, Buffer, &Length);
 
-    sprintf((char *)Buffer, "HsMode: %d\r\n", (ULONG)&(pMapComm->HsMode) - (ULONG)pMapComm);
+    sprintf((char *)Buffer, "HsMode: %ld\r\n", (ULONG)&(pMapComm->HsMode) - (ULONG)pMapComm);
     Length = strlen((char *)Buffer);
     LStatus = pMapLoader->pFunc(WRITE, &Handle, Buffer, &Length);
 
-    sprintf((char *)Buffer, "BtDataMode: %d\r\n", (ULONG)&(pMapComm->BtDataMode) - (ULONG)pMapComm);
+    sprintf((char *)Buffer, "BtDataMode: %ld\r\n", (ULONG)&(pMapComm->BtDataMode) - (ULONG)pMapComm);
     Length = strlen((char *)Buffer);
     LStatus = pMapLoader->pFunc(WRITE, &Handle, Buffer, &Length);
 
-    sprintf((char *)Buffer, "HsDataMode: %d\r\n", (ULONG)&(pMapComm->HsDataMode) - (ULONG)pMapComm);
+    sprintf((char *)Buffer, "HsDataMode: %ld\r\n", (ULONG)&(pMapComm->HsDataMode) - (ULONG)pMapComm);
     Length = strlen((char *)Buffer);
     LStatus = pMapLoader->pFunc(WRITE, &Handle, Buffer, &Length);
 

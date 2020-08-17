@@ -5,7 +5,6 @@ project(NXTcore VERSION 1.32.1
         LANGUAGES C)
 
 add_executable(nxt3.elf
-        ${CMAKE_CURRENT_SOURCE_DIR}/generated/cCmdWriteIOMapOffsetsFile.txt
         ${CMAKE_CURRENT_SOURCE_DIR}/generated/Mainmenu.rms
         ${CMAKE_CURRENT_SOURCE_DIR}/generated/Submenu01.rms
         ${CMAKE_CURRENT_SOURCE_DIR}/generated/Submenu02.rms
@@ -92,6 +91,7 @@ add_executable(nxt3.elf
         ${CMAKE_CURRENT_SOURCE_DIR}/src/m_sched.c
         ${CMAKE_CURRENT_SOURCE_DIR}/src/c_sound.c
         ${CMAKE_CURRENT_SOURCE_DIR}/src/c_cmd.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/c_cmd_iomap_writer.c
         ${CMAKE_CURRENT_SOURCE_DIR}/src/c_ioctrl.c
         ${CMAKE_CURRENT_SOURCE_DIR}/src/c_input.c
         ${CMAKE_CURRENT_SOURCE_DIR}/src/c_cmd_drawing.inc
