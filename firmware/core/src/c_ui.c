@@ -59,59 +59,59 @@ const     HEADER  cUi =
 
 // ****** GENERAL GRAPHIC RESOURCES ******************************************
 
-#include  "Display.txt"       // Bitmap for frame used in view and datalog
-#include  "LowBattery.txt"    // Bitmap showed when low battery occures
+#include  "Display.h"       // Bitmap for frame used in view and datalog
+#include  "LowBattery.h"      // Bitmap showed when low battery occures
 #include  "Font.txt"          // Font used for all text
 #ifndef STRIPPED
 #include  "Step.txt"          // Bitmap used in On Brick Programming
 #endif
-#include  "Cursor.txt"        // Bitmap for cursor
+#include  "Cursor.h"          // Bitmap for cursor
 #include  "Running.txt"       // Icon collection used for "running" symbol
 #include  "Port.txt"          // Font used for naming sensor ports in datalog/bluetooth
-#include  "Ok.txt"            // Bitmap for OK buttom in get user string
-#include  "Wait.txt"          // Bitmap for feedback
-#include  "Fail.txt"          // Bitmap for feedback
-#include  "Info.txt"          // Bitmap for feedback
+#include  "Ok.h"              // Bitmap for OK buttom in get user string
+#include  "Wait.h"            // Bitmap for feedback
+#include  "Fail.h"            // Bitmap for feedback
+#include  "Info.h"            // Bitmap for feedback
 #include  "Icons.txt"         // Icon collection used for menues
 
 #ifndef STRIPPED
 // ****** INTRO ANIMATION RESOURCES ******************************************
 
-#include  "RCXintro_1.txt"    // Bitmap for picture 1  in the intro animation
-#include  "RCXintro_2.txt"    // Bitmap for picture 2  in the intro animation
-#include  "RCXintro_3.txt"    // Bitmap for picture 3  in the intro animation
-#include  "RCXintro_4.txt"    // Bitmap for picture 4  in the intro animation
-#include  "RCXintro_5.txt"    // Bitmap for picture 5  in the intro animation
-#include  "RCXintro_6.txt"    // Bitmap for picture 6  in the intro animation
-#include  "RCXintro_7.txt"    // Bitmap for picture 7  in the intro animation
-#include  "RCXintro_8.txt"    // Bitmap for picture 8  in the intro animation
-#include  "RCXintro_9.txt"    // Bitmap for picture 9  in the intro animation
-#include  "RCXintro_10.txt"   // Bitmap for picture 10 in the intro animation
-#include  "RCXintro_11.txt"   // Bitmap for picture 11 in the intro animation
-#include  "RCXintro_12.txt"   // Bitmap for picture 12 in the intro animation
-#include  "RCXintro_13.txt"   // Bitmap for picture 13 in the intro animation
-#include  "RCXintro_14.txt"   // Bitmap for picture 14 in the intro animation
-#include  "RCXintro_15.txt"   // Bitmap for picture 15 in the intro animation
-#include  "RCXintro_16.txt"   // Bitmap for picture 16 in the intro animation
+#include  "RCXintro_1.h"    // Bitmap for picture 1  in the intro animation
+#include  "RCXintro_2.h"    // Bitmap for picture 2  in the intro animation
+#include  "RCXintro_3.h"    // Bitmap for picture 3  in the intro animation
+#include  "RCXintro_4.h"    // Bitmap for picture 4  in the intro animation
+#include  "RCXintro_5.h"    // Bitmap for picture 5  in the intro animation
+#include  "RCXintro_6.h"    // Bitmap for picture 6  in the intro animation
+#include  "RCXintro_7.h"    // Bitmap for picture 7  in the intro animation
+#include  "RCXintro_8.h"    // Bitmap for picture 8  in the intro animation
+#include  "RCXintro_9.h"    // Bitmap for picture 9  in the intro animation
+#include  "RCXintro_10.h"   // Bitmap for picture 10 in the intro animation
+#include  "RCXintro_11.h"   // Bitmap for picture 11 in the intro animation
+#include  "RCXintro_12.h"   // Bitmap for picture 12 in the intro animation
+#include  "RCXintro_13.h"   // Bitmap for picture 13 in the intro animation
+#include  "RCXintro_14.h"   // Bitmap for picture 14 in the intro animation
+#include  "RCXintro_15.h"   // Bitmap for picture 15 in the intro animation
+#include  "RCXintro_16.h"   // Bitmap for picture 16 in the intro animation
 
 const     BMPMAP *Intro[NO_OF_INTROBITMAPS] = // Picture sequence for the intro animation
 {
-  &RCXintro_1,
-  &RCXintro_2,
-  &RCXintro_3,
-  &RCXintro_4,
-  &RCXintro_5,
-  &RCXintro_6,
-  &RCXintro_7,
-  &RCXintro_8,
-  &RCXintro_9,
-  &RCXintro_10,
-  &RCXintro_11,
-  &RCXintro_12,
-  &RCXintro_13,
-  &RCXintro_14,
-  &RCXintro_15,
-  &RCXintro_16
+  RCXintro_1,
+  RCXintro_2,
+  RCXintro_3,
+  RCXintro_4,
+  RCXintro_5,
+  RCXintro_6,
+  RCXintro_7,
+  RCXintro_8,
+  RCXintro_9,
+  RCXintro_10,
+  RCXintro_11,
+  RCXintro_12,
+  RCXintro_13,
+  RCXintro_14,
+  RCXintro_15,
+  RCXintro_16
 };
 #endif
 
@@ -170,97 +170,7 @@ enum STATUS_NO                          // Index in status icon collection file
 
 // ****** FREE TEXT GRAPHIC RESOURCES ****************************************
 
-#include  "Ui.txt"            // Text strings that is'nt defined in menu files
-
-enum                          // String index in text string file
-{
-  TXT_GENERAL_EMPTY,
-  TXT_FB_GENERIC_FAIL,                      // "Failed!"
-
-                                            // BlueTooth connect
-  TXT_FB_BT_CONNECTING_WAIT,                // "Connecting"
-  TXT_FB_BT_CONNECT_BUSY_FAIL,              // "Line is busy"
-
-                                            // BlueTooth send file
-  TXT_FB_BT_SENDING_NO_CONN_FAIL,           // "Connection?"
-  TXT_FB_BT_SENDING_WAIT,                   // "Sending file"
-
-                                            // BlueTooth on/off
-  TXT_FB_BT_TURNING_ON_WAIT,                // "Turning on"
-  TXT_FB_BT_TURNING_OFF_WAIT,               // "Turning off"
-
-                                            // BlueTooth seach
-  TXT_FB_BT_SEARCHING_WAIT,                 // "Searching"
-  TXT_FB_BT_SEARCH_ABORTED_INFO,            // "Aborted!"
-
-                                            // On Brick Programming
-  TXT_FB_OBP_MEMORY_FULL_FAIL,              // "Memory full!"
-  TXT_FB_FILE_SAVED_INFO,                   // "File saved"
-  TXT_FB_FILE_EXIST_FAIL,                   // "File exist"
-  TXT_FB_OVERWRITE_FAIL,                    // "overwrite!"
-
-                                            // File delete
-  TXT_FB_FD_FILE_DELETED_INFO,              // "File deleted"
-
-                                            // Files delete
-  TXT_FB_FD_FILES_INFO,                     // "Files"
-  TXT_FB_FD_DELETED_INFO,                   // "deleted"
-
-                                            // File run
-  TXT_FILERUN_RUNNING,                      // "Running"
-  TXT_FILERUN_ABORTED,                      // "Aborted!"
-  TXT_FILERUN_ENDED,                        // "Ended"
-  TXT_FILERUN_FILE_ERROR,                   // "File error! %d"
-
-                                            // Files delete
-  TXT_FILESDELETE_DELETING_ALL,             // "Deleting all"
-  TXT_FILESDELETE_S_FILES,                  // "%s files!"
-
-                                            // Datalogging
-  TXT_DATALOGGING_PRESS_EXIT_TO,            // "Press exit to"
-  TXT_DATALOGGING_STOP_DATALOGGING,         // "stop datalogging"
-  TXT_DATALOGGING_PORT_OCCUPIED,            // "Port occupied!"
-  TXT_DATALOGGING_RATE,                     // "H:MM:SS:00
-  TXT_DATALOGGING_TIME,                     // "HH:MM:SS"
-
-                                            // File types
-  TXT_FILETYPE_SOUND,                       // "Sound"
-  TXT_FILETYPE_LMS,                         // "Software"
-  TXT_FILETYPE_NXT,                         // "NXT"
-  TXT_FILETYPE_TRY_ME,                      // "Try me"
-  TXT_FILETYPE_DATA,                        // "Datalog"
-
-                                            // Get user string
-  TXT_GETUSERSTRING_PIN,                    // "Pin:"
-  TXT_GETUSERSTRING_FILENAME,               // "Filename:"
-
-                                            // On Brick Programming
-  TXT_ONBRICKPROGRAMMING_PLEASE_USE_PORT,   // "Please use port:"
-  TXT_ONBRICKPROGRAMMING_1_TOUCH_SENSOR,    // "1 - Touch sensor"
-  TXT_ONBRICKPROGRAMMING_2_SOUND_SENSOR,    // "2 - Sound sensor"
-  TXT_ONBRICKPROGRAMMING_3_LIGHT_SENSOR,    // "3 - Light sensor"
-  TXT_ONBRICKPROGRAMMING_4_ULTRA_SONIC,     // "4 - Ultra sonic"
-  TXT_ONBRICKPROGRAMMING_BC_LR_MOTORS,      // "B/C - L/R motors"
-
-                                            // View
-  TXT_GENERIC_SELECT,                       // "Select"
-
-                                            // Bluetooth list errors
-  TXT_FB_BT_ERROR_LR_COULD_NOT_SAVE_1,      // BT save data error!
-  TXT_FB_BT_ERROR_LR_COULD_NOT_SAVE_2,      //
-  TXT_FB_BT_ERROR_LR_STORE_IS_FULL_1,       // BT store is full error!
-  TXT_FB_BT_ERROR_LR_STORE_IS_FULL_2,       //
-  TXT_FB_BT_ERROR_LR_UNKOWN_ADDR_1,         // BT unknown addr. error!
-  TXT_FB_BT_ERROR_LR_UNKOWN_ADDR_2,         //
-
-                                            // Datalog errors
-  TXT_FB_DL_ERROR_MEMORY_FULL_1,            // Memory is full!
-  TXT_FB_DL_ERROR_MEMORY_FULL_2,            //
-
-                                            // Power of time
-  TXT_POWEROFFTIME_NEVER                    // "Never"
-
-};
+#include  "Ui.h"              // Text strings that is'nt defined in menu files
 
 // ****** FILE TYPE GRAPHIC RESOURCES ****************************************
 
@@ -338,20 +248,10 @@ UBYTE*    cUiGetMenuPointer(UBYTE FileNo)
 
 UBYTE*    cUiGetString(UBYTE No)        // Get string in text string file
 {
-  UBYTE   *Result = NULL;
-  UWORD   Tmp;
+  if (No >= TXT_STRING_COUNT)
+      return NULL;
 
-  if (No)
-  {
-    if (No <= Ui.ItemsY)
-    {
-      Tmp  = No - 1;
-      Tmp *= Ui.ItemCharsX;
-      Result = (UBYTE*) &(Ui.Data[Tmp]);
-    }
-  }
-
-  return (Result);
+  return (UBYTE*) UiStrings[No];
 }
 
 
@@ -1159,7 +1059,7 @@ void      cUiLoadLevel(UBYTE FileLevel,UBYTE MenuLevel,UBYTE MenuIndex)
   }
 }
 
-#include  "Functions.inl"
+#include  "Functions.inl.h"
 
 
 void      cUiInit(void* pHeader)
@@ -1340,7 +1240,7 @@ void      cUiCtrl(void)
         {
           if (VarsUi.LowBatt)
           {
-            pMapDisplay->pBitmaps[BITMAP_1] = &LowBattery;
+            pMapDisplay->pBitmaps[BITMAP_1] =  LowBattery;
             pMapDisplay->UpdateMask         =  BITMAP_BIT(BITMAP_1);
             VarsUi.LowBattHasOccured = 1;
           }
@@ -1805,7 +1705,7 @@ void      cUiCtrl(void)
 
       }
 
-      if (!cUiFeedback(&Fail,Tmp,Tmp + 1,DISPLAY_SHOW_ERROR_TIME))
+      if (!cUiFeedback(Fail,Tmp,Tmp + 1,DISPLAY_SHOW_ERROR_TIME))
       {
         IOMapUi.BluetoothState &= ~BT_ERROR_ATTENTION;
         cUiLoadLevel(0,1,1);
@@ -1830,7 +1730,7 @@ void      cUiCtrl(void)
           VarsUi.LowBattHasOccured           = 1;
           VarsUi.LowBattSavedState           = IOMapUi.State;
           VarsUi.LowBattSavedBitmap          = pMapDisplay->pBitmaps[BITMAP_1];
-          pMapDisplay->pBitmaps[BITMAP_1]    = &LowBattery;
+          pMapDisplay->pBitmaps[BITMAP_1]    = LowBattery;
           pMapDisplay->UpdateMask            = BITMAP_BIT(BITMAP_1);
           IOMapUi.Flags                     |= UI_REDRAW_STATUS;
           IOMapUi.Flags                     |= UI_BUSY;
