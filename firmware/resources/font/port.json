@@ -1,0 +1,16 @@
+{
+  "icon": {
+    "icon_width": 3,
+    "icon_height": 8,
+    "items": [
+      {"index": 0, "file": "port0.png"},
+      {"index": 1, "file": "port1.png"},
+      {"index": 2, "file": "port2.png"},
+      {"index": 3, "file": "port3.png"},
+      {"index": 4, "file": "port4.png"},
+      {"index": 5, "file": "port5.png"},
+      {"index": 6, "file": "port6.png"},
+      {"index": 7, "file": "port7.png"}
+    ]
+  }
+}

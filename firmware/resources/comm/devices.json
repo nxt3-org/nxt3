@@ -1,0 +1,12 @@
+{
+  "icon": {
+    "icon_width": 24,
+    "icon_height": 24,
+    "items": [
+      {"index": 0, "file": "dev_unknown.png"},
+      {"index": 1, "file": "dev_nxt.png"},
+      {"index": 2, "file": "dev_phone.png"},
+      {"index": 3, "file": "dev_pc.png"}
+    ]
+  }
+}

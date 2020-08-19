@@ -1,0 +1,40 @@
+{
+  "icon": {
+    "icon_width": 11,
+    "icon_height": 16,
+    "items": [
+      {"index": 0, "file": "empty.png"},
+      {"index": 1, "file": "action/forward_1.png"},
+      {"index": 2, "file": "action/forward_2.png"},
+      {"index": 3, "file": "action/back_left_2.png"},
+      {"index": 4, "file": "action/turn_left_1.png"},
+      {"index": 5, "file": "action/turn_left_2.png"},
+      {"index": 6, "file": "action/back_right_1.png"},
+      {"index": 7, "file": "action/turn_right_1.png"},
+      {"index": 8, "file": "action/turn_right_2.png"},
+      {"index": 9, "file": "action/back_left_1.png"},
+      {"index": 10, "file": "action/tone_1.png"},
+      {"index": 11, "file": "action/tone_2.png"},
+      {"index": 12, "file": "action/backward_1.png"},
+      {"index": 13, "file": "action/backward_2.png"},
+      {"index": 14, "file": "action/back_right_2.png"},
+      {"index": 15, "file": "invalid.png"},
+      {"index": 16, "file": "empty.png"},
+      {"index": 17, "file": "wait/light.png"},
+      {"index": 18, "file": "wait/sonic.png"},
+      {"index": 19, "file": "wait/sound.png"},
+      {"index": 20, "file": "wait/touch.png"},
+      {"index": 21, "file": "wait/2s.png"},
+      {"index": 22, "file": "wait/5s.png"},
+      {"index": 23, "file": "wait/10s.png"},
+      {"index": 24, "file": "wait/dark.png"},
+      {"index": 25, "file": "invalid.png"},
+      {"index": 26, "file": "invalid.png"},
+      {"index": 27, "file": "invalid.png"},
+      {"index": 28, "file": "invalid.png"},
+      {"index": 29, "file": "invalid.png"},
+      {"index": 30, "file": "end/loop.png"},
+      {"index": 31, "file": "end/stop.png"}
+    ]
+  }
+}

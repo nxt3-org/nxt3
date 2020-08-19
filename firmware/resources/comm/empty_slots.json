@@ -1,0 +1,12 @@
+{
+  "icon": {
+    "icon_width": 24,
+    "icon_height": 24,
+    "items": [
+      {"index": 0, "file": "empty0.png"},
+      {"index": 1, "file": "empty1.png"},
+      {"index": 2, "file": "empty2.png"},
+      {"index": 3, "file": "empty3.png"}
+    ]
+  }
+}
