@@ -113,7 +113,7 @@
 		{ "id": "run file",             "macro": "FUNC_NO_FILE_RUN",                "value": "0x08",        "doc": "Run file",                  "func": "cUiFileRun"            },
 		{ "id": "delete file",          "macro": "FUNC_NO_FILE_DELETE",             "value": "0x09",        "doc": "Delete file",               "func": "cUiFileDelete"         },
 		{ "id": "datalog",              "macro": "FUNC_NO_FREE1",                   "value": "0x0A",        "doc": "Datalogging",               "func": "cUiDataLogging"        },
-		{ "id": "blockprg",             "macro": "FUNC_NO_ON_BRICK_PROGRAMMING",    "value": "0x0B",        "doc": "On-brick programming",      "func": "cUiOnBrickProgramming" },
+		{ "id": "on brick program",     "macro": "FUNC_NO_ON_BRICK_PROGRAMMING",    "value": "0x0B",        "doc": "On-brick programming",      "func": "cUiOnBrickProgramming" },
 		{ "id": "",                     "macro": "FUNC_NO_FREE2",                   "value": "0x0C",        "doc": "free #2",                   "func": ""                      },
 		{ "id": "bt conn req",          "macro": "FUNC_NO_BT_CONNECT_REQUEST",      "value": "0x0D",        "doc": "Bluetooth connect request", "func": "cUiBTConnectRequest"   },
 		{ "id": "sensor view",          "macro": "FUNC_NO_VIEW",                    "value": "0x0E",        "doc": "View sensor data",          "func": "cUiView"               },
