@@ -1,0 +1,43 @@
+{
+  "menus": [
+    {
+      "icon": "file tryme",
+      "flags": ["MENU_AUTO_PRESS_ENTER"],
+      "function": "FUNC_NO_FILE_LIST", "parameter": "MENU_FILETYPE_TRYME",
+      "next_menu": 1,
+      "menus": [
+        {
+          "icon": "file tryme",
+          "flags": ["MENU_INIT_CALLS_WITH_0", "MENU_LEFT_RIGHT_AS_CALL", "MENU_EXIT_LEAVES_MENUFILE"],
+          "function": "FUNC_NO_FILE_LIST", "parameter": "MENU_SELECT",
+          "next_menu": 2,
+          "menus": [
+            {
+              "label": "Delete", "icon": "general delete",
+              "next_menu": 2,
+              "menus": [
+                {
+                  "label": "Are you sure?", "icon": "general yes",
+                  "flags": ["MENU_BACK_TWICE"],
+                  "function": "FUNC_NO_FILE_DELETE", "parameter": 0,
+                  "next_menu": "parent"
+                },
+                {
+                  "label": "Are you sure?", "icon": "general no",
+                  "flags": ["MENU_ENTER_ACT_AS_EXIT"],
+                  "next_menu": "parent"
+                }
+              ]
+            },
+            {
+              "label": "Run", "icon": "general run",
+              "flags": ["MENU_INIT_CALLS_WITH_0", "MENU_LEAVE_BACKGROUND"],
+              "function": "FUNC_NO_FILE_RUN", "parameter": "MENU_RUN",
+              "next_menu": "parent"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

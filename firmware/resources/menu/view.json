@@ -1,0 +1,154 @@
+{
+  "menus": [
+    {
+      "label": "Sound dB", "icon": "sensor sound db",
+      "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND"],
+      "function": "FUNC_NO_VIEW", "parameter": "MENU_SENSOR_SOUND_DB",
+      "next_menu": 1,
+      "menus": [
+        {
+          "label": "Port 1", "icon": "port input 1",
+          "flags": ["MENU_LEAVE_BACKGROUND"],
+          "function": "FUNC_NO_VIEW", "parameter": "MENU_PORT_1",
+          "next_menu": "parent"
+        },
+        {
+          "label": "Port 2", "icon": "port input 2",
+          "flags": ["MENU_LEAVE_BACKGROUND"],
+          "function": "FUNC_NO_VIEW", "parameter": "MENU_PORT_2",
+          "next_menu": "parent"
+        },
+        {
+          "label": "Port 3", "icon": "port input 3",
+          "flags": ["MENU_LEAVE_BACKGROUND"],
+          "function": "FUNC_NO_VIEW", "parameter": "MENU_PORT_3",
+          "next_menu": "parent"
+        },
+        {
+          "label": "Port 4", "icon": "port input 4",
+          "flags": ["MENU_LEAVE_BACKGROUND"],
+          "function": "FUNC_NO_VIEW", "parameter": "MENU_PORT_4",
+          "next_menu": "parent"
+        }
+      ]
+    },
+    {
+      "label": "Sound dBA", "icon": "sensor sound dba",
+      "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND"],
+      "function": "FUNC_NO_VIEW", "parameter": "MENU_SENSOR_SOUND_DBA",
+      "next_menu": 1
+    },
+    {
+      "label": "Reflected light", "icon": "sensor light reflect",
+      "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND"],
+      "function": "FUNC_NO_VIEW", "parameter": "MENU_SENSOR_LIGHT",
+      "next_menu": 1
+    },
+    {
+      "label": "Ambient light", "icon": "sensor light ambient",
+      "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND"],
+      "function": "FUNC_NO_VIEW", "parameter": "MENU_SENSOR_LIGHT_AMB",
+      "next_menu": 1
+    },
+    {
+      "label": "Temperature `C", "icon": "sensor temp c",
+      "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_INIT_CALLS_WITH_0"],
+      "function": "FUNC_NO_VIEW", "parameter": "MENU_SENSOR_IIC_TEMP_C",
+      "next_menu": 1
+    },
+    {
+      "label": "Temperature `F", "icon": "sensor temp f",
+      "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND"],
+      "function": "FUNC_NO_VIEW", "parameter": "MENU_SENSOR_IIC_TEMP_F",
+      "next_menu": 1
+    },
+    {
+      "label": "Motor rotations", "icon": "sensor motor rot",
+      "flags": ["MENU_LEAVE_BACKGROUND"],
+      "function": "FUNC_NO_VIEW", "parameter": "MENU_SENSOR_MOTOR_ROT",
+      "next_menu": 1,
+      "menus": [
+        {
+          "label": "Port A", "icon": "port output a",
+          "flags": ["MENU_LEAVE_BACKGROUND"],
+          "function": "FUNC_NO_VIEW", "parameter": "MENU_PORT_A",
+          "next_menu": "parent"
+        },
+        {
+          "label": "Port B", "icon": "port output b",
+          "flags": ["MENU_LEAVE_BACKGROUND"],
+          "function": "FUNC_NO_VIEW", "parameter": "MENU_PORT_B",
+          "next_menu": "parent"
+        },
+        {
+          "label": "Port C", "icon": "port output c",
+          "flags": ["MENU_LEAVE_BACKGROUND"],
+          "function": "FUNC_NO_VIEW", "parameter": "MENU_PORT_C",
+          "next_menu": "parent"
+        },
+        {
+          "label": "Port D", "icon": "port output d",
+          "flags": ["MENU_LEAVE_BACKGROUND"],
+          "function": "FUNC_NO_VIEW", "parameter": "MENU_PORT_D",
+          "next_menu": "parent"
+        }
+      ]
+    },
+    {
+      "label": "Motor degrees", "icon": "sensor motor deg",
+      "flags": ["MENU_LEAVE_BACKGROUND"],
+      "function": "FUNC_NO_VIEW", "parameter": "MENU_SENSOR_MOTOR_DEG",
+      "next_menu": 1,
+      "menus": [
+        {
+          "label": "Port A", "icon": "port output a",
+          "flags": ["MENU_LEAVE_BACKGROUND"],
+          "function": "FUNC_NO_VIEW", "parameter": "MENU_PORT_A",
+          "next_menu": "parent"
+        },
+        {
+          "label": "Port B", "icon": "port output b",
+          "flags": ["MENU_LEAVE_BACKGROUND"],
+          "function": "FUNC_NO_VIEW", "parameter": "MENU_PORT_B",
+          "next_menu": "parent"
+        },
+        {
+          "label": "Port C", "icon": "port output c",
+          "flags": ["MENU_LEAVE_BACKGROUND"],
+          "function": "FUNC_NO_VIEW", "parameter": "MENU_PORT_C",
+          "next_menu": "parent"
+        },
+        {
+          "label": "Port D", "icon": "port output d",
+          "flags": ["MENU_LEAVE_BACKGROUND"],
+          "function": "FUNC_NO_VIEW", "parameter": "MENU_PORT_D",
+          "next_menu": "parent"
+        }
+      ]
+    },
+    {
+      "label": "Touch", "icon": "sensor touch",
+      "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND"],
+      "function": "FUNC_NO_VIEW", "parameter": "MENU_SENSOR_TOUCH",
+      "next_menu": 1
+    },
+    {
+      "label": "Ultrasonic inch", "icon": "sensor sonic in",
+      "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND"],
+      "function": "FUNC_NO_VIEW", "parameter": "MENU_SENSOR_ULTRASONIC_IN",
+      "next_menu": 1
+    },
+    {
+      "label": "Ultrasonic cm", "icon": "sensor sonic cm",
+      "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND"],
+      "function": "FUNC_NO_VIEW", "parameter": "MENU_SENSOR_ULTRASONIC_CM",
+      "next_menu": 1
+    },
+    {
+      "label": "Color", "icon": "sensor color",
+      "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND"],
+      "function": "FUNC_NO_VIEW", "parameter": "MENU_SENSOR_COLOR",
+      "next_menu": 1
+    }
+  ]
+}

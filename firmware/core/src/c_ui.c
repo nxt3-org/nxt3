@@ -175,31 +175,31 @@ const     UBYTE PowerOffTimeSteps[POWER_OFF_TIME_STEPS] = { 0,2,5,10,30,60 }; //
 
 //******* UI MENU FILE HANDLER *************************************************************************
 
-#include  "Mainmenu.rms"
-#include  "Submenu01.rms"
-#include  "Submenu02.rms"
-#include  "Submenu03.rms"
-#include  "Submenu04.rms"
-#include  "Submenu05.rms"
-#include  "Submenu06.rms"
-#include  "Submenu07.rms"
+#include  "MenuMain.h"
+#include  "MenuFiles.h"
+#include  "MenuBlockPrg.h"
+#include  "MenuDatalog.h"
+#include  "MenuView.h"
+#include  "MenuSettings.h"
+#include  "MenuTryme.h"
+#include  "MenuBluetooth.h"
 
-const     UBYTE *MenuPointers[] =
+const     MENU *MenuPointers[] =
 {
-  (UBYTE*)MAINMENU,
-  (UBYTE*)SUBMENU01,
-  (UBYTE*)SUBMENU02,
-  (UBYTE*)SUBMENU03,
-  (UBYTE*)SUBMENU04,
-  (UBYTE*)SUBMENU05,
-  (UBYTE*)SUBMENU06,
-  (UBYTE*)SUBMENU07
+  (const MENU*)MenuMain,
+  (const MENU*)MenuFiles,
+  (const MENU*)MenuBlockPrg,
+  (const MENU*)MenuDatalog,
+  (const MENU*)MenuView,
+  (const MENU*)MenuSettings,
+  (const MENU*)MenuTryme,
+  (const MENU*)MenuBluetooth
 };
 
 
-UBYTE*    cUiGetMenuPointer(UBYTE FileNo)
+const MENU* cUiGetMenuPointer(UBYTE FileNo)
 {
-  return ((UBYTE*)MenuPointers[FileNo]);
+  return MenuPointers[FileNo];
 }
 
 
@@ -382,7 +382,7 @@ void      cUiListCalc(UBYTE Limit,UBYTE *Center,UBYTE *Left,UBYTE *Right)
 UBYTE     cUiMenuSearchSensorIcon(UBYTE Sensor)
 {
   UBYTE    Result = 0;
-  MENUITEM *MenuItem;
+  const MENUITEM *MenuItem;
   UBYTE    Index;
 
   for (Index = 0;(Index < IOMapUi.pMenu->Items) && (Result == 0);Index++)
@@ -398,7 +398,7 @@ UBYTE     cUiMenuSearchSensorIcon(UBYTE Sensor)
 }
 
 
-ULONG     cUiMenuGetId(MENUITEM *pMenuItem)
+ULONG     cUiMenuGetId(const MENUITEM *pMenuItem)
 {
   ULONG   MenuId;
 
@@ -411,7 +411,7 @@ ULONG     cUiMenuGetId(MENUITEM *pMenuItem)
 }
 
 
-ULONG     cUiMenuGetSpecialMask(MENUITEM *pMenuItem)
+ULONG     cUiMenuGetSpecialMask(const MENUITEM *pMenuItem)
 {
   ULONG   Mask;
 
@@ -494,7 +494,7 @@ UBYTE     cUiMenuIdValid(MENUFILE *pMenuFile,ULONG Id)
 }
 
 
-UBYTE     cUiMenuGetNoOfMenus(MENU *pMenu,MENUFILE *pMenuFile)
+UBYTE     cUiMenuGetNoOfMenus(const MENU *pMenu,MENUFILE *pMenuFile)
 {
   ULONG   MenuId;
   UBYTE   NoOfMenus;
@@ -540,7 +540,7 @@ UBYTE     cUiMenuGetNoOfMenus(MENU *pMenu,MENUFILE *pMenuFile)
 }
 
 
-UBYTE     cUiGetMenuItemIndex(MENU *pMenu,MENUFILE *pMenuFile,UBYTE No)
+UBYTE     cUiGetMenuItemIndex(const MENU *pMenu,MENUFILE *pMenuFile,UBYTE No)
 {
   ULONG   MenuId;
   UBYTE   NoOfMenus;
@@ -595,7 +595,7 @@ UBYTE     cUiGetMenuItemIndex(MENU *pMenu,MENUFILE *pMenuFile,UBYTE No)
 
 
 
-UBYTE     cUiMenuGetNo(MENU *pMenu,ULONG Id,UBYTE Level)
+UBYTE     cUiMenuGetNo(const MENU *pMenu,ULONG Id,UBYTE Level)
 {
   ULONG   MenuId;
   ULONG   MotherId;
@@ -792,9 +792,9 @@ void      cUiMenuCallFunction(UBYTE Function,UBYTE Parameter)
 
 void      cUiMenuNextFile(void)
 {
-  MENU    *pTmpMenu;
+  const MENU *pTmpMenu;
 
-  pTmpMenu      = (MENU*)cUiGetMenuPointer(VarsUi.pMenuLevel->NextFileNo);
+  pTmpMenu      = cUiGetMenuPointer(VarsUi.pMenuLevel->NextFileNo);
   if (pTmpMenu != NULL)
   {
     if (VarsUi.MenuFileLevel < (MENUFILELEVELS - 1))

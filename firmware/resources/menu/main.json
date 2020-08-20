@@ -1,0 +1,54 @@
+{
+  "menus": [
+    {
+      "label": "Exit NXT3?", "icon": "general yes",
+      "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_EXIT_LOAD_MENU", "MENU_ENTER_ONLY_CALLS"],
+      "function": "FUNC_NO_OFF",
+      "next_menu": 1,
+      "menus": [
+        {
+          "label": "My Files", "icon": "menu files",
+          "flags": ["MENU_EXIT_LOAD_POINTER", 1],
+          "next_file": 1, "next_menu": 1
+        },
+        {
+          "label": "NXT Program", "icon": "menu blockprg",
+          "flags": ["MENU_EXIT_LOAD_POINTER", 1],
+          "next_file": 2, "next_menu": 1
+        },
+        {
+          "label": "NXT Datalog", "icon": "menu datalog",
+          "flags": ["MENU_EXIT_LOAD_POINTER", 1, "MENU_ONLY_DATALOG_ENABLED"],
+          "function": "FUNC_NO_DATALOG",
+          "next_file": 3, "next_menu": 1
+        },
+        {
+          "label": "View", "icon": "menu view",
+          "flags": ["MENU_EXIT_LOAD_POINTER", 1],
+          "function": "FUNC_NO_VIEW",
+          "next_file": 4, "next_menu": 1
+        },
+        {
+          "label": "Bluetooth", "icon": "bt menu",
+          "flags": ["MENU_EXIT_LOAD_POINTER", 1],
+          "next_file": 7, "next_menu": 2
+        },
+        {
+          "label": "Settings", "icon": "menu settings",
+          "flags": ["MENU_EXIT_LOAD_POINTER", 1],
+          "next_file": 5, "next_menu": 1
+        },
+        {
+          "label": "Try Me", "icon": "menu tryme",
+          "flags": ["MENU_EXIT_LOAD_POINTER", 1],
+          "next_file": 6, "next_menu": 1
+        }
+      ]
+    },
+    {
+      "label": "Exit NXT3?", "icon": "general no",
+      "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_EXIT_LOAD_MENU"],
+      "next_menu": 1
+    }
+  ]
+}

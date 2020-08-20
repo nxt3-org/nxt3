@@ -1,0 +1,110 @@
+{
+  "menus": [
+    {
+      "label": "Software files", "icon": "file program",
+      "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_ACCEPT_INCOMMING_REQUEST"],
+      "function": "FUNC_NO_FILE_LIST", "parameter": "MENU_FILETYPE_LMS",
+      "next_menu": 1,
+      "menus": [
+        {
+          "flags": ["MENU_INIT_CALLS_WITH_0", "MENU_LEFT_RIGHT_AS_CALL"],
+          "function": "FUNC_NO_FILE_LIST", "parameter": "MENU_SELECT",
+          "next_menu": 1,
+          "menus": [
+            {
+              "label": "Run", "icon": "general run",
+              "flags": ["MENU_INIT_CALLS_WITH_0", "MENU_LEAVE_BACKGROUND"],
+              "function": "FUNC_NO_FILE_RUN", "parameter": "MENU_RUN",
+              "next_menu": "parent"
+            },
+            {
+              "label": "Send", "icon": "general send",
+              "flags": ["MENU_ONLY_BT_ON"],
+              "next_menu": 1,
+              "menus": [
+                {
+                  "flags": ["MENU_INIT_CALLS_WITH_0", "MENU_LEFT_RIGHT_AS_CALL"],
+                  "function": "FUNC_NO_BT_CONNECT", "parameter": "MENU_SEND",
+                  "next_menu": "parent"
+                }
+              ]
+            },
+            {
+              "label": "Delete", "icon": "general delete",
+              "next_menu": 2,
+              "menus": [
+                {
+                  "label": "Are you sure?", "icon": "general yes",
+                  "flags": ["MENU_BACK_TWICE"],
+                  "function": "FUNC_NO_FILE_DELETE", "parameter": "MENU_INIT",
+                  "next_menu": "parent"
+                },
+                {
+                  "label": "Are you sure?", "icon": "general no",
+                  "flags": ["MENU_ENTER_ACT_AS_EXIT"],
+                  "next_menu": "parent"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "NXT files", "icon": "file blockprg",
+      "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_ACCEPT_INCOMMING_REQUEST"],
+      "function": "FUNC_NO_FILE_LIST", "parameter": "MENU_FILETYPE_NXT",
+      "next_menu": 1
+    },
+    {
+      "label": "Sound files", "icon": "file sound",
+      "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_ACCEPT_INCOMMING_REQUEST"],
+      "function": "FUNC_NO_FILE_LIST", "parameter": "MENU_FILETYPE_SOUND",
+      "next_menu": 1
+    },
+    {
+      "label": "Datalog files", "icon": "file datalog",
+      "flags": ["MENU_ACCEPT_INCOMMING_REQUEST", "MENU_ONLY_DATALOG_ENABLED"],
+      "function": "FUNC_NO_FILE_LIST", "parameter": "MENU_FILETYPE_DATALOG",
+      "next_menu": 2,
+      "menus": [
+        {
+          "flags": ["MENU_INIT_CALLS_WITH_0", "MENU_LEFT_RIGHT_AS_CALL"],
+          "function": "FUNC_NO_FILE_LIST", "parameter": "MENU_SELECT",
+          "next_menu": 1,
+          "menus": [
+            {
+              "label": "Delete", "icon": "general delete",
+              "next_menu": 2,
+              "menus": [
+                {
+                  "label": "Are you sure?", "icon": "general yes",
+                  "flags": ["MENU_BACK_TWICE"],
+                  "function": "FUNC_NO_FILE_DELETE", "parameter": "MENU_INIT",
+                  "next_menu": "parent"
+                },
+                {
+                  "label": "Are you sure?", "icon": "general no",
+                  "flags": ["MENU_ENTER_ACT_AS_EXIT"],
+                  "next_menu": "parent"
+                }
+              ]
+            },
+            {
+              "label": "Send", "icon": "general send",
+              "flags": ["MENU_ONLY_BT_ON"],
+              "next_menu": 1,
+              "menus": [
+                {
+                  "flags": ["MENU_INIT_CALLS_WITH_0", "MENU_LEFT_RIGHT_AS_CALL"],
+                  "function": "FUNC_NO_BT_CONNECT", "parameter": "MENU_SEND",
+                  "next_menu": "parent"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

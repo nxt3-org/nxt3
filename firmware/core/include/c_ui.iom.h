@@ -110,7 +110,7 @@ enum
 
 typedef   struct
 {
-  MENU    *pMenu;                             // W  - Pointer to menu file
+  const MENU *pMenu;                          // W  - Pointer to menu file
   UWORD   BatteryVoltage;                     // R  - Battery voltage in millivolts
   UBYTE   LMSfilename[FILENAME_LENGTH + 1];   // W  - LMS filename to execute (Try It)
   UBYTE   Flags;                              // RW - Update command flags  (flags enumerated above)

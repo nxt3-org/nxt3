@@ -3,6 +3,7 @@
     "icon_width": 24,
     "icon_height": 24,
     "items": [
+      {"id": "empty", "index": 0},
       {"id": "sensor sound db", "index": 2, "file": "sensor/sound_db.png"},
       {"id": "sensor sound dba", "index": 3, "file": "sensor/sound_dba.png"},
       {"id": "sensor light reflect", "index": 4, "file": "sensor/light_reflect.png"},

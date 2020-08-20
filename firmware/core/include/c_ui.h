@@ -59,111 +59,7 @@
 
 // Menu special flags
 
-#define   MENU_SKIP_THIS_MOTHER_ID      0x00000001L // Used to seek next common menu (i0000000)
-                                                    // Free
-#define   MENU_ENTER_ACT_AS_EXIT        0x00000004L // Enter button acts as exit button
-#define   MENU_BACK_TWICE               0x00000008L // Exit twice on exit button
-#define   MENU_EXIT_ACT_AS_ENTER        0x00000010L // Exit button acts as enter button
-#define   MENU_LEAVE_BACKGROUND         0x00000020L // Don't erase background at next menu
-#define   MENU_EXIT_CALLS_WITH_FF       0x00000040L // Exit button calls function with MENU_EXIT
-#define   MENU_EXIT_LEAVES_MENUFILE     0x00000080L // Exit leaves menu file
-#define   MENU_INIT_CALLS_WITH_0        0x00000100L // Menu init calls with MENU_INIT
-#define   MENU_LEFT_RIGHT_AS_CALL       0x00000200L // Left calls with MENU_LEFT and right with MENU_RIGHT
-#define   MENU_ENTER_ONLY_CALLS         0x00000400L // Enter calls only it does not change menues
-#define   MENU_EXIT_ONLY_CALLS          0x00000800L // Exit calls only it does not change menues
-#define   MENU_AUTO_PRESS_ENTER         0x00001000L // Enter button is pressed automaticly
-#define   MENU_ENTER_LEAVES_MENUFILE    0x00002000L // Enter leaves menufile
-#define   MENU_INIT_CALLS               0x00004000L // Init calls instead of enter
-#define   MENU_ACCEPT_INCOMMING_REQUEST 0x00008000L // Accept incomming BT connection request
-#define   MENU_BACK_THREE_TIMES         0x00010000L // Exit three times on exit button
-#define   MENU_EXIT_DISABLE             0x00020000L // Disable exit button
-#define   MENU_EXIT_LOAD_POINTER        0x00040000L // Load item index on exit (0i000000)
-#define   MENU_EXIT_CALLS               0x00080000L // Exit calls as enter
-#define   MENU_INIT_CALLS_WITH_1        0x00100000L // Menu init calls with MENU_INIT
-#define   MENU_EXIT_LOAD_MENU           0x00200000L // Exit loads next menu
-#define   MENU_ONLY_BT_ON               0x00400000L // Only valid when bluecore is on
-#define   MENU_ONLY_DATALOG_ENABLED     0x00800000L // Only valid when datalog is enabled
-
-// Menu function call parameter
-
-#define   MENU_SENSOR_EMPTY             0x01        // Empty
-#define   MENU_SENSOR_SOUND_DB          0x02        // Sound sensor dB
-#define   MENU_SENSOR_SOUND_DBA         0x03        // Sound sensor dBA
-#define   MENU_SENSOR_LIGHT             0x04        // Light sensor with flood light
-#define   MENU_SENSOR_LIGHT_AMB         0x05        // Light sensor without flood light
-#define   MENU_SENSOR_TOUCH             0x06        // Touch sensor
-#define   MENU_SENSOR_MOTOR_DEG         0x07        // Motor sensor degrees
-#define   MENU_SENSOR_MOTOR_ROT         0x08        // Motor sensor rotations
-#define   MENU_SENSOR_ULTRASONIC_IN     0x09        // Ultrasonic sensor inch
-#define   MENU_SENSOR_ULTRASONIC_CM     0x0A        // Ultrasonic sensor cm
-#define   MENU_SENSOR_IIC_TEMP_C        0x0B        // IIC temp sensor celcius
-#define   MENU_SENSOR_IIC_TEMP_F        0x0C        // IIC temp sensor fahrenheit
-#define   MENU_SENSOR_COLOR             0x0D        // Color sensor
-#define   MENU_SENSOR_INVALID           0x0E        // Invalid
-
-#define   MENU_PORT_EMPTY               0x11        // Port empty
-#define   MENU_PORT_1                   0x12        // Port 1
-#define   MENU_PORT_2                   0x13        // Port 2
-#define   MENU_PORT_3                   0x14        // Port 3
-#define   MENU_PORT_4                   0x15        // Port 4
-#define   MENU_PORT_A                   0x16        // Port A
-#define   MENU_PORT_B                   0x17        // Port B
-#define   MENU_PORT_C                   0x18        // Port C
-#define   MENU_PORT_INVALID             0x19        // Invalid
-
-#define   MENU_ACTION_EMPTY             0x21        // Empty
-#define   MENU_ACTION_FORWARD_1         0x22        // Forward until
-#define   MENU_ACTION_FORWARD_2         0x23        // Forward 5
-#define   MENU_ACTION_BACK_LEFT_2       0x24        // Back left 2
-#define   MENU_ACTION_TURN_LEFT_1       0x25        // Turn left until
-#define   MENU_ACTION_TURN_LEFT_2       0x26        // Turn left 2
-#define   MENU_ACTION_BACK_RIGHT_1      0x27        // Back right until
-#define   MENU_ACTION_TURN_RIGHT_1      0x28        // Turn right until
-#define   MENU_ACTION_TURN_RIGHT_2      0x29        // Turn right 2
-#define   MENU_ACTION_BACK_LEFT_1       0x2A        // Back left until
-#define   MENU_ACTION_TONE_1            0x2B        // Tone 1
-#define   MENU_ACTION_TONE_2            0x2C        // Tone 2
-#define   MENU_ACTION_BACKWARD_1        0x2D        // Backward until
-#define   MENU_ACTION_BACKWARD_2        0x2E        // Backward 5
-#define   MENU_ACTION_BACK_RIGHT_2      0x2F        // Back right 2
-#define   MENU_ACTION_INVALID           0x30        // Invalid
-
-#define   MENU_WAIT_EMPTY               0x41        // Empty
-#define   MENU_WAIT_LIGHT               0x42        // Light
-#define   MENU_WAIT_SEEK_OBJ            0x43        // Seek obj.
-#define   MENU_WAIT_SOUND               0x44        // Sound
-#define   MENU_WAIT_TOUCH               0x45        // Touch
-#define   MENU_WAIT_1                   0x46        // Wait 2
-#define   MENU_WAIT_2                   0x47        // Wait 5
-#define   MENU_WAIT_3                   0x48        // Wait 10
-#define   MENU_WAIT_DARK                0x49        // Dark
-#define   MENU_WAIT_INVALID             0x4A        // Invalid
-
-#define   MENU_INIT                     0x00        // Init
-#define   MENU_INIT_ALTERNATIVE         0x01        // Init alternative
-#define   MENU_DRAW                     0xE9        // Draw
-#define   MENU_OFF                      0xEA        // Off
-#define   MENU_ON                       0xEB        // On
-#define   MENU_OPEN_STREAM              0xEC        // Open stream
-#define   MENU_OVERWRITE                0xED        // Overwrite file
-#define   MENU_CALCULATE                0xEE        // Calculate
-#define   MENU_ENTER                    0xEF        // Enter
-#define   MENU_DISCONNECT               0xF0        // Disconnect BT
-#define   MENU_DELETE                   0xF1        // Delete
-#define   MENU_SELECT                   0xF2        // Select
-#define   MENU_RUN_SILENT               0xF3        // Run without graphics
-#define   MENU_TOGGLE                   0xF4        // Toggle
-#define   MENU_CONNECT                  0xF5        // Connect BT
-#define   MENU_UPDATE                   0xF6        // Update
-#define   MENU_TEXT                     0xF7        // Text
-#define   MENU_RUN                      0xF8        // Run
-#define   MENU_SEND                     0xF9        // Send
-#define   MENU_SAVE                     0xFA        // Save
-#define   MENU_STOP                     0xFB        // Stop
-#define   MENU_LOOP                     0xFC        // Loop
-#define   MENU_LEFT                     0xFD        // Left
-#define   MENU_RIGHT                    0xFE        // Right
-#define   MENU_EXIT                     0xFF        // Exit
+#include "MenuCommon.h"
 
 #define   DATALOGPORTS                  (MENU_PORT_INVALID - MENU_PORT_EMPTY - 1)
 #define   MAX_DATALOGS                  9999        // Highest datalog file number
@@ -175,7 +71,7 @@
 typedef   struct                                    // VarsUi.MenuFiles[VarsUi.MenuFileLevel].MenuLevels[VarsUi.MenuLevel].
 {
   ULONG   Id;                                       // Menu item id
-  UBYTE   *IconText;                                // Menu item icon text  pointer
+  const UBYTE *IconText;                            // Menu item icon text  pointer
   ULONG   SpecialFlags;                             // Menu item special behaivor
   UBYTE   IconImageNo;                              // Menu item icon image no
   UBYTE   FunctionNo;                               // Menu item function call no   (0 = none)
@@ -216,7 +112,7 @@ typedef   struct
   MENUFILE  MenuFiles[MENUFILELEVELS];              // Menu file array
   MENUFILE  *pMenuFile;                             // Actual menu file pointer
   MENULEVEL *pMenuLevel;                            // Actual menu item on level, pointer
-  MENUITEM  *pMenuItem;                             // Actual menu item in menu flash file
+  const MENUITEM *pMenuItem;                        // Actual menu item in menu flash file
   UBYTE     MenuFileLevel;                          // Actual menu file level
   UBYTE   Function;                                 // Running function (0 = none)
   UBYTE   Parameter;                                // Parameter for running function

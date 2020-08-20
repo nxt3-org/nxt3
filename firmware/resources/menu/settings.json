@@ -1,0 +1,103 @@
+{
+  "menus": [
+    {
+      "label": "Volume", "icon": "general volume",
+      "flags": ["MENU_ACCEPT_INCOMMING_REQUEST"],
+      "next_menu": 1,
+      "menus": [
+        {
+          "icon": "general volume",
+          "flags": [
+            "MENU_LEAVE_BACKGROUND",
+            "MENU_EXIT_CALLS_WITH_FF",
+            "MENU_INIT_CALLS_WITH_0",
+            "MENU_LEFT_RIGHT_AS_CALL"
+          ],
+          "function": "FUNC_NO_VOLUME", "parameter": "MENU_ENTER",
+          "next_menu": "parent"
+        },
+        {"icon": "general arrow right", "next_menu": "parent"},
+        {"icon": "general arrow left", "next_menu": "parent"}
+      ]
+    },
+    {
+      "label": "Sleep", "icon": "general power timer",
+      "flags": ["MENU_ACCEPT_INCOMMING_REQUEST"],
+      "next_menu": 1,
+      "menus": [
+        {
+          "icon": "general power timer",
+          "flags": [
+            "MENU_LEAVE_BACKGROUND",
+            "MENU_INIT_CALLS_WITH_0",
+            "MENU_LEFT_RIGHT_AS_CALL"
+          ],
+          "function": "FUNC_NO_POWER_OFF_TIME", "parameter": "MENU_ENTER",
+          "next_menu": "parent"
+        },
+        {"icon": "general arrow right", "next_menu": "parent"},
+        {"icon": "general arrow left", "next_menu": "parent"}
+      ]
+    },
+    {
+      "label": "NXT Version", "icon": "prgend test",
+      "function": "FUNC_NO_TEST_PROGRAM",
+      "next_menu": "parent"
+    },
+    {
+      "label": "Delete files", "icon": "general delete",
+      "flags": ["MENU_ACCEPT_INCOMMING_REQUEST"],
+      "next_menu": 1,
+      "menus": [
+        {
+          "label": "Software files", "icon": "file program",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1],
+          "function": "FUNC_NO_FILES_DELETE", "parameter": "MENU_FILETYPE_LMS",
+          "next_menu": 2,
+          "menus": [
+            {
+              "label": "Are you sure?", "icon": "general yes",
+              "flags": ["MENU_BACK_TWICE", "MENU_INIT_CALLS_WITH_0"],
+              "function": "FUNC_NO_FILES_DELETE", "parameter": "MENU_DELETE",
+              "next_menu": "parent"
+            },
+            {
+              "label": "Are you sure?", "icon": "general no",
+              "flags": ["MENU_ENTER_ACT_AS_EXIT", "MENU_INIT_CALLS_WITH_0"],
+              "function": "FUNC_NO_FILES_DELETE", "parameter": "MENU_INIT",
+              "next_menu": "parent"
+            }
+          ]
+        },
+        {
+          "label": "NXT files", "icon": "file blockprg",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1],
+          "function": "FUNC_NO_FILES_DELETE",
+          "parameter": "MENU_FILETYPE_NXT",
+          "next_menu": 2
+        },
+        {
+          "label": "Sound files", "icon": "file sound",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1],
+          "function": "FUNC_NO_FILES_DELETE",
+          "parameter": "MENU_FILETYPE_SOUND",
+          "next_menu": 2
+        },
+        {
+          "label": "Datalog files", "icon": "file datalog",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_ONLY_DATALOG_ENABLED"],
+          "function": "FUNC_NO_FILES_DELETE",
+          "parameter": "MENU_FILETYPE_DATALOG",
+          "next_menu": 2
+        },
+        {
+          "label": "Try me files", "icon": "file tryme",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1],
+          "function": "FUNC_NO_FILES_DELETE",
+          "parameter": "MENU_FILETYPE_TRYME",
+          "next_menu": 2
+        }
+      ]
+    }
+  ]
+}

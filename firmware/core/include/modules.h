@@ -278,7 +278,7 @@ typedef   struct
   UBYTE   Items;
   UBYTE   ItemPixelsX;
   UBYTE   ItemPixelsY;
-  MENUITEM Data[MAX_MENUITEMS];
+  MENUITEM Data[];
 }
 MENU;
 

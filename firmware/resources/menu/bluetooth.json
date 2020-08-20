@@ -1,0 +1,128 @@
+{
+  "menus": [
+    {
+      "label": "Search", "icon": "bt search",
+      "flags": ["MENU_ACCEPT_INCOMMING_REQUEST", "MENU_ONLY_BT_ON"],
+      "next_menu": 1,
+      "menus": [
+        {
+          "icon": "bt unknown",
+          "flags": ["MENU_INIT_CALLS_WITH_0", "MENU_LEFT_RIGHT_AS_CALL"],
+          "function": "FUNC_NO_BT_SEARCH", "parameter": "MENU_EXIT",
+          "next_menu": 1,
+          "menus": [
+            {
+              "icon": "bt unknown",
+              "flags": ["MENU_BACK_TWICE", "MENU_INIT_CALLS_WITH_0", "MENU_LEFT_RIGHT_AS_CALL"],
+              "function": "FUNC_NO_BT_DEVICE_LIST", "parameter": "MENU_SELECT",
+              "next_menu": 1,
+              "menus": [
+                {
+                  "icon": "bt unknown",
+                  "flags": ["MENU_INIT_CALLS_WITH_0", "MENU_LEFT_RIGHT_AS_CALL"],
+                  "function": "FUNC_NO_BT_CONNECT", "parameter": "MENU_CONNECT",
+                  "next_menu": "parent"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "My contacts", "icon": "bt contacts",
+      "flags": ["MENU_ACCEPT_INCOMMING_REQUEST", "MENU_ONLY_BT_ON"],
+      "next_menu": 1,
+      "menus": [
+        {
+          "icon": "bt unknown",
+          "flags": ["MENU_AUTO_PRESS_ENTER"],
+          "next_menu": 1,
+          "menus": [
+            {
+              "icon": "bt unknown",
+              "flags": ["MENU_BACK_TWICE", "MENU_LEFT_RIGHT_AS_CALL", "MENU_INIT_CALLS_WITH_1"],
+              "function": "FUNC_NO_BT_DEVICE_LIST", "parameter": "MENU_SELECT",
+              "next_menu": 2,
+              "menus": [
+                {
+                  "label": "Delete", "icon": "general delete",
+                  "function": "FUNC_NO_BT_DEVICE_LIST", "parameter": "MENU_DELETE",
+                  "next_menu": "parent"
+                },
+                {
+                  "label": "Connect", "icon": "bt connect",
+                  "next_menu": 1,
+                  "menus": [
+                    {
+                      "icon": "bt unknown",
+                      "flags": ["MENU_BACK_TWICE", "MENU_INIT_CALLS_WITH_0", "MENU_LEFT_RIGHT_AS_CALL"],
+                      "function": "FUNC_NO_BT_CONNECT", "parameter": "MENU_CONNECT",
+                      "next_menu": "parent"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Connections", "icon": "bt connections",
+      "flags": ["MENU_ACCEPT_INCOMMING_REQUEST", "MENU_ONLY_BT_ON"],
+      "next_menu": 1,
+      "menus": [
+        {
+          "icon": "bt unknown",
+          "flags": ["MENU_INIT_CALLS_WITH_0", "MENU_LEFT_RIGHT_AS_CALL"],
+          "function": "FUNC_NO_BT_CONNECT_LIST", "parameter": "MENU_UPDATE",
+          "next_menu": 1,
+          "menus": [
+            {
+              "label": "Disconnect", "icon": "bt disconnect",
+              "function": "FUNC_NO_BT_CONNECT_LIST", "parameter": "MENU_DISCONNECT",
+              "next_menu": "parent"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Visibility", "icon": "bt visibility",
+      "flags": ["MENU_ACCEPT_INCOMMING_REQUEST", "MENU_ONLY_BT_ON"],
+      "next_menu": 1,
+      "menus": [
+        {
+          "label": "Visible", "icon": "bt visible",
+          "function": "FUNC_NO_BT_VISIABILITY", "parameter": "MENU_ON",
+          "next_menu": "parent"
+        },
+        {
+          "label": "Invisible", "icon": "bt invisible",
+          "function": "FUNC_NO_BT_VISIABILITY", "parameter": "MENU_OFF",
+          "next_menu": "parent"
+        }
+      ]
+    },
+    {
+      "label": "On/Off", "icon": "bt power",
+      "flags": ["MENU_ACCEPT_INCOMMING_REQUEST"],
+      "next_menu": 1,
+      "menus": [
+        {
+          "label": "On", "icon": "bt power on",
+          "flags": ["MENU_EXIT_LEAVES_MENUFILE"],
+          "function": "FUNC_NO_BT_ON", "parameter": "MENU_ON",
+          "next_menu": "parent"
+        },
+        {
+          "label": "Off", "icon": "bt power off",
+          "flags": ["MENU_EXIT_LEAVES_MENUFILE", "MENU_ONLY_BT_ON"],
+          "function": "FUNC_NO_BT_ON", "parameter": "MENU_OFF",
+          "next_menu": "parent"
+        }
+      ]
+    }
+  ]
+}

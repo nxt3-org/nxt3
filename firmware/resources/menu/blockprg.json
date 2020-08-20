@@ -1,0 +1,391 @@
+{
+  "menus": [
+    {
+      "id": "0x1",
+      "flags": ["MENU_INIT_CALLS_WITH_0", "MENU_LEFT_RIGHT_AS_CALL"],
+      "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_TEXT",
+      "next_menu": 1
+    },
+    {
+      "comment": "this is the first OBP block (action)",
+      "id": "0x1",
+      "depth": 0,
+      "virtual": true,
+      "menus": [
+        {
+          "label": "Forward 5", "icon": "action forward 2",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_FORWARD_2",
+          "next_menu": 1
+        },
+        {
+          "label": "Forward", "icon": "action forward 1",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_FORWARD_1",
+          "next_menu": 1
+        },
+        {
+          "label": "Turn right 2", "icon": "action turn right 2",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_TURN_RIGHT_2",
+          "next_menu": 1
+        },
+        {
+          "label": "Turn right", "icon": "action turn right 1",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_TURN_RIGHT_1",
+          "next_menu": 1
+        },
+        {
+          "label": "Back right 2", "icon": "action back right 2",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_BACK_RIGHT_2",
+          "next_menu": 1
+        },
+        {
+          "label": "Back right", "icon": "action back right 1",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_BACK_RIGHT_1",
+          "next_menu": 1
+        },
+        {
+          "label": "Tone 1", "icon": "action tone 1",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_TONE_1",
+          "next_menu": 1
+        },
+        {
+          "label": "Tone 2",
+          "icon": "action tone 2",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_TONE_2",
+          "next_menu": 1
+        },
+        {
+          "label": "Back left 2", "icon": "action back left 2",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_BACK_LEFT_2",
+          "next_menu": 1
+        },
+        {
+          "label": "Back left", "icon": "action back left 1",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_BACK_LEFT_1",
+          "next_menu": 1
+        },
+        {
+          "label": "Turn left", "icon": "action turn left 1",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_TURN_LEFT_1",
+          "next_menu": 1
+        },
+        {
+          "label": "Turn left 2", "icon": "action turn left 2",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_TURN_LEFT_2",
+          "next_menu": 1
+        },
+        {
+          "label": "Empty", "icon": "action empty",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_EMPTY",
+          "next_menu": 1
+        },
+        {
+          "label": "Backward", "icon": "action backward 1",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_BACKWARD_1",
+          "next_menu": 1
+        },
+        {
+          "label": "Backward 5", "icon": "action backward 2",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_BACKWARD_2",
+          "next_menu": 1
+        }
+      ]
+    },
+    {
+      "comment": "this is the second OBP block (wait)",
+      "id": "0x11",
+      "depth": 1,
+      "virtual": true,
+      "menus": [
+        {
+          "label": "Empty", "icon": "action empty",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_WAIT_EMPTY",
+          "next_menu": 1
+        },
+        {
+          "label": "Wait 2", "icon": "waitfor 2s",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_WAIT_1",
+          "next_menu": 1
+        },
+        {
+          "label": "Wait 5", "icon": "waitfor 5s",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_WAIT_2",
+          "next_menu": 1
+        },
+        {
+          "label": "Wait 10", "icon": "waitfor 10s",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_WAIT_3",
+          "next_menu": 1
+        },
+        {
+          "label": "Object", "icon": "waitfor sonic",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_WAIT_SEEK_OBJ",
+          "next_menu": 1
+        },
+        {
+          "label": "Sound", "icon": "waitfor sound",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_WAIT_SOUND",
+          "next_menu": 1
+        },
+        {
+          "label": "Light", "icon": "waitfor light",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_WAIT_LIGHT",
+          "next_menu": 1
+        },
+        {
+          "label": "Dark", "icon": "waitfor dark",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_WAIT_DARK",
+          "next_menu": 1
+        },
+        {
+          "label": "Touch", "icon": "waitfor touch",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_WAIT_TOUCH",
+          "next_menu": 1
+        }
+      ]
+    },
+    {
+      "comment": "this is the third OBP block (action)",
+      "id": "0x111",
+      "depth": 2,
+      "virtual": true,
+      "menus": [
+        {
+          "label": "Forward 5", "icon": "action forward 2",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_FORWARD_2",
+          "next_menu": 1
+        },
+        {
+          "label": "Forward", "icon": "action forward 1",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_FORWARD_1",
+          "next_menu": 1
+        },
+        {
+          "label": "Turn right 2", "icon": "action turn right 2",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_TURN_RIGHT_2",
+          "next_menu": 1
+        },
+        {
+          "label": "Turn right", "icon": "action turn right 1",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_TURN_RIGHT_1",
+          "next_menu": 1
+        },
+        {
+          "label": "Back right 2", "icon": "action back right 2",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_BACK_RIGHT_2",
+          "next_menu": 1
+        },
+        {
+          "label": "Back right", "icon": "action back right 1",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_BACK_RIGHT_1",
+          "next_menu": 1
+        },
+        {
+          "label": "Tone 1", "icon": "action tone 1",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_TONE_1",
+          "next_menu": 1
+        },
+        {
+          "label": "Tone 2", "icon": "action tone 2",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_TONE_2",
+          "next_menu": 1
+        },
+        {
+          "label": "Back left 2", "icon": "action back left 2",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_BACK_LEFT_2",
+          "next_menu": 1
+        },
+        {
+          "label": "Back left", "icon": "action back left 1",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_BACK_LEFT_1",
+          "next_menu": 1
+        },
+        {
+          "label": "Turn left", "icon": "action turn left 1",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_TURN_LEFT_1",
+          "next_menu": 1
+        },
+        {
+          "label": "Turn left 2", "icon": "action turn left 2",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_TURN_LEFT_2",
+          "next_menu": 1
+        },
+        {
+          "label": "Empty", "icon": "action empty",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_EMPTY",
+          "next_menu": 1
+        },
+        {
+          "label": "Backward", "icon": "action backward 1",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_BACKWARD_1",
+          "next_menu": 1
+        },
+        {
+          "label": "Backward 5", "icon": "action backward 2",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_ACTION_BACKWARD_2",
+          "next_menu": 1
+        }
+      ]
+    },
+    {
+      "comment": "this is the fourth OBP block (wait)",
+      "id": "0x1111",
+      "depth": 3,
+      "virtual": true,
+      "menus": [
+        {
+          "label": "Empty", "icon": "action empty",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_WAIT_EMPTY",
+          "next_menu": 1
+        },
+        {
+          "label": "Wait 2", "icon": "waitfor 2s",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_WAIT_1",
+          "next_menu": 1
+        },
+        {
+          "label": "Wait 5", "icon": "waitfor 5s",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_WAIT_2",
+          "next_menu": 1
+        },
+        {
+          "label": "Wait 10", "icon": "waitfor 10s",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_WAIT_3",
+          "next_menu": 1
+        },
+        {
+          "label": "Object", "icon": "waitfor sonic",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_WAIT_SEEK_OBJ",
+          "next_menu": 1
+        },
+        {
+          "label": "Sound", "icon": "waitfor sound",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_WAIT_SOUND",
+          "next_menu": 1
+        },
+        {
+          "label": "Light", "icon": "waitfor light",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_WAIT_LIGHT",
+          "next_menu": 1
+        },
+        {
+          "label": "Dark", "icon": "waitfor dark",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_WAIT_DARK",
+          "next_menu": 1
+        },
+        {
+          "label": "Touch", "icon": "waitfor touch",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_WAIT_TOUCH",
+          "next_menu": 1
+        }
+      ]
+    },
+    {
+      "comment": "this is the last OBP block (repeat)",
+      "id": "0x11111",
+      "depth": 4,
+      "virtual": true,
+      "menus": [
+        {
+          "label": "Stop", "icon": "prgend stop",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_STOP",
+          "next_menu": 1
+        },
+        {
+          "label": "Loop", "icon": "prgend loop",
+          "flags": ["MENU_SKIP_THIS_MOTHER_ID", 1, "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_LOOP",
+          "next_menu": 1
+        }
+      ]
+    },
+    {
+      "comment": "this is the what-to-do-now menu",
+      "id": "0x111111",
+      "depth": 5,
+      "virtual": true,
+      "menus": [
+        {
+          "label": "Run", "icon": "general run",
+          "flags": ["MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_RUN",
+          "next_menu": "parent"
+        },
+        {
+          "label": "Main menu", "icon": "general main menu",
+          "flags": ["MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF", "MENU_ENTER_LEAVES_MENUFILE"],
+          "next_menu": "parent"
+        },
+        {"virtual": true},
+        {
+          "label": "Save", "icon": "file blockprg",
+          "flags": ["MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS_WITH_FF"],
+          "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_SAVE",
+          "next_menu": 2,
+          "menus": [
+            {
+              "label": "Yes", "icon": "general yes",
+              "flags": ["MENU_LEAVE_BACKGROUND", "MENU_ENTER_LEAVES_MENUFILE"],
+              "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_OVERWRITE",
+              "next_menu": "parent"
+            },
+            {
+              "label": "No", "icon": "general no",
+              "flags": ["MENU_ENTER_ACT_AS_EXIT", "MENU_LEAVE_BACKGROUND", "MENU_EXIT_CALLS"],
+              "function": "FUNC_NO_ON_BRICK_PROGRAMMING", "parameter": "MENU_UPDATE",
+              "next_menu": "parent"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
