@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import os
 import struct
 import typing
 from pathlib import Path
@@ -24,6 +25,7 @@ def main():
     with open(Path(params.enums), "r") as fp:
         enum_db = json.load(fp)
 
+    os.makedirs(dst.parent, exist_ok=True)
     if params.input is None:
         with open(dst, "w") as fp:
             compile_enums(enum_db, fp)
