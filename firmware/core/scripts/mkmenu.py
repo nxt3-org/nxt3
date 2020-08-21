@@ -75,7 +75,7 @@ def compile_function_table(name: str,
     print(file=fp)
     print("typedef unsigned char (*menu_fn)(unsigned char);", file=fp)
     print(file=fp)
-    print("#ifndef INCLUDE_OS", file=fp)
+    print("#ifdef INCLUDE_OS", file=fp)
     print(f"//! {doc}", file=fp)
     print(f"extern const menu_fn {name}[FUNC_NO_MAX];", file=fp)
     print(file=fp)
