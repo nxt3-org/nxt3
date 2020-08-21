@@ -129,7 +129,7 @@ const     BMPMAP *Intro[NO_OF_INTROBITMAPS] = // Picture sequence for the intro 
 
 // ****** FREE TEXT GRAPHIC RESOURCES ****************************************
 
-#include  "Ui.h"              // Text strings that aren't defined in menu files
+#include  "UiStrings.h"       // Text strings that aren't defined in menu files
 
 // ****** FILE TYPE GRAPHIC RESOURCES ****************************************
 
