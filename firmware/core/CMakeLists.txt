@@ -84,7 +84,7 @@ add_custom_command(TARGET nxt3.elf
         COMMAND ${CMAKE_STRIP} --strip-all nxt3.elf
         )
 
-add_texts(nxt3.elf strings/english.json UiStrings)
+add_texts(nxt3.elf strings/english.json Ui.h)
 add_font(nxt3.elf font/normal.json Font.h)
 add_icons(nxt3.elf font/port.json Port.h)
 add_icons(nxt3.elf status/status.json Status.h)

@@ -1,19 +1,11 @@
 function(add_texts TARGET SRC DST)
-    target_sources("${TARGET}" PRIVATE
-            "${CMAKE_CURRENT_BINARY_DIR}/generated/${DST}.c"
-            "${CMAKE_CURRENT_BINARY_DIR}/generated/${DST}.h"
-            )
+    target_sources("${TARGET}" PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated/${DST}")
     add_custom_command(
             COMMENT "Generating string file ${DST}"
-            DEPENDS
-            "${CMAKE_SOURCE_DIR}/resources/${SRC}"
-            "${CMAKE_CURRENT_SOURCE_DIR}/scripts/mktexts.py"
-            OUTPUT
-            "${CMAKE_CURRENT_BINARY_DIR}/generated/${DST}.c"
-            "${CMAKE_CURRENT_BINARY_DIR}/generated/${DST}.h"
+            DEPENDS "${CMAKE_SOURCE_DIR}/resources/${SRC}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/mktexts.py"
+            OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/generated/${DST}"
             COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/scripts/mktexts.py"
-            --in "${CMAKE_SOURCE_DIR}/resources/${SRC}"
-            --src "${CMAKE_CURRENT_BINARY_DIR}/generated/${DST}.c"
-            --hdr "${CMAKE_CURRENT_BINARY_DIR}/generated/${DST}.h"
+            -i "${CMAKE_SOURCE_DIR}/resources/${SRC}"
+            -o "${CMAKE_CURRENT_BINARY_DIR}/generated/${DST}"
     )
 endfunction()
