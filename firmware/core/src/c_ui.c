@@ -706,7 +706,7 @@ void      cUiUpdateStatus(void)
       pMapDisplay->pStatusText   =  (UBYTE*)VarsUi.StatusText;
 
       // Status line update nessesary
-      if (IOMapUi.BatteryState < Status->ItemsX)
+      if (IOMapUi.BatteryState < 6)
       {
         bool batteryPack = false;
         Hal_Battery_IsRechargeable(&batteryPack);
@@ -723,7 +723,7 @@ void      cUiUpdateStatus(void)
       }
 
       // Update bluetooth status icons
-      if ((IOMapUi.BluetoothState & (BT_STATE_VISIBLE | BT_STATE_CONNECTED | BT_STATE_OFF)) < Status->ItemsX)
+      if ((IOMapUi.BluetoothState & (BT_STATE_VISIBLE | BT_STATE_CONNECTED | BT_STATE_OFF)) < 6)
       {
         VarsUi.NewStatusIcons[STATUSICON_BLUETOOTH] = STATUS_NO_BLUETOOTH_0 + (IOMapUi.BluetoothState & (BT_STATE_VISIBLE | BT_STATE_CONNECTED | BT_STATE_OFF));
       }
