@@ -663,13 +663,14 @@ void      cUiUpdateStatus(void)
     Hal_Battery_GetVoltage(&voltage);
     Hal_Battery_GetPercentRemaining(&pct);
 
+    if (pct > 100.0f)
+        pct = 100.0f;
+    if (pct < 0.0f)
+        pct = 0.0f;
+
     IOMapUi.Rechargeable = akku ? 1 : 0;
     IOMapUi.BatteryVoltage = (UWORD)(voltage * 1000.0f);
     IOMapUi.BatteryState = (UBYTE)(pct * 4.0f / 100.0f);
-    if (IOMapUi.BatteryState > 4)
-        IOMapUi.BatteryState = 4;
-    if (pct == 0.0f)
-        IOMapUi.BatteryState = 0;
 
     if (crit)
         IOMapUi.ForceOff  = TRUE;
