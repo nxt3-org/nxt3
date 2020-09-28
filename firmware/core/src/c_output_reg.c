@@ -434,6 +434,7 @@ void dOutputSetSpeed (UBYTE MotorNr, UBYTE NewMotorRunState, SBYTE Speed, SBYTE 
       pMD->PositionFracError = 0;
       pMD->RegulationTimeCount = 0;
       pMD->DeltaCaptureCount = 0;
+      pMD->LastTachoValid = false;
       Hal_MotorDev_ResetTacho(pMD->Device);
     }
     switch (NewMotorRunState)
