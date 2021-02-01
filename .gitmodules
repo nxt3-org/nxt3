@@ -1,0 +1,3 @@
+[submodule "firmware/hal"]
+	path = firmware/hal
+	url = https://github.com/nxt3-org/ev3-hal.git
