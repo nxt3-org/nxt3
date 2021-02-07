@@ -45,6 +45,8 @@ Since the core code comes straight from the NXT codebase, it falls under the LOS
 See [LICENSE.pdf](LICENSE.pdf) for details. This also [precludes](https://fedoraproject.org/wiki/Licensing/LOSLA) using GPL'd components, so all code for interfacing
 with the EV3 kernel has to be written from scratch (C4EV3 is GPLv2.0, lms2012 is GPLv2.0).
 
+[libsamplerate](https://github.com/libsndfile/libsamplerate) is Copyright (c) 2012-2016, Erik de Castro Lopo <erikd@mega-nerd.com> and released under the BSD 2-clause license. 
+
 The original code for this port comes from the Mindboards SVN repository: https://sourceforge.net/p/mindboards/code/HEAD/tree/lms_nbcnxc/branches/version_132/
 
 The HAL base and implementation layers are licensed under the MIT License.

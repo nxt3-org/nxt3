@@ -10,6 +10,12 @@ include(scripts/mkfont.cmake)
 include(scripts/mkmenu.cmake)
 include(scripts/mkicons.cmake)
 
+set(LIBSAMPLERATE_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(LIBSAMPLERATE_INSTALL OFF CACHE BOOL "" FORCE)
+set(LIBSAMPLERATE_TESTS OFF CACHE BOOL "" FORCE)
+set(LIBSAMPLERATE_ENABLE_SANITIZERS OFF CACHE BOOL "" FORCE)
+add_subdirectory(libsamplerate)
+
 add_executable(nxt3.elf
         ${CMAKE_CURRENT_SOURCE_DIR}/include/c_pnp.h
         ${CMAKE_CURRENT_SOURCE_DIR}/include/c_output.iom.h
@@ -69,7 +75,7 @@ target_include_directories(nxt3.elf PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
         ${CMAKE_CURRENT_BINARY_DIR}/generated
         )
-target_link_libraries(nxt3.elf nxthal nxthal_lms2012 -lm -lrt)
+target_link_libraries(nxt3.elf nxthal nxthal_lms2012 SampleRate::samplerate -lm -lrt)
 
 set_target_properties(nxt3.elf PROPERTIES
         C_STANDARD 99

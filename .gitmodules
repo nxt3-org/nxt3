@@ -1,3 +1,6 @@
 [submodule "firmware/hal"]
 	path = firmware/hal
 	url = https://github.com/nxt3-org/ev3-hal.git
+[submodule "firmware/core/libsamplerate"]
+	path = firmware/core/libsamplerate
+	url = https://github.com/libsndfile/libsamplerate
