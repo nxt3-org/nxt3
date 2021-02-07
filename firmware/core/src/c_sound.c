@@ -64,8 +64,17 @@ void      cSoundInit(void* pHeader)
   IOMapSound.SoundFilename[0] =  0;
   VarsSound.BufferIn          =  0;
   VarsSound.BufferOut         =  0;
-  if (!Hal_Sound_RefAdd())
+  // resampler
+  int error = 0;
+  VarsSound.ResamplerState = src_new(SRC_SINC_FASTEST, 1, &error);
+  if (VarsSound.ResamplerState == NULL) {
+      fprintf(stderr, "error: cannot initialize libsamplerate: %d\n", error);
+      Hal_General_AbnormalExit("cannot initialize sound module");
+  }
+  // sound
+  if (!Hal_Sound_RefAdd()) {
       Hal_General_AbnormalExit("Cannot initialize sound output");
+  }
 }
 
 static uint8_t cSoundVolume(void) {
@@ -366,5 +375,5 @@ void cSoundDecodeAdpcm(UBYTE bufferNo) {
 void      cSoundExit(void)
 {
   Hal_Sound_RefDel();
+  VarsSound.ResamplerState = src_delete(VarsSound.ResamplerState);
 }
-

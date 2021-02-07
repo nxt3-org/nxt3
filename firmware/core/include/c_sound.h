@@ -20,6 +20,7 @@
 #ifndef   C_SOUND
 #define   C_SOUND
 
+#include <samplerate.h>
 #include "hal_sound.h"
 #include "c_sound_adpcm.h"
 
@@ -42,6 +43,7 @@ typedef   struct
   UBYTE   BufferOut;
   UBYTE   BufferTmp;
   ADPCM_State AdpcmState;
+  SRC_STATE *ResamplerState;
 }VARSSOUND;
 
 void      cSoundInit(void* pHeaders);
