@@ -14,7 +14,7 @@ This project is **pre-alpha**, do expect bugs and crashes to occur.
 | Buttons    | mostly DONE               | button press OK; TODO for LED control (needs new bytecode or IOMap) |
 | Motors     | partial DONE, not tested  | reused NXT PID controller, PID coefficients need some tuning |
 | Display    | mostly DONE               | needs configurable scaling + some sort of "damage" tracking to optimize flushes |
-| Sound      | mostly DONE               | sounds (PCM+ADPCM) tested, tones tested, melodies untested; only 8000 kHz sample rate is supported |
+| Sound      | DONE, WIP tests           | sounds (PCM+ADPCM) tested, tones tested, melodies untested; full 2000-16000 Hz range supported by resampling to 8000 Hz |
 | Sensors    | PARTIAL                   | EV3 sensors emulate NXT ones; needs pure EV3 layer + IIC support + emulation of more sensors |
 | Bluetooth  | not started               | RFCOMM connections + HCI |
 | USB        | PARTIAL                   | EV3 system commands work (ev3duder), NXT protocol tunnel mostly works |
