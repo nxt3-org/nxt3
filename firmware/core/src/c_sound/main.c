@@ -202,6 +202,7 @@ buffer_state_t sound_pipe_out(uint16_t fmt, buffer_t *samples) {
                            sound_get_volume());
     if (result >= 0) {
         // ok, send data to fifo, mark tmp buffer as free
+        samples->length = 0;
         return BUFFER_OK;
     } else if (result == SOUND_RESULT_BUSY) {
         // ok, fifo filled
