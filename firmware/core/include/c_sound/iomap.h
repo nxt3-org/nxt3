@@ -16,8 +16,8 @@
 // Platform        C
 //
 
-#ifndef   CSOUND_IOM
-#define   CSOUND_IOM
+#ifndef   SOUND_IOMAP
+#define   SOUND_IOMAP
 
 #define   pMapSound ((IOMAPSOUND*)(pHeaders[ENTRY_SOUND]->pIOMap))  
 
@@ -103,7 +103,4 @@ typedef   struct
 }IOMAPSOUND;
 
 
-#endif
-
-
-
+#endif // SOUND_IOMAP

@@ -29,7 +29,7 @@
 #include "c_input.iom.h"
 #include "c_loader.iom.h"
 #include "c_ui.iom.h"
-#include "c_sound.iom.h"
+#include "c_sound/iomap.h"
 #include "c_button.iom.h"
 #include "c_display.iom.h"
 #include "c_comm.iom.h"

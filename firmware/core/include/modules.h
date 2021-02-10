@@ -148,6 +148,13 @@ enum
   FILEFORMAT_DATALOG          = 0x0900    // rdt
 };
 
+typedef struct
+{
+  UBYTE FormatMsb;
+  UBYTE FormatLsb;
+}
+NXTFILE_BASE;
+
 typedef   struct
 {
   UBYTE   FormatMsb;
@@ -245,6 +252,19 @@ typedef   struct
   UBYTE   Data[];
 }
 DATALOG;
+
+typedef union
+{
+    NXTFILE_BASE Base;
+    SOUND        Sound;
+    BMPMAP       Bitmap;
+    FONT         Font;
+    ICON         Icon;
+    MELODY       Melody;
+    PROGRAM      Program;
+    DATALOG      Datalog;
+}
+NXTFILE;
 
 #define   ICON_TEXTLNG             15   // 15 characters
 #define   ICON_IMAGESIZE           72   // 24 x 24 pixels
