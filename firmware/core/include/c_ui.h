@@ -139,6 +139,7 @@ typedef   struct
   const UBYTE   *MenuIconTextSave;                  // Menu icon text save
 
   UBYTE   *pTmp;                                    // General UBYTE pointer
+  hal_timestamp_t Timestamp;                        // General Hal_Timer timestamp
   ULONG   TmpLength;                                // General filelength  (used in filelist)
   SWORD   TmpHandle;                                // General filehandle  (used in filelist)
 

@@ -19,6 +19,7 @@
 #include <hal_battery.h>
 #include <hal_general.h>
 #include <hal_led.h>
+#include <hal_timer.h>
 #include  "stdio.h"
 #include  "string.h"
 #include  "ctype.h"
@@ -1138,7 +1139,7 @@ void      cUiCtrl(void)
 
       VarsUi.State                                    =  0;
       VarsUi.Pointer                                  =  0;
-      VarsUi.Timer                                    =  -INTRO_START_TIME;
+      VarsUi.Timestamp                                =  Hal_Timer_Now();
 
       VarsUi.FNOFState                                =  0;
       VarsUi.FBState                                  =  0;
@@ -1167,7 +1168,7 @@ void      cUiCtrl(void)
 
     case INIT_LOW_BATTERY :
     {
-      if (++VarsUi.Timer >= (INTRO_LOWBATT_TIME))
+      if (Hal_Timer_MillisSince(VarsUi.Timestamp) >= (INTRO_LOWBATT_TIME))
       {
         VarsUi.LowBattHasOccured        = 2;
         pMapDisplay->EraseMask          =  SCREEN_BIT(SCREEN_BACKGROUND);
@@ -1178,7 +1179,7 @@ void      cUiCtrl(void)
         IOMapUi.Flags                  &= ~UI_ENABLE_STATUS_UPDATE;
         VarsUi.State                    =  0;
         VarsUi.Pointer                  =  0;
-        VarsUi.Timer                    =  -INTRO_START_TIME;
+        VarsUi.Timestamp                =  Hal_Timer_Now();
         IOMapUi.State                   =  INIT_INTRO;
       }
     }
@@ -1191,7 +1192,7 @@ void      cUiCtrl(void)
         IOMapUi.Flags |=  UI_ENABLE_STATUS_UPDATE;
         IOMapUi.Flags |=  UI_UPDATE;
         IOMapUi.Flags |=  UI_REDRAW_STATUS;
-        VarsUi.Timer   =  0;
+        VarsUi.Timestamp = Hal_Timer_Now();
         IOMapUi.State  =  INIT_LOW_BATTERY;
       }
       else
@@ -1206,18 +1207,27 @@ void      cUiCtrl(void)
           }
         }
 #ifndef STRIPPED
-        if (++VarsUi.Timer >= (INTRO_SHIFT_TIME))
+        if (Hal_Timer_MillisSince(VarsUi.Timestamp) >= (INTRO_SHIFT_TIME))
         {
           switch (VarsUi.State)
           {
             case 0 :
+            {
+              if (Hal_Timer_MillisSince(VarsUi.Timestamp) >= (INTRO_START_TIME))
+              {
+                VarsUi.State++;
+              }
+            }
+            break;
+
+            case 1 :
             {
               pMapDisplay->Flags &= ~DISPLAY_REFRESH;
               VarsUi.State++;
             }
             break;
 
-            case 1 :
+            case 2 :
             {
               if ((pMapDisplay->Flags & DISPLAY_REFRESH_DISABLED))
               {
@@ -1250,8 +1260,8 @@ void      cUiCtrl(void)
               if (!(pMapDisplay->UpdateMask & BITMAP_BIT(BITMAP_1)))
               {
                 pMapDisplay->Flags |= DISPLAY_REFRESH;
-                VarsUi.Timer        = 0;
-                VarsUi.State        = 0;
+                VarsUi.Timestamp    = Hal_Timer_Now();
+                VarsUi.State        = 1;
               }
             }
             break;
@@ -1268,7 +1278,7 @@ void      cUiCtrl(void)
 #ifndef STRIPPED
     case INIT_WAIT :
     {
-      if (++VarsUi.Timer >= INTRO_STOP_TIME)
+      if (Hal_Timer_MillisSince(VarsUi.Timestamp) >= INTRO_STOP_TIME)
       {
         pMapDisplay->EraseMask |=  SCREEN_BIT(SCREEN_BACKGROUND);
         IOMapUi.State           = INIT_MENU;
