@@ -118,5 +118,6 @@ buffer_state_t adpcm_decode(buffer_t *input, buffer_t *output, adpcm_state_t *st
     if (!out)
         return BUFFER_ERROR;
     adpcm_decode_raw(input->length, in, out, state);
+    output->length = 2 * input->length;
     return BUFFER_OK;
 }
