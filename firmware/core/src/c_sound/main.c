@@ -90,6 +90,7 @@ void sound_handle_iomap(void) {
 }
 
 void sound_start_tone(void) {
+    sndfile_close(&VarsSound.file);
     Hal_Sound_SendTone(IOMapSound.Freq, IOMapSound.Duration, sound_get_volume());
     IOMapSound.State = SOUND_FREQ;
 }
